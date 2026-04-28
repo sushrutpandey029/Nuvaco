@@ -4,8 +4,8 @@ import {AdminRegister,adminloginview,adminlogin} from "../Controller/AdminContro
 
 const adminrouter = express.Router();
 
-adminrouter.post("/adminsigup",AdminRegister);
 adminrouter.get("/",adminloginview);
+adminrouter.post("/adminsigup",AdminRegister);
 adminrouter.post("/adminsigin",adminlogin);
 
 export default adminrouter;
