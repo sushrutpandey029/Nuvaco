@@ -46,9 +46,14 @@
                         <div class="mb-4">
                             <input type="password" class="form-control login-input" placeholder="Enter Your Password" />
                         </div>
-                        <div class="mb-5">
+                        {{!-- <div class="mb-5">
                             <input type="text" class="form-control login-input" placeholder="Captcha for Security" />
-                        </div>
+                        </div> --}}
+                         <div 
+              class="g-recaptcha"
+              data-sitekey="6LdZ150sAAAAAPhjw_YeWLo3Q6ipUREs3cHGdCrE"
+              data-callback="enableLogin"
+            ></div>
 
 
                         <div class="d-grid">
