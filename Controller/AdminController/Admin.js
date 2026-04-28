@@ -86,7 +86,7 @@ export const adminloginview = async (req, res) => {
 };
 
 export const adminlogin = async (req,res) =>{
-    res.send("sucesss")
+    res.render("admin/dashboard");
 }
 
 
