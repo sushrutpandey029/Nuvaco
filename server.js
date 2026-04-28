@@ -18,8 +18,7 @@ const __dirname = path.dirname(__filename);
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "view"));
-
-hbs.registerPartials(path.join(__dirname, "view", "partials"));
+hbs.registerPartials(path.join(__dirname, "view", "admin", "partials"));
 
 
 app.use(express.json());
