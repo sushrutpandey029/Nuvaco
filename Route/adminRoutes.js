@@ -5,8 +5,8 @@ import {AdminRegister,adminloginview,adminlogin,registerDealer} from "../Control
 const adminrouter = express.Router();
 
 adminrouter.get("/",adminloginview);
-adminrouter.post("/adminsigup",AdminRegister);
-adminrouter.post("/adminsigin",adminlogin);
+adminrouter.post("admin/adminsigup",AdminRegister);
+adminrouter.post("/adminsignin",adminlogin);
 
 // dealer Registration routes
 adminrouter.post("/regi-delars",registerDealer);

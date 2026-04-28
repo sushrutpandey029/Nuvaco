@@ -5,31 +5,31 @@ import bcrypt from "bcrypt"
 
 
 export const AdminRegister = async (req, res) => {
-    try {
-        const { fullname, email, password, phonenumber } = req.body;
+  try {
+    const { fullname, email, password, phonenumber } = req.body;
 
-        if (!fullname || !email || !password || !phonenumber) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+    if (!fullname || !email || !password || !phonenumber) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-        const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
-        if (isDuplicateEmail) {
-            return res.status(400).json({ message: "Email already exists" });
-        }
+    const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
+    if (isDuplicateEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
-        const hashpassword = await bcrypt.hash(password, 10);
+    const hashpassword = await bcrypt.hash(password, 10);
 
-        const newAdmin = await AdminModel.create({
-            fullname,
-            email,
-            password: hashpassword,
-            phonenumber,
-        });
+    const newAdmin = await AdminModel.create({
+      fullname,
+      email,
+      password: hashpassword,
+      phonenumber,
+    });
 
-        await sendMail({
-            to: newAdmin.email,
-            subject: "Welcome to Nuvaco",
-            html: `
+    await sendMail({
+      to: newAdmin.email,
+      subject: "Welcome to Nuvaco",
+      html: `
   <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:20px;">
     <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:30px;">
       
@@ -66,28 +66,28 @@ export const AdminRegister = async (req, res) => {
     </div>
   </div>
   `,
-        });
+    });
 
-        return res.status(201).json({
-            success: true,
-            message: "Admin registered successfully",
-            data: newAdmin,
-        });
+    return res.status(201).json({
+      success: true,
+      message: "Admin registered successfully",
+      data: newAdmin,
+    });
 
-    } catch (error) {
-        return res.status(500).json({
-            message: "Internal server error",
-            error: error.message,
-        });
-    }
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
 };
 
 export const adminloginview = async (req, res) => {
   res.render("admin/adminLogin");
 };
 
-export const adminlogin = async (req,res) =>{
-    res.render("admin/dashboard");
+export const adminlogin = async (req, res) => {
+  res.render("admin/dashboard");
 }
 
 // dealer Registration
