@@ -15,11 +15,9 @@ const PORT = process.env.PORT || 5050;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "view"));
 hbs.registerPartials(path.join(__dirname, "view", "admin", "partials"));
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

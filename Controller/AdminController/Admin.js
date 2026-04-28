@@ -1,5 +1,6 @@
 import AdminModel from "../../Model/adminModel.js"
 import { sendMail } from "../../utils/mailer.js";
+import Dealer from "../../Model/dealerModel.js";
 import bcrypt from "bcrypt"
 
 
@@ -89,5 +90,50 @@ export const adminlogin = async (req,res) =>{
     res.render("admin/dashboard");
 }
 
+// dealer Registration
+export const registerDealer = async (req, res) => {
+  try {
+    const { dealer_name, dealer_email, dealer_contact, region } = req.body;
 
+    // Validation
+    if (!dealer_name || !dealer_email || !dealer_contact || !region) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
 
+    // Check existing email
+    const existingDealer = await Dealer.findOne({
+      where: { dealer_email },
+    });
+
+    if (existingDealer) {
+      return res.status(409).json({
+        success: false,
+        message: "Dealer already registered with this email",
+      });
+    }
+
+    // Create dealer
+    const dealer = await Dealer.create({
+      dealer_name,
+      dealer_email,
+      dealer_contact,
+      region,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Dealer registered successfully",
+      data: dealer,
+    });
+
+  } catch (error) {
+    console.error("Dealer Registration Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
