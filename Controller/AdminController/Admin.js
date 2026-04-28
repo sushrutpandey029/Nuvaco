@@ -292,3 +292,45 @@ export const uploadDealersExcel = async (req, res) => {
     });
   }
 };
+
+
+export const getDealers = async (req, res) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const offset = (page - 1) * limit;
+
+    const whereCondition = search
+      ? {
+          dealer_name: {
+            [Op.like]: `%${search}%`,
+          },
+        }
+      : {};
+
+    const { count, rows } = await Dealer.findAndCountAll({
+      where: whereCondition,
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      total: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      data: rows,
+    });
+
+  } catch (error) {
+    console.error("Get Dealers Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
