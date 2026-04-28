@@ -40,7 +40,7 @@ const sessionStore = new MySQLStore({
 
 app.use(
   session({
-    key: "amdin_session",
+    key: "admin_session",
     secret: process.env.SESSION_SECRET || "defaultsecret",
     store: sessionStore,
     resave: false,

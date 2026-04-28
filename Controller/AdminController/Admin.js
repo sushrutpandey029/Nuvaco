@@ -1,6 +1,6 @@
 import AdminModel from "../../Model/adminModel.js";
 import { sendMail } from "../../utils/mailer.js";
-import Dealer from "../../Model/dealerModel.js"
+import Dealer from "../../Model/dealerModel.js";
 import XLSX from "xlsx";
 import axios from "axios";
 import bcrypt from "bcrypt";
@@ -162,10 +162,26 @@ export const adminlogin = async (req, res) => {
 
 export const adminDashboard = async (req, res) => {
   const admin = req.session.admin;
-  console.log("admin in dashobar",admin)
-  res.render("admin/dashboard",{admin});
+  if(!admin) {
+    return res.redirect("login")
+  }
+  console.log("admin in dashobar", admin);
+  res.render("admin/dashboard", { admin });
 };
 
+export const adminLogout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ success: false });
+    }
+    req.session.admin = "";
+
+    res.clearCookie("connect.sid");
+
+    return res.status(200).json({ success: true });
+  });
+};
 
 export const registerDealer = async (req, res) => {
   try {
@@ -199,7 +215,6 @@ export const registerDealer = async (req, res) => {
       message: "Dealer registered successfully",
       data: dealer,
     });
-
   } catch (error) {
     console.error("Dealer Registration Error:", error);
     return res.status(500).json({
@@ -218,12 +233,9 @@ export const uploadDealersExcel = async (req, res) => {
       });
     }
 
-    
     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
-    const sheetData = XLSX.utils.sheet_to_json(
-      workbook.Sheets[sheetName]
-    );
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     if (!sheetData.length) {
       return res.status(400).json({
@@ -241,13 +253,11 @@ export const uploadDealersExcel = async (req, res) => {
       try {
         const { dealer_name, dealer_email, dealer_contact, region } = row;
 
-       
         if (!dealer_name || !dealer_email || !dealer_contact || !region) {
           failedRows.push({ row: i + 2, error: "Missing fields" });
           continue;
         }
 
-     
         const exists = await Dealer.findOne({
           where: { dealer_email },
         });
@@ -260,7 +270,6 @@ export const uploadDealersExcel = async (req, res) => {
           continue;
         }
 
-     
         await Dealer.create({
           dealer_name,
           dealer_email,
@@ -283,7 +292,6 @@ export const uploadDealersExcel = async (req, res) => {
       inserted: successCount,
       failed: failedRows,
     });
-
   } catch (error) {
     console.error("Excel Upload Error:", error);
     return res.status(500).json({
