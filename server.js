@@ -29,7 +29,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "public")));
 
-
 // Session Store
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
@@ -41,7 +40,7 @@ const sessionStore = new MySQLStore({
 
 app.use(
   session({
-    key: "amdin_session",
+    key: "admin_session",
     secret: process.env.SESSION_SECRET || "defaultsecret",
     store: sessionStore,
     resave: false,
