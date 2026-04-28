@@ -82,9 +82,12 @@ export const AdminRegister = async (req, res) => {
 };
 
 export const adminloginview = async (req, res) => {
-  res.render("adminView/adminLogin");
+  res.render("admin/adminLogin");
 };
 
 export const adminlogin = async (req,res) =>{
     res.send("sucesss")
 }
+
+
+
