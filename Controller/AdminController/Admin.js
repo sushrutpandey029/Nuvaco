@@ -1,7 +1,8 @@
 import AdminModel from "../../Model/adminModel.js"
-import { sendMail } from "../../utils/mailer.js";
 import Dealer from "../../Model/dealerModel.js";
-import bcrypt from "bcrypt"
+import { sendMail } from "../../utils/mailer.js";
+import bcrypt from "bcrypt";
+import XLSX from "xlsx";
 
 
 export const AdminRegister = async (req, res) => {
@@ -87,7 +88,7 @@ export const adminloginview = async (req, res) => {
 };
 
 export const adminlogin = async (req,res) =>{
-    res.render("admin/dashboard");
+    res.send("sucesss")
 }
 
 
@@ -139,3 +140,132 @@ export const registerDealer = async (req, res) => {
     });
   }
 };
+
+
+export const uploadDealersExcel = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Excel file is required",
+      });
+    }
+
+    // Read Excel buffer
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheetData = XLSX.utils.sheet_to_json(
+      workbook.Sheets[sheetName]
+    );
+
+    if (!sheetData.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Excel file is empty",
+      });
+    }
+
+    let successCount = 0;
+    let failedRows = [];
+
+    for (let i = 0; i < sheetData.length; i++) {
+      const row = sheetData[i];
+
+      try {
+        const { dealer_name, dealer_email, dealer_contact, region } = row;
+
+        // Validation
+        if (!dealer_name || !dealer_email || !dealer_contact || !region) {
+          failedRows.push({ row: i + 2, error: "Missing fields" });
+          continue;
+        }
+
+        // Check duplicate email
+        const exists = await Dealer.findOne({
+          where: { dealer_email },
+        });
+
+        if (exists) {
+          failedRows.push({
+            row: i + 2,
+            error: "Email already exists",
+          });
+          continue;
+        }
+
+        // Insert
+        await Dealer.create({
+          dealer_name,
+          dealer_email,
+          dealer_contact,
+          region,
+        });
+
+        successCount++;
+      } catch (err) {
+        failedRows.push({
+          row: i + 2,
+          error: err.message,
+        });
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Excel processed",
+      inserted: successCount,
+      failed: failedRows,
+    });
+
+  } catch (error) {
+    console.error("Excel Upload Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+export const getDealers = async (req, res) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const offset = (page - 1) * limit;
+
+    // Search condition
+    const whereCondition = search
+      ? {
+          dealer_name: {
+            [Op.like]: `%${search}%`,
+          },
+        }
+      : {};
+
+    const { count, rows } = await Dealer.findAndCountAll({
+      where: whereCondition,
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      total: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      data: rows,
+    });
+
+  } catch (error) {
+    console.error("Get Dealers Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+

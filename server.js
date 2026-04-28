@@ -18,7 +18,8 @@ const __dirname = path.dirname(__filename);
 
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "view"));
-hbs.registerPartials(path.join(__dirname, "view", "admin", "partials"));
+
+hbs.registerPartials(path.join(__dirname, "view", "partials"));
 
 
 app.use(express.json());
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 
 app.use("/", adminrouter);
+
 
 
 const startServer = async () => {
