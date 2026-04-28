@@ -1,34 +1,34 @@
-import AdminModel from "../../Model/adminModel.js"
+import AdminModel from "../../Model/adminModel.js";
 import { sendMail } from "../../utils/mailer.js";
-import bcrypt from "bcrypt"
-
+import axios from "axios";
+import bcrypt from "bcrypt";
 
 export const AdminRegister = async (req, res) => {
-    try {
-        const { fullname, email, password, phonenumber } = req.body;
+  try {
+    const { fullname, email, password, phonenumber } = req.body;
 
-        if (!fullname || !email || !password || !phonenumber) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+    if (!fullname || !email || !password || !phonenumber) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-        const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
-        if (isDuplicateEmail) {
-            return res.status(400).json({ message: "Email already exists" });
-        }
+    const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
+    if (isDuplicateEmail) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
-        const hashpassword = await bcrypt.hash(password, 10);
+    const hashpassword = await bcrypt.hash(password, 10);
 
-        const newAdmin = await AdminModel.create({
-            fullname,
-            email,
-            password: hashpassword,
-            phonenumber,
-        });
+    const newAdmin = await AdminModel.create({
+      fullname,
+      email,
+      password: hashpassword,
+      phonenumber,
+    });
 
-        await sendMail({
-            to: newAdmin.email,
-            subject: "Welcome to Nuvaco",
-            html: `
+    await sendMail({
+      to: newAdmin.email,
+      subject: "Welcome to Nuvaco",
+      html: `
   <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:20px;">
     <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:30px;">
       
@@ -65,29 +65,93 @@ export const AdminRegister = async (req, res) => {
     </div>
   </div>
   `,
-        });
+    });
 
-        return res.status(201).json({
-            success: true,
-            message: "Admin registered successfully",
-            data: newAdmin,
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            message: "Internal server error",
-            error: error.message,
-        });
-    }
+    return res.status(201).json({
+      success: true,
+      message: "Admin registered successfully",
+      data: newAdmin,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
 };
 
 export const adminloginview = async (req, res) => {
   res.render("admin/adminLogin");
 };
 
-export const adminlogin = async (req,res) =>{
-    res.render("admin/dashboard");
-}
+export const adminlogin = async (req, res) => {
+  try {
+    console.log("insied admin logn conteooler");
+    console.log("req body in admin logi", req.body);
+    const { email, password } = req.body;
+    const captcha = req.body["g-recaptcha-response"];
 
+    // ✅ 1. Basic validation
+    if (!email || !password) {
+      req.flash("error", "Email and Password are required");
+      return res.redirect("login");
+    }
+    console.log("after base alidiaiotn");
+    // ✅ 2. Captcha check
+    if (!captcha) {
+      req.flash("error", "Please verify captcha");
+      return res.redirect("login");
+    }
+    console.log("after captcha");
 
+    // ✅ 3. Verify captcha from Google
+    const response = await axios.post(process.env.VERIFY_CAPTCHA_URL, null, {
+      params: {
+        secret: process.env.RECAPTCHA_SECRET_KEY,
+        response: captcha,
+      },
+    });
+    console.log("after recaptcha");
 
+    if (!response.data.success) {
+      req.flash("error", "Captcha verification failed");
+      return res.redirect("login");
+    }
+
+    // ✅ 4. Check admin
+    const admin = await AdminModel.findOne({ where: { email } });
+    console.log("after admib check");
+    console.log("admin", admin);
+
+    if (!admin) {
+      req.flash("error", "Admin not found");
+      return res.redirect("login");
+    }
+
+    // ✅ 5. Password check
+    const isMatch = await bcrypt.compare(password, admin.password);
+
+    if (!isMatch) {
+      req.flash("error", "Invalid password");
+      return res.redirect("login");
+    }
+
+    // ✅ 6. Store session (simple login)
+    req.session.admin = {
+      id: admin.id,
+      email: admin.email,
+      fullname: admin.fullname,
+    };
+
+    // ✅ 7. Redirect
+    return res.redirect("dashboard");
+  } catch (error) {
+    console.error(error);
+    req.flash("error", "Something went wrong");
+    return res.redirect("login");
+  }
+};
+
+export const adminDashboard = async (req, res) => {
+  res.render("admin/dashboard");
+};
