@@ -83,6 +83,11 @@ export const AdminRegister = async (req, res) => {
 };
 
 export const adminloginview = async (req, res) => {
+  const loggedInAdmin = req.session.admin;
+
+  if (loggedInAdmin) {
+    return res.redirect("dashboard");
+  }
   res.render("admin/adminLogin");
 };
 
@@ -122,7 +127,6 @@ export const adminlogin = async (req, res) => {
 
     // ✅ 4. Check admin
     const admin = await AdminModel.findOne({ where: { email } });
-    console.log("after admib check");
     console.log("admin", admin);
 
     if (!admin) {
@@ -145,6 +149,8 @@ export const adminlogin = async (req, res) => {
       fullname: admin.fullname,
     };
 
+    console.log("session data of adkin", req.session.admin);
+
     // ✅ 7. Redirect
     return res.redirect("dashboard");
   } catch (error) {
@@ -155,7 +161,9 @@ export const adminlogin = async (req, res) => {
 };
 
 export const adminDashboard = async (req, res) => {
-  res.render("admin/dashboard");
+  const admin = req.session.admin;
+  console.log("admin in dashobar",admin)
+  res.render("admin/dashboard",{admin});
 };
 
 
