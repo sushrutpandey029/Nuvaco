@@ -3,6 +3,11 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import hbs from "hbs";
+import session from "express-session";
+import { createRequire } from "module";
+import flash from "express-flash";
+const require = createRequire(import.meta.url);
+const MySQLStore = require("express-mysql-session")(session);
 
 import { Db_connection, sequelize } from "./DBConnection/mysqlconnetion.js";
 import adminrouter from "./Route/adminRoutes.js";
@@ -22,9 +27,39 @@ hbs.registerPartials(path.join(__dirname, "view", "admin", "partials"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use(express.static(path.join(__dirname, "public")));
 
+
+// Session Store
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+app.use(
+  session({
+    key: "amdin_session",
+    secret: process.env.SESSION_SECRET || "defaultsecret",
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // true if using https
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    },
+  }),
+);
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 
 app.use("/admin", adminrouter);
 

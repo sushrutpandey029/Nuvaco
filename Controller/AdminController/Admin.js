@@ -1,8 +1,7 @@
-import AdminModel from "../../Model/adminModel.js"
+import AdminModel from "../../Model/adminModel.js";
 import { sendMail } from "../../utils/mailer.js";
-import Dealer from "../../Model/dealerModel.js";
-import bcrypt from "bcrypt"
-
+import axios from "axios";
+import bcrypt from "bcrypt";
 
 export const AdminRegister = async (req, res) => {
   try {
@@ -73,7 +72,6 @@ export const AdminRegister = async (req, res) => {
       message: "Admin registered successfully",
       data: newAdmin,
     });
-
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",
@@ -87,53 +85,73 @@ export const adminloginview = async (req, res) => {
 };
 
 export const adminlogin = async (req, res) => {
-  res.render("admin/dashboard");
-}
-
-// dealer Registration
-export const registerDealer = async (req, res) => {
   try {
-    const { dealer_name, dealer_email, dealer_contact, region } = req.body;
+    console.log("insied admin logn conteooler");
+    console.log("req body in admin logi", req.body);
+    const { email, password } = req.body;
+    const captcha = req.body["g-recaptcha-response"];
 
-    // Validation
-    if (!dealer_name || !dealer_email || !dealer_contact || !region) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    // ✅ 1. Basic validation
+    if (!email || !password) {
+      req.flash("error", "Email and Password are required");
+      return res.redirect("login");
+    }
+    console.log("after base alidiaiotn");
+    // ✅ 2. Captcha check
+    if (!captcha) {
+      req.flash("error", "Please verify captcha");
+      return res.redirect("login");
+    }
+    console.log("after captcha");
+
+    // ✅ 3. Verify captcha from Google
+    const response = await axios.post(process.env.VERIFY_CAPTCHA_URL, null, {
+      params: {
+        secret: process.env.RECAPTCHA_SECRET_KEY,
+        response: captcha,
+      },
+    });
+    console.log("after recaptcha");
+
+    if (!response.data.success) {
+      req.flash("error", "Captcha verification failed");
+      return res.redirect("login");
     }
 
-    // Check existing email
-    const existingDealer = await Dealer.findOne({
-      where: { dealer_email },
-    });
+    // ✅ 4. Check admin
+    const admin = await AdminModel.findOne({ where: { email } });
+    console.log("after admib check");
+    console.log("admin", admin);
 
-    if (existingDealer) {
-      return res.status(409).json({
-        success: false,
-        message: "Dealer already registered with this email",
-      });
+    if (!admin) {
+      req.flash("error", "Admin not found");
+      return res.redirect("login");
     }
 
-    // Create dealer
-    const dealer = await Dealer.create({
-      dealer_name,
-      dealer_email,
-      dealer_contact,
-      region,
-    });
+    // ✅ 5. Password check
+    const isMatch = await bcrypt.compare(password, admin.password);
 
-    return res.status(201).json({
-      success: true,
-      message: "Dealer registered successfully",
-      data: dealer,
-    });
+    if (!isMatch) {
+      req.flash("error", "Invalid password");
+      return res.redirect("login");
+    }
 
+    // ✅ 6. Store session (simple login)
+    req.session.admin = {
+      id: admin.id,
+      email: admin.email,
+      fullname: admin.fullname,
+    };
+
+    // ✅ 7. Redirect
+    return res.redirect("dashboard");
   } catch (error) {
-    console.error("Dealer Registration Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    console.error(error);
+    req.flash("error", "Something went wrong");
+    return res.redirect("login");
   }
+};
+
+export const adminDashboard = async (req, res) => {
+  res.render("admin/dashboard");
 };

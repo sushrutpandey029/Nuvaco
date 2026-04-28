@@ -1,14 +1,13 @@
 import express from "express"
 
-import {AdminRegister,adminloginview,adminlogin,registerDealer} from "../Controller/AdminController/Admin.js"
+import {AdminRegister,adminloginview,adminlogin,adminDashboard} from "../Controller/AdminController/Admin.js"
 
 const adminrouter = express.Router();
 
-adminrouter.get("/",adminloginview);
-adminrouter.post("admin/adminsigup",AdminRegister);
+adminrouter.post("/adminsigup",AdminRegister);
+adminrouter.get("/login",adminloginview);
 adminrouter.post("/adminsignin",adminlogin);
+adminrouter.get("/dashboard",adminDashboard);
 
-// dealer Registration routes
-adminrouter.post("/regi-delars",registerDealer);
 
 export default adminrouter;
