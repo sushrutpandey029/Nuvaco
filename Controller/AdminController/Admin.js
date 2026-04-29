@@ -330,6 +330,9 @@ export const registerDealer = async (req, res) => {
   try {
     const { fullname, email, contact, region, city, address } = req.body;
 
+    console.log(req.body); // 👈 DEBUG (important)
+    console.log(req.file); // 👈 DEBUG
+
     if (!fullname || !email || !contact || !region) {
       return res.render("admin/registerDealer", {
         error: "All required fields missing",
@@ -349,6 +352,9 @@ export const registerDealer = async (req, res) => {
       email,
       contact,
       region,
+      city,
+      address,
+      shop_image: req.file ? req.file.filename : null,
     });
 
     return res.render("admin/registerDealer", {
