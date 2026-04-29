@@ -1,0 +1,43 @@
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main class="purple-main">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+  <div class="pbubble pb4"></div>
+  <div class="pbubble pb5"></div>
+  <div class="pbubble pb6"></div>
+  {{#if error}}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{error}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {{/if}}
+  {{#if success}}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{success}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {{/if}}
+  <div class="center-card">
+
+    
+
+    <form id="AdminProfile" action="/admin/change-password" method="POST">
+      <div class="mb-4">
+        <input type="password" class="form-control pw-input" name="currentPassword" placeholder="Enter Your Current Password" />
+      </div>
+      <div class="mb-4">
+        <input type="password" class="form-control pw-input" name="newPassword" placeholder="Enter Your New Password" />
+      </div>
+      <div class="mb-5">
+        <input type="password" class="form-control pw-input" name="confirmPassword" placeholder="Confirm Your New Password" />
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-login" style="letter-spacing:2px;">CHANGE PASSWORD</button>
+      </div>
+    </form>
+  </div>
+</main>
+{{> footer }}
