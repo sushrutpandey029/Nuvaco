@@ -11,6 +11,7 @@ const MySQLStore = require("express-mysql-session")(session);
 
 import { Db_connection, sequelize } from "./DBConnection/mysqlconnetion.js";
 import adminrouter from "./Route/adminRoutes.js";
+import dealerrouter from "./Route/dealerRoutes.js";
 
 dotenv.config();
 
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/admin", adminrouter);
+app.use("/", dealerrouter);
 
 const startServer = async () => {
   try {
