@@ -12,7 +12,6 @@ import {
   adminChangePassword,
   adminProfile,dealerList,dealerDetail,dealerRegister,videoMessage
 } from "../Controller/AdminController/Admin.js";
-import dealerUpload from "../middlewares/dealerUpload.js";
 import {upload} from "../middlewares/shopimageupload.js";
 
 const adminrouter = express.Router();
