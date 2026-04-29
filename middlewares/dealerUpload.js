@@ -1,11 +1,10 @@
-// middleware/upload.js
 import multer from "multer";
 
 const storage = multer.memoryStorage();
 
-const upload = multer({
+const dealerUpload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
-export default upload;
+export default dealerUpload;

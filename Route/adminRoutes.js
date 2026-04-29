@@ -1,25 +1,35 @@
 import express from "express";
-import upload from "../Middleware/upload.js";
-
-import {AdminRegister,adminloginview,adminlogin,registerDealer, uploadDealersExcel, getDealers} from "../Controller/AdminController/Admin.js"
-
+import dealerUpload from "../middlewares/dealerUpload.js";
+import Videoupload from "../middlewares/videoUpload.js";
+import {
+  AdminRegister,
+  adminloginview,
+  adminlogin,
+  adminDashboard,
+  registerDealer,
+  uploadDealersExcel,
+  adminLogout,
+  uploadRegionVideo
+} from "../Controller/AdminController/Admin.js";
 
 const adminrouter = express.Router();
 
-adminrouter.post("/adminsigup",AdminRegister);
-adminrouter.get("/",adminloginview);
-adminrouter.post("/adminsigin",adminlogin);
-
-// dealer Registration routes
-
-adminrouter.post("/regi-delars",registerDealer);
-
+adminrouter.post("/adminsigup", AdminRegister);
+adminrouter.get("/login", adminloginview);
+adminrouter.post("/adminsignin", adminlogin);
+adminrouter.get("/dashboard", adminDashboard);
+adminrouter.post("/regi-delars", registerDealer);
 adminrouter.post(
   "/upload-dealers",
-  upload.single("file"),
-  uploadDealersExcel
+  dealerUpload.single("file"),
+  uploadDealersExcel,
 );
+adminrouter.post("/adminlogout", adminLogout);
 
-adminrouter.get("/get-dealers", getDealers);
+adminrouter.post(
+  "/upload-region-video",
+  Videoupload.single("video"),
+  uploadRegionVideo
+);
 
 export default adminrouter;
