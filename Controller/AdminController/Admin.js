@@ -163,7 +163,7 @@ export const adminlogin = async (req, res) => {
 export const adminDashboard = async (req, res) => {
   const admin = req.session.admin;
   if (!admin) {
-    return res.redirect("login")
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/dashboard", { admin });
@@ -214,7 +214,6 @@ export const adminChangePassword = async (req, res) => {
       admin: adminSession,
       success: "Password changed successfully",
     });
-
   } catch (err) {
     console.log(err);
     return res.render("admin/adminprofile", {
@@ -230,19 +229,18 @@ export const adminLogout = (req, res) => {
       console.log(err);
       return res.status(500).json({ success: false });
     }
-    req.session.admin = "";
+    // req.session.admin = "";
 
     res.clearCookie("connect.sid");
 
-    return res.status(200).json({ success: true });
+    return res.redirect("/admin/login");
   });
 };
-
 
 export const adminProfile = async (req, res) => {
   const admin = req.session.admin;
   if (!admin) {
-    return res.redirect("login")
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/adminprofile", { admin });
@@ -251,7 +249,7 @@ export const adminProfile = async (req, res) => {
 export const dealerList = async (req, res) => {
   const admin = req.session.admin;
   if (!admin) {
-    return res.redirect("login")
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/dealerList", { admin });
@@ -260,7 +258,7 @@ export const dealerList = async (req, res) => {
 export const dealerDetail = async (req, res) => {
   const admin = req.session.admin;
   if (!admin) {
-    return res.redirect("login")
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/dealerDetail", { admin });
@@ -269,7 +267,7 @@ export const dealerDetail = async (req, res) => {
 export const dealerRegister = async (req, res) => {
   const admin = req.session.admin;
   if (!admin) {
-    return res.redirect("login")
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/registerDealer", { admin });
@@ -278,7 +276,7 @@ export const dealerRegister = async (req, res) => {
 export const videoMessage = async (req, res) => {
   const admin = req.session.admin;
   if (!admin) {
-    return res.redirect("login")
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/videoMessage", { admin });
@@ -325,7 +323,6 @@ export const videoMessage = async (req, res) => {
 //   }
 // };
 
-
 export const registerDealer = async (req, res) => {
   try {
     const { fullname, email, contact, region, city, address } = req.body;
@@ -354,7 +351,6 @@ export const registerDealer = async (req, res) => {
     return res.render("admin/registerDealer", {
       success: "Dealer registered successfully",
     });
-
   } catch (error) {
     console.error(error);
     return res.render("admin/registerDealer", {
@@ -362,7 +358,6 @@ export const registerDealer = async (req, res) => {
     });
   }
 };
-
 
 export const uploadDealersExcel = async (req, res) => {
   try {
@@ -441,7 +436,6 @@ export const uploadDealersExcel = async (req, res) => {
   }
 };
 
-
 export const getDealers = async (req, res) => {
   try {
     let { page = 1, limit = 10, search = "" } = req.query;
@@ -453,10 +447,10 @@ export const getDealers = async (req, res) => {
 
     const whereCondition = search
       ? {
-        dealer_name: {
-          [Op.like]: `%${search}%`,
-        },
-      }
+          dealer_name: {
+            [Op.like]: `%${search}%`,
+          },
+        }
       : {};
 
     const { count, rows } = await Dealer.findAndCountAll({
@@ -473,7 +467,6 @@ export const getDealers = async (req, res) => {
       totalPages: Math.ceil(count / limit),
       data: rows,
     });
-
   } catch (error) {
     console.error("Get Dealers Error:", error);
     return res.status(500).json({

@@ -1,0 +1,17 @@
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/sidebar.js"></script>
+
+  <script>
+  function confirmLogout(event) {
+    event.preventDefault(); // stop direct navigation
+
+    const confirmAction = confirm("Are you sure you want to logout?");
+
+    if (confirmAction) {
+      window.location.href = "/logout";
+    }
+  }
+</script>
+</body>
+</html>

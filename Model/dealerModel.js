@@ -48,13 +48,13 @@ const Dealer = sequelize.define(
     },
 
     shop_image: {
-      type: DataTypes.STRING, // filename store hoga
+      type: DataTypes.STRING,
       allowNull: true,
     },
 
     status: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true, // active / inactive
+      defaultValue: true,
     },
   },
   {

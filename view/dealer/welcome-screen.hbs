@@ -1,0 +1,32 @@
+{{> dealerheader dealer=dealer}}
+    
+    
+    <main class="purple-main">
+      <div class="pbubble pb1"></div><div class="pbubble pb2"></div>
+      <div class="pbubble pb3"></div><div class="pbubble pb4"></div><div class="pbubble pb5"></div>
+      <div style="position:relative;z-index:2;width:100%;max-width:460px;">
+ 
+        <div class="video-select-box mb-3" onclick="document.getElementById('vidFile').click()">
+          <i class="bi bi-play-circle text-primary me-2" style="font-size:1.4rem;"></i>
+          Video 
+          <input type="file" id="vidFile" accept="video/*" class="d-none"
+            onchange="document.getElementById('vidName').textContent = this.files[0] ? this.files[0].name : ''"/>
+        </div>
+        <p id="vidName" class="text-center text-white fw-semibold mb-3" style="font-size:0.85rem;min-height:1.2em;word-break:break-all;"></p>
+        <div class="d-flex justify-content-center">
+          <a href="#" class="btn btn-login px-5 me-3"
+            style="border-radius:50px;display:inline-block;text-decoration:none;">
+            Re-Listen
+          </a>
+          <a href="/upload-pic" class="btn btn-login px-5"
+            style="border-radius:50px;display:inline-block;text-decoration:none;">
+           Next
+          </a>
+        </div>
+      </div>
+    </main>
+
+
+{{> dealerfooter}}
+
+  

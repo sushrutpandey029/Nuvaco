@@ -24,6 +24,7 @@ const __dirname = path.dirname(__filename);
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "view"));
 hbs.registerPartials(path.join(__dirname, "view", "admin", "partials"));
+hbs.registerPartials(path.join(__dirname, "view", "dealer", "dealerpartials"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -47,7 +48,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, 
+      secure: false,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     },

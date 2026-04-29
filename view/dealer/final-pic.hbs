@@ -1,0 +1,44 @@
+ {{> dealerheader dealer=dealer}}
+ 
+  <main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+      <div class="pbubble pb1"></div><div class="pbubble pb2"></div><div class="pbubble pb3"></div>
+      <div style="position:relative;z-index:2;width:100%;">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="pic-radio-wrap">
+              <input type="radio" name="dealerPic" id="pic1"/>
+              <label class="pic-box" for="pic1">Uploaded Pic 1</label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="pic-radio-wrap">
+              <input type="radio" name="dealerPic" id="pic2"/>
+              <label class="pic-box" for="pic2">Uploaded Pic 2</label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="pic-radio-wrap">
+              <input type="radio" name="dealerPic" id="pic3"/>
+              <label class="pic-box" for="pic3">Uploaded Pic 3</label>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="pic-radio-wrap">
+              <input type="radio" name="dealerPic" id="pic4"/>
+              <label class="pic-box" for="pic4">Uploaded Pic 4</label>
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-4">
+          <a href="#" class="btn btn-login me-3 px-5" style="border-radius:50px;display:inline-block;text-decoration:none;">
+            Re-upload
+          </a>
+          <a href="/thankyou" class="btn btn-login px-5" style="border-radius:50px;display:inline-block;text-decoration:none;">
+            Submit
+          </a>
+        </div>
+      </div>
+    </main>
+
+
+      {{> dealerfooter}}

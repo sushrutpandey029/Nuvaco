@@ -8,19 +8,21 @@
 
     if (confirmAction) {
       try {
-        const res = await fetch("/adminlogout", {
+
+        window.location.href = "/admin/adminlogout";
+        {{!-- const res = await fetch("/adminlogout", {
           method: "POST",
           credentials: "include"
-        });
+        }); --}}
 
-        const data = await res.json();
+        {{!-- const data = await res.json(); --}}
 
-        if (data.success) {
+        {{!-- if (data.success) {
           // ✅ Redirect to login page
           window.location.href = "/login";
         } else {
           alert("Logout failed");
-        }
+        } --}}
 
       } catch (err) {
         console.error("Logout failed", err);
