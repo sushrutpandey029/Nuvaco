@@ -1,6 +1,7 @@
 import AdminModel from "../../Model/adminModel.js";
 import { sendMail } from "../../utils/mailer.js";
 import Dealer from "../../Model/dealerModel.js";
+import { Op } from "sequelize";
 import XLSX from "xlsx";
 import axios from "axios";
 import bcrypt from "bcrypt";
@@ -246,14 +247,125 @@ export const adminProfile = async (req, res) => {
   res.render("admin/adminprofile", { admin });
 };
 
+// export const dealerList = async (req, res) => {
+//   const admin = req.session.admin;
+//   if (!admin) {
+//     return res.redirect("login")
+//   }
+//   console.log("admin in dashobar", admin);
+//   res.render("admin/dealerList", { admin });
+// };
+
 export const dealerList = async (req, res) => {
-  const admin = req.session.admin;
-  if (!admin) {
-    return res.redirect("login");
+  try {
+    const admin = req.session.admin;
+    if (!admin) return res.redirect("login");
+
+    console.log("📥 Query Params:", req.query);
+
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
+
+    search = search.trim();
+
+    console.log("📊 Parsed:", { page, limit, search });
+
+    const offset = (page - 1) * limit;
+
+    const whereCondition = search
+      ? {
+        fullname: {
+          [Op.like]: `%${search}%`,
+        },
+      }
+      : {};
+
+    console.log("🔍 Where Condition:", whereCondition);
+
+    const { count, rows } = await Dealer.findAndCountAll({
+      where: whereCondition,
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    console.log("📦 Count:", count);
+    console.log("📄 Rows Length:", rows.length);
+
+    if (rows.length > 0) {
+      console.log("👤 First Dealer:", rows[0].toJSON());
+    }
+
+    if (req.xhr || req.headers.accept?.includes("json")) {
+      return res.status(200).json({
+        success: true,
+        total: count,
+        currentPage: page,
+        totalPages: Math.ceil(count / limit),
+        data: rows || [],
+      });
+    }
+
+    return res.render("admin/dealerList", {
+      admin,
+      dealers: rows || [],
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      search,
+    });
+
+  } catch (error) {
+    console.error("❌ Dealer List Error:", error);
+    return res.status(500).send("Server Error");
   }
-  console.log("admin in dashobar", admin);
-  res.render("admin/dealerList", { admin });
 };
+
+
+// export const getDealers = async (req, res) => {
+//   try {
+//     let { page = 1, limit = 10, search = "" } = req.query;
+
+//     page = parseInt(page);
+//     limit = parseInt(limit);
+
+//     const offset = (page - 1) * limit;
+
+//     const whereCondition = search
+//       ? {
+//         dealer_name: {
+//           [Op.like]: `%${search}%`,
+//         },
+//       }
+//       : {};
+
+//     const { count, rows } = await Dealer.findAndCountAll({
+//       where: whereCondition,
+//       limit,
+//       offset,
+//       order: [["createdAt", "DESC"]],
+//     });
+
+//     return res.status(200).json({
+//       success: true,
+//       total: count,
+//       currentPage: page,
+//       totalPages: Math.ceil(count / limit),
+//       data: rows,
+//     });
+
+//   } catch (error) {
+//     console.error("Get Dealers Error:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     });
+//   }
+// };
 
 export const dealerDetail = async (req, res) => {
   const admin = req.session.admin;
@@ -327,6 +439,9 @@ export const registerDealer = async (req, res) => {
   try {
     const { fullname, email, contact, region, city, address } = req.body;
 
+    console.log(req.body); // 👈 DEBUG (important)
+    console.log(req.file); // 👈 DEBUG
+
     if (!fullname || !email || !contact || !region) {
       return res.render("admin/registerDealer", {
         error: "All required fields missing",
@@ -346,6 +461,9 @@ export const registerDealer = async (req, res) => {
       email,
       contact,
       region,
+      city,
+      address,
+      shop_image: req.file ? req.file.filename : null,
     });
 
     return res.render("admin/registerDealer", {
