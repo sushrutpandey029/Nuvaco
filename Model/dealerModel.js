@@ -10,11 +10,11 @@ const Dealer = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    dealer_name: {
+    fullname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    dealer_email: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -22,7 +22,7 @@ const Dealer = sequelize.define(
         isEmail: true,
       },
     },
-    dealer_contact: {
+    contact: {
       type: DataTypes.STRING,
       allowNull: false,
     },

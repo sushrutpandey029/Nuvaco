@@ -162,8 +162,8 @@ export const adminlogin = async (req, res) => {
 
 export const adminDashboard = async (req, res) => {
   const admin = req.session.admin;
-  if(!admin) {
-    return res.redirect("login")
+  if (!admin) {
+    return res.redirect("login");
   }
   console.log("admin in dashobar", admin);
   res.render("admin/dashboard", { admin });
