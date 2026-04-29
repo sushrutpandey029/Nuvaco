@@ -16,43 +16,29 @@
             <th>Action</th>
           </tr>
         </thead>
+
+
         <tbody>
+          {{#each dealers}}
           <tr>
-            <td>1</td>
-            <td>Ram</td>
-            <td>North</td>
-            <td><span style="color:#2e7d32;font-weight:600;">Yes</span></td>
-            <td><a href="dealer-detail.html" class="view-link">View</a></td>
+            <td>{{@index}}</td>
+            <td>{{this.fullname}}</td>
+            <td>{{this.region}}</td>
+            <td>
+              {{#if this.shop_image}}
+              <span style="color:#2e7d32;font-weight:600;">Yes</span>
+              {{else}}
+              <span style="color:#c62828;font-weight:600;">No</span>
+              {{/if}}
+            </td>
+            <td>
+              <a href="/admin/dealerdetail/{{this.id}}" class="view-link">View</a>
+            </td>
           </tr>
-          <tr>
-            <td>2</td>
-            <td>Shyam</td>
-            <td>North</td>
-            <td><span style="color:#c62828;font-weight:600;">No</span></td>
-            <td><a href="dealer-detail.html" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>Ghanshyam</td>
-            <td>South</td>
-            <td><span style="color:#2e7d32;font-weight:600;">Yes</span></td>
-            <td><a href="dealer-detail.html" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>Mohan</td>
-            <td>East</td>
-            <td><span style="color:#c62828;font-weight:600;">No</span></td>
-            <td><a href="dealer-detail.html" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td>Sohan</td>
-            <td>West</td>
-            <td><span style="color:#2e7d32;font-weight:600;">Yes</span></td>
-            <td><a href="dealer-detail.html" class="view-link">View</a></td>
-          </tr>
+          {{/each}}
         </tbody>
+
+
       </table>
     </div>
   </div>
