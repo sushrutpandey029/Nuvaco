@@ -1,4 +1,3 @@
-// models/dealer.js
 import { DataTypes } from "sequelize";
 import { sequelize } from "../DBConnection/mysqlconnetion.js";
 
@@ -10,11 +9,13 @@ const Dealer = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    dealer_name: {
+
+    fullname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    dealer_email: {
+
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -22,19 +23,44 @@ const Dealer = sequelize.define(
         isEmail: true,
       },
     },
-    dealer_contact: {
+
+    contact: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [10, 15], // basic phone validation
+      },
+    },
+
+    region: {
+      type: DataTypes.ENUM("North", "South", "East", "West"),
       allowNull: false,
     },
-    region: {
+
+    city: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+    },
+
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    shop_image: {
+      type: DataTypes.STRING, // filename store hoga
+      allowNull: true,
+    },
+
+    status: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true, // active / inactive
     },
   },
   {
     tableName: "dealers",
     timestamps: true,
-  },
+  }
 );
 
 export default Dealer;

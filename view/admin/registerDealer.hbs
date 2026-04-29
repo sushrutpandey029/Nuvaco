@@ -1,0 +1,73 @@
+{{> header admin=admin }}
+{{> sidebar }}
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+  <div class="pbubble pb4"></div>
+  <div class="reg-form-card">
+    <h5 class="fw-bold text-center mb-4" style="color:#1a1a2e;">Register New Dealer</h5>
+
+    {{#if error}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{error}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {{/if}}
+    {{#if success}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{success}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {{/if}}
+
+    <form id="AdminProfile" action="/admin/registration-delars" method="POST" enctype="multipart/form-data">
+      <div class="row g-3">
+
+        <div class="col-12">
+          <input name="fullname" class="form-control reg-input" placeholder="Dealer Name" />
+        </div>
+
+        <div class="col-12">
+          <input name="contact" class="form-control reg-input" placeholder="Phone Number" />
+        </div>
+
+        <div class="col-12">
+          <select name="region" class="form-select reg-input">
+            <option value="">Select Region</option>
+            <option>North</option>
+            <option>South</option>
+            <option>East</option>
+            <option>West</option>
+          </select>
+        </div>
+
+        <div class="col-12">
+          <input name="city" class="form-control reg-input" placeholder="City" />
+        </div>
+
+        <div class="col-12">
+          <input name="address" class="form-control reg-input" placeholder="Address" />
+        </div>
+
+        <div class="col-12">
+          <input name="email" class="form-control reg-input" placeholder="Email" />
+        </div>
+
+        <div class="col-12">
+          <label class="fw-semibold mb-1">Upload Shop Photo</label>
+          <div class="video-select-box" onclick="document.getElementById('shopPic').click()">
+            Select Photo to Upload
+            <input type="file" name="shop_image" id="shopPic" accept="image/*" class="d-none" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-login">REGISTER DEALER</button>
+      </div>
+    </form>
+  </div>
+</main>
+{{> footer }}
