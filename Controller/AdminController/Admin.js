@@ -162,11 +162,66 @@ export const adminlogin = async (req, res) => {
 
 export const adminDashboard = async (req, res) => {
   const admin = req.session.admin;
-  if(!admin) {
+  if (!admin) {
     return res.redirect("login")
   }
   console.log("admin in dashobar", admin);
   res.render("admin/dashboard", { admin });
+};
+
+export const adminChangePassword = async (req, res) => {
+  try {
+    const adminSession = req.session.admin;
+    if (!adminSession) return res.redirect("login");
+
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.render("admin/adminprofile", {
+        admin: adminSession,
+        error: "All fields are required",
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.render("admin/adminprofile", {
+        admin: adminSession,
+        error: "Passwords do not match",
+      });
+    }
+
+    const admin = await AdminModel.findByPk(adminSession.id);
+    if (!admin) {
+      return res.render("admin/adminprofile", {
+        admin: adminSession,
+        error: "Admin not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, admin.password);
+    if (!isMatch) {
+      return res.render("admin/adminprofile", {
+        admin: adminSession,
+        error: "Current password is incorrect",
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    admin.password = await bcrypt.hash(newPassword, salt);
+    await admin.save();
+
+    return res.render("admin/adminprofile", {
+      admin: adminSession,
+      success: "Password changed successfully",
+    });
+
+  } catch (err) {
+    console.log(err);
+    return res.render("admin/adminprofile", {
+      admin: req.session.admin,
+      error: "Server error",
+    });
+  }
 };
 
 export const adminLogout = (req, res) => {
@@ -183,46 +238,131 @@ export const adminLogout = (req, res) => {
   });
 };
 
+
+export const adminProfile = async (req, res) => {
+  const admin = req.session.admin;
+  if (!admin) {
+    return res.redirect("login")
+  }
+  console.log("admin in dashobar", admin);
+  res.render("admin/adminprofile", { admin });
+};
+
+export const dealerList = async (req, res) => {
+  const admin = req.session.admin;
+  if (!admin) {
+    return res.redirect("login")
+  }
+  console.log("admin in dashobar", admin);
+  res.render("admin/dealerList", { admin });
+};
+
+export const dealerDetail = async (req, res) => {
+  const admin = req.session.admin;
+  if (!admin) {
+    return res.redirect("login")
+  }
+  console.log("admin in dashobar", admin);
+  res.render("admin/dealerDetail", { admin });
+};
+
+export const dealerRegister = async (req, res) => {
+  const admin = req.session.admin;
+  if (!admin) {
+    return res.redirect("login")
+  }
+  console.log("admin in dashobar", admin);
+  res.render("admin/registerDealer", { admin });
+};
+
+export const videoMessage = async (req, res) => {
+  const admin = req.session.admin;
+  if (!admin) {
+    return res.redirect("login")
+  }
+  console.log("admin in dashobar", admin);
+  res.render("admin/videoMessage", { admin });
+};
+
+// export const registerDealer = async (req, res) => {
+//   try {
+//     const { dealer_name, dealer_email, dealer_contact, region } = req.body;
+//     if (!dealer_name || !dealer_email || !dealer_contact || !region) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All fields are required",
+//       });
+//     }
+//     const existingDealer = await Dealer.findOne({
+//       where: { dealer_email },
+//     });
+
+//     if (existingDealer) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "Dealer already registered with this email",
+//       });
+//     }
+
+//     const dealer = await Dealer.create({
+//       dealer_name,
+//       dealer_email,
+//       dealer_contact,
+//       region,
+//     });
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Dealer registered successfully",
+//       data: dealer,
+//     });
+//   } catch (error) {
+//     console.error("Dealer Registration Error:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     });
+//   }
+// };
+
+
 export const registerDealer = async (req, res) => {
   try {
-    const { dealer_name, dealer_email, dealer_contact, region } = req.body;
-    if (!dealer_name || !dealer_email || !dealer_contact || !region) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
+    const { fullname, email, contact, region, city, address } = req.body;
+
+    if (!fullname || !email || !contact || !region) {
+      return res.render("admin/registerDealer", {
+        error: "All required fields missing",
       });
     }
-    const existingDealer = await Dealer.findOne({
-      where: { dealer_email },
-    });
+
+    const existingDealer = await Dealer.findOne({ where: { email } });
 
     if (existingDealer) {
-      return res.status(409).json({
-        success: false,
-        message: "Dealer already registered with this email",
+      return res.render("admin/registerDealer", {
+        error: "Dealer already exists with this email",
       });
     }
 
-    const dealer = await Dealer.create({
-      dealer_name,
-      dealer_email,
-      dealer_contact,
+    await Dealer.create({
+      fullname,
+      email,
+      contact,
       region,
     });
 
-    return res.status(201).json({
-      success: true,
-      message: "Dealer registered successfully",
-      data: dealer,
+    return res.render("admin/registerDealer", {
+      success: "Dealer registered successfully",
     });
+
   } catch (error) {
-    console.error("Dealer Registration Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
+    console.error(error);
+    return res.render("admin/registerDealer", {
+      error: "Server error",
     });
   }
 };
+
 
 export const uploadDealersExcel = async (req, res) => {
   try {
@@ -313,10 +453,10 @@ export const getDealers = async (req, res) => {
 
     const whereCondition = search
       ? {
-          dealer_name: {
-            [Op.like]: `%${search}%`,
-          },
-        }
+        dealer_name: {
+          [Op.like]: `%${search}%`,
+        },
+      }
       : {};
 
     const { count, rows } = await Dealer.findAndCountAll({
