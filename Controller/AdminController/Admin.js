@@ -1,6 +1,11 @@
 import AdminModel from "../../Model/adminModel.js";
 import { sendMail } from "../../utils/mailer.js";
+
 import Dealer from "../../Model/dealerModel.js";
+import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
+import SalesSpoc from "../../Model/salesSpocModel.js";
+
+
 import { Op } from "sequelize";
 import XLSX from "xlsx";
 import axios from "axios";
@@ -256,6 +261,7 @@ export const adminProfile = async (req, res) => {
 //   res.render("admin/dealerList", { admin });
 // };
 
+
 export const dealerList = async (req, res) => {
   try {
     const admin = req.session.admin;
@@ -325,7 +331,6 @@ export const dealerList = async (req, res) => {
   }
 };
 
-
 // export const getDealers = async (req, res) => {
 //   try {
 //     let { page = 1, limit = 10, search = "" } = req.query;
@@ -394,40 +399,184 @@ export const videoMessage = async (req, res) => {
   res.render("admin/videoMessage", { admin });
 };
 
+
 // export const registerDealer = async (req, res) => {
 //   try {
-//     const { dealer_name, dealer_email, dealer_contact, region } = req.body;
-//     if (!dealer_name || !dealer_email || !dealer_contact || !region) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "All fields are required",
+//     const { fullname, email, contact, region, city, address } = req.body;
+
+//     console.log(req.body); // 👈 DEBUG (important)
+//     console.log(req.file); // 👈 DEBUG
+
+//     if (!fullname || !email || !contact || !region) {
+//       return res.render("admin/registerDealer", {
+//         error: "All required fields missing",
 //       });
 //     }
-//     const existingDealer = await Dealer.findOne({
-//       where: { dealer_email },
-//     });
+
+//     const existingDealer = await Dealer.findOne({ where: { email } });
 
 //     if (existingDealer) {
-//       return res.status(409).json({
-//         success: false,
-//         message: "Dealer already registered with this email",
+//       return res.render("admin/registerDealer", {
+//         error: "Dealer already exists with this email",
 //       });
 //     }
 
-//     const dealer = await Dealer.create({
-//       dealer_name,
-//       dealer_email,
-//       dealer_contact,
+//     await Dealer.create({
+//       fullname,
+//       email,
+//       contact,
 //       region,
+//       city,
+//       address,
+//       shop_image: req.file ? req.file.filename : null,
 //     });
 
-//     return res.status(201).json({
-//       success: true,
-//       message: "Dealer registered successfully",
-//       data: dealer,
+//     return res.render("admin/registerDealer", {
+//       success: "Dealer registered successfully",
 //     });
 //   } catch (error) {
-//     console.error("Dealer Registration Error:", error);
+//     console.error(error);
+//     return res.render("admin/registerDealer", {
+//       error: "Server error",
+//     });
+//   }
+// };
+
+export const registerDealer = async (req, res) => {
+  try {
+
+    const {
+      state,
+      dealer_code,
+      shop_name,
+      dealer_person,
+      district,
+      address,
+      pincode,
+      dealer_mobile_number,
+
+      sales_spoc,
+
+      trade_marketing_spoc,
+
+    } = req.body;
+
+    // Create Dealer
+    const dealer = await Dealer.create({
+      state,
+      dealer_code,
+      shop_name,
+      dealer_person,
+      district,
+      address,
+      pincode,
+      dealer_mobile_number,
+    });
+
+    // Create Sales SPOC
+    await SalesSpoc.create({
+      dealer_id: dealer.id,
+      name: sales_spoc.name,
+      email: sales_spoc.email,
+      contact_number: sales_spoc.contact_number,
+    });
+
+    // Create Trade Marketing SPOC
+    await TradeMarketingSpoc.create({
+      dealer_id: dealer.id,
+      name: trade_marketing_spoc.name,
+      email: trade_marketing_spoc.email,
+      contact_number:
+        trade_marketing_spoc.contact_number,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Dealer registered successfully",
+      dealer_id: dealer.id,
+    });
+
+  } catch (error) {
+
+    console.log("Registration Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// export const uploadDealersExcel = async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Excel file is required",
+//       });
+//     }
+
+//     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+//     const sheetName = workbook.SheetNames[0];
+//     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+//     if (!sheetData.length) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Excel file is empty",
+//       });
+//     }
+
+//     let successCount = 0;
+//     let failedRows = [];
+
+//     for (let i = 0; i < sheetData.length; i++) {
+//       const row = sheetData[i];
+
+//       try {
+//         const { dealer_name, dealer_email, dealer_contact, region } = row;
+
+//         if (!dealer_name || !dealer_email || !dealer_contact || !region) {
+//           failedRows.push({ row: i + 2, error: "Missing fields" });
+//           continue;
+//         }
+
+//         const exists = await Dealer.findOne({
+//           where: { dealer_email },
+//         });
+
+//         if (exists) {
+//           failedRows.push({
+//             row: i + 2,
+//             error: "Email already exists",
+//           });
+//           continue;
+//         }
+
+//         await Dealer.create({
+//           dealer_name,
+//           dealer_email,
+//           dealer_contact,
+//           region,
+//         });
+
+//         successCount++;
+//       } catch (err) {
+//         failedRows.push({
+//           row: i + 2,
+//           error: err.message,
+//         });
+//       }
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Excel processed",
+//       inserted: successCount,
+//       failed: failedRows,
+//     });
+//   } catch (error) {
+//     console.error("Excel Upload Error:", error);
 //     return res.status(500).json({
 //       success: false,
 //       message: "Server error",
@@ -435,121 +584,161 @@ export const videoMessage = async (req, res) => {
 //   }
 // };
 
-export const registerDealer = async (req, res) => {
+
+export const uploadDealersExcel = async ( req,res) => {
+
   try {
-    const { fullname, email, contact, region, city, address } = req.body;
 
-    console.log(req.body); // 👈 DEBUG (important)
-    console.log(req.file); // 👈 DEBUG
-
-    if (!fullname || !email || !contact || !region) {
-      return res.render("admin/registerDealer", {
-        error: "All required fields missing",
-      });
-    }
-
-    const existingDealer = await Dealer.findOne({ where: { email } });
-
-    if (existingDealer) {
-      return res.render("admin/registerDealer", {
-        error: "Dealer already exists with this email",
-      });
-    }
-
-    await Dealer.create({
-      fullname,
-      email,
-      contact,
-      region,
-      city,
-      address,
-      shop_image: req.file ? req.file.filename : null,
-    });
-
-    return res.render("admin/registerDealer", {
-      success: "Dealer registered successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    return res.render("admin/registerDealer", {
-      error: "Server error",
-    });
-  }
-};
-
-export const uploadDealersExcel = async (req, res) => {
-  try {
+    // Check file
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Excel file is required",
+        message: "Excel file required",
       });
     }
 
-    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0];
-    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    // Read excel
+    const workbook =
+      XLSX.readFile(req.file.path);
 
-    if (!sheetData.length) {
-      return res.status(400).json({
-        success: false,
-        message: "Excel file is empty",
-      });
-    }
+    const sheetName =
+      workbook.SheetNames[0];
 
-    let successCount = 0;
-    let failedRows = [];
+    const sheetData =
+      XLSX.utils.sheet_to_json(
+        workbook.Sheets[sheetName]
+      );
 
-    for (let i = 0; i < sheetData.length; i++) {
-      const row = sheetData[i];
+    let uploaded = 0;
 
-      try {
-        const { dealer_name, dealer_email, dealer_contact, region } = row;
+    let skipped = 0;
 
-        if (!dealer_name || !dealer_email || !dealer_contact || !region) {
-          failedRows.push({ row: i + 2, error: "Missing fields" });
-          continue;
-        }
+    // Loop rows
+    for (const row of sheetData) {
 
-        const exists = await Dealer.findOne({
-          where: { dealer_email },
+      console.log(row);
+
+      // Duplicate check
+      const existingDealer =
+        await Dealer.findOne({
+          where: {
+            dealer_code:
+              row.dealer_code,
+          },
         });
 
-        if (exists) {
-          failedRows.push({
-            row: i + 2,
-            error: "Email already exists",
-          });
-          continue;
-        }
+      if (existingDealer) {
 
-        await Dealer.create({
-          dealer_name,
-          dealer_email,
-          dealer_contact,
-          region,
-        });
+        skipped++;
 
-        successCount++;
-      } catch (err) {
-        failedRows.push({
-          row: i + 2,
-          error: err.message,
-        });
+        continue;
       }
+
+      // Create Dealer
+      const dealer =
+        await Dealer.create({
+
+          state:
+            row.state,
+
+          dealer_code:
+            row.dealer_code,
+
+          shop_name:
+            row.shop_name,
+
+          dealer_person:
+            row.dealer_person,
+
+          district:
+            row.district,
+
+          address:
+            row.address,
+
+          pincode:
+            row.pincode,
+
+          dealer_mobile_number:
+            row.dealer_mobile_number,
+        });
+
+      console.log(
+        "Dealer Created:",
+        dealer.id
+      );
+
+      // Create Sales SPOC
+      const salesData =
+        await SalesSpoc.create({
+
+          dealer_id:
+            dealer.id,
+
+          name:
+            row.sales_name,
+
+          email:
+            row.sales_email,
+
+          contact_number:
+            row.sales_contact_number,
+        });
+
+      console.log(
+        "Sales SPOC Created:",
+        salesData.id
+      );
+
+      // Create Trade Marketing SPOC
+      const tradeData =
+        await TradeMarketingSpoc.create({
+
+          dealer_id:
+            dealer.id,
+
+          name:
+            row.trade_name,
+
+          email:
+            row.trade_email,
+
+          contact_number:
+            row.trade_contact_number,
+        });
+
+      console.log(
+        "Trade SPOC Created:",
+        tradeData.id
+      );
+
+      uploaded++;
     }
 
-    return res.status(200).json({
+    return res.status(201).json({
+
       success: true,
-      message: "Excel processed",
-      inserted: successCount,
-      failed: failedRows,
+
+      message:
+        "Excel uploaded successfully",
+
+      uploaded,
+
+      skipped,
     });
+
   } catch (error) {
-    console.error("Excel Upload Error:", error);
+
+    console.log(
+      "Excel Upload Error:",
+      error
+    );
+
     return res.status(500).json({
+
       success: false,
-      message: "Server error",
+
+      message: error.message,
     });
   }
 };
@@ -593,3 +782,6 @@ export const getDealers = async (req, res) => {
     });
   }
 };
+
+
+
