@@ -10,45 +10,51 @@ const Dealer = sequelize.define(
       primaryKey: true,
     },
 
-    state: {
+    fullname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
 
-    dealer_code: {
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true,
+      },
     },
 
-    shop_name: {
+    contact: {
       type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [10, 15], // basic phone validation
+      },
+    },
+
+    region: {
+      type: DataTypes.ENUM("North", "South", "East", "West"),
       allowNull: false,
     },
 
-    dealer_person: {
+    city: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-
-    district: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     address: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
 
-    pincode: {
+    shop_image: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
-    dealer_mobile_number: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    status: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
   {
