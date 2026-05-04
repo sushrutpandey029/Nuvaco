@@ -19,6 +19,7 @@
     "express-flash": "^0.0.2",
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.19.0",
+    "form-data": "^4.0.5",
     "hbs": "^4.2.1",
     "multer": "^2.1.1",
     "mysql2": "^3.22.3",

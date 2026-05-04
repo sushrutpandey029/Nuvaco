@@ -26,10 +26,23 @@ app.set("views", path.join(__dirname, "view"));
 hbs.registerPartials(path.join(__dirname, "view", "admin", "partials"));
 hbs.registerPartials(path.join(__dirname, "view", "dealer", "dealerpartials"));
 
+hbs.registerHelper("subtract", (a, b) => a - b);
+hbs.registerHelper("add", (...args) =>
+  args.slice(0, -1).reduce((s, n) => s + n, 0),
+);
+hbs.registerHelper("times", function (n, block) {
+  let result = "";
+  for (let i = 0; i < n; i++) result += block.fn({ "@index": i });
+  return result;
+});
+hbs.registerHelper("eq", (a, b) => a === b);
+hbs.registerHelper("gt", (a, b) => a > b);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static("uploads"));
 
 // Session Store
 const sessionStore = new MySQLStore({
@@ -59,6 +72,7 @@ app.use(flash());
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.dealer = req.session.dealer || null;
   next();
 });
 

@@ -7,8 +7,11 @@ import {
   renderFinalPic,
   renderThankyouPage,
   logout,
-  renderLogin
+  renderLogin,
+  uploadDealerImages,
+  saveFinalImage
 } from "../Controller/DealerController/Dealer.js";
+import imagesupload from "../middlewares/imageUpload.js";
 
 const dealerrouter = express.Router();
 
@@ -22,4 +25,6 @@ dealerrouter.get("/upload-pic", renderUploadPic);
 dealerrouter.get("/final-pic", renderFinalPic);
 dealerrouter.get("/thankyou", renderThankyouPage);
 
+dealerrouter.post("/upload-dealer-images",imagesupload.array("images", 4), uploadDealerImages);
+dealerrouter.post("/save-final-image", saveFinalImage);
 export default dealerrouter;

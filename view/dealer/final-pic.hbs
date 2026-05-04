@@ -1,44 +1,107 @@
- {{> dealerheader dealer=dealer}}
- 
-  <main class="purple-main" style="align-items:flex-start; padding-top:32px;">
-      <div class="pbubble pb1"></div><div class="pbubble pb2"></div><div class="pbubble pb3"></div>
-      <div style="position:relative;z-index:2;width:100%;">
-        <div class="row g-3">
-          <div class="col-6">
-            <div class="pic-radio-wrap">
-              <input type="radio" name="dealerPic" id="pic1"/>
-              <label class="pic-box" for="pic1">Uploaded Pic 1</label>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="pic-radio-wrap">
-              <input type="radio" name="dealerPic" id="pic2"/>
-              <label class="pic-box" for="pic2">Uploaded Pic 2</label>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="pic-radio-wrap">
-              <input type="radio" name="dealerPic" id="pic3"/>
-              <label class="pic-box" for="pic3">Uploaded Pic 3</label>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="pic-radio-wrap">
-              <input type="radio" name="dealerPic" id="pic4"/>
-              <label class="pic-box" for="pic4">Uploaded Pic 4</label>
-            </div>
-          </div>
-        </div>
-        <div class="text-center mt-4">
-          <a href="#" class="btn btn-login me-3 px-5" style="border-radius:50px;display:inline-block;text-decoration:none;">
-            Re-upload
-          </a>
-          <a href="/thankyou" class="btn btn-login px-5" style="border-radius:50px;display:inline-block;text-decoration:none;">
-            Submit
-          </a>
+{{> dealerheader }}
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+  <div class="pbubble pb1"></div><div class="pbubble pb2"></div><div class="pbubble pb3"></div>
+  <div style="position:relative;z-index:2;width:100%;">
+
+    <!-- Alert -->
+    <div id="finalAlert" style="display:none;" class="mb-3"></div>
+
+    <div class="row g-3">
+      {{#each images}}
+      <div class="col-3">
+        <div class="pic-radio-wrap">
+          <input
+            type="radio"
+            name="dealerPic"
+            id="pic{{@index}}"
+            value="{{this.id}}"
+            class="final-pic-radio"
+          />
+          <label class="pic-box" for="pic{{@index}}">
+            <img
+              src="{{this.image}}"
+              
+            />
+          </label>
         </div>
       </div>
-    </main>
+      {{/each}}
+    </div>
 
+    <div class="text-center mt-4">
+      <a href="/upload-pic" class="btn btn-login me-3 px-5" style="border-radius:50px;display:inline-block;text-decoration:none;">
+        Re-upload
+      </a>
+      <a href="#" id="submitBtn" class="btn btn-login px-5" style="border-radius:50px;display:inline-block;text-decoration:none;opacity:0.5;pointer-events:none;">
+        Submit
+      </a>
+    </div>
 
-      {{> dealerfooter}}
+  </div>
+</main>
+
+{{> dealerfooter}}
+
+<script>
+  function showAlert(type, message) {
+    const el = document.getElementById("finalAlert");
+    el.className = `alert alert-${type} alert-dismissible fade show`;
+    el.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    el.style.setProperty("display", "block", "important");
+  }
+
+  function hideAlert() {
+    document.getElementById("finalAlert").style.setProperty("display", "none", "important");
+  }
+
+  // Enable submit when any radio is selected
+  document.querySelectorAll(".final-pic-radio").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const submitBtn = document.getElementById("submitBtn");
+      submitBtn.style.opacity = "1";
+      submitBtn.style.pointerEvents = "auto";
+      hideAlert();
+    });
+  });
+
+  document.getElementById("submitBtn").addEventListener("click", async function (e) {
+    e.preventDefault();
+
+    const selected = document.querySelector(".final-pic-radio:checked");
+    if (!selected) {
+      showAlert("warning", "Please select an image before submitting.");
+      return;
+    }
+
+    const imageId = selected.value;
+
+    this.textContent = "Submitting…";
+    this.style.pointerEvents = "none";
+    this.style.opacity = "0.7";
+
+    try {
+      const res = await fetch("/save-final-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_id: imageId }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        window.location.href = "/thankyou";
+      } else {
+        showAlert("danger", data.message || "Submission failed.");
+        this.textContent = "Submit";
+        this.style.opacity = "1";
+        this.style.pointerEvents = "auto";
+      }
+    } catch (err) {
+      showAlert("danger", "Something went wrong. Please try again.");
+      this.textContent = "Submit";
+      this.style.opacity = "1";
+      this.style.pointerEvents = "auto";
+    }
+  });
+</script>
