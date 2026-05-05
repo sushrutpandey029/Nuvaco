@@ -5,11 +5,12 @@ import Dealer from "../../Model/dealerModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import SalesSpoc from "../../Model/salesSpocModel.js";
 
-
 import { Op } from "sequelize";
 import XLSX from "xlsx";
 import axios from "axios";
 import bcrypt from "bcrypt";
+import RegionVideo from "../../Model/regionVideoModel.js";
+import { states } from "../../constants/states.js";
 
 export const AdminRegister = async (req, res) => {
   try {
@@ -261,7 +262,6 @@ export const adminProfile = async (req, res) => {
 //   res.render("admin/dealerList", { admin });
 // };
 
-
 export const dealerList = async (req, res) => {
   try {
     const admin = req.session.admin;
@@ -285,10 +285,10 @@ export const dealerList = async (req, res) => {
 
     const whereCondition = search
       ? {
-        fullname: {
-          [Op.like]: `%${search}%`,
-        },
-      }
+          fullname: {
+            [Op.like]: `%${search}%`,
+          },
+        }
       : {};
 
     console.log("🔍 Where Condition:", whereCondition);
@@ -324,7 +324,6 @@ export const dealerList = async (req, res) => {
       totalPages: Math.ceil(count / limit),
       search,
     });
-
   } catch (error) {
     console.error("❌ Dealer List Error:", error);
     return res.status(500).send("Server Error");
@@ -395,56 +394,89 @@ export const videoMessage = async (req, res) => {
   if (!admin) {
     return res.redirect("login");
   }
-  console.log("admin in dashobar", admin);
-  res.render("admin/videoMessage", { admin });
+  res.render("admin/video-message", { admin,states });
 };
 
-
-// export const registerDealer = async (req, res) => {
+// export const uploadRegionVideo = async (req, res) => {
 //   try {
-//     const { fullname, email, contact, region, city, address } = req.body;
+//     console.log("BODY =>", req.body);
+//     console.log("FILE =>", req.file);
 
-//     console.log(req.body); // 👈 DEBUG (important)
-//     console.log(req.file); // 👈 DEBUG
+//     const { region } = req.body;
+//     console.log("req body",req.body)
 
-//     if (!fullname || !email || !contact || !region) {
-//       return res.render("admin/registerDealer", {
-//         error: "All required fields missing",
+//     if (!region) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Region required",
 //       });
 //     }
 
-//     const existingDealer = await Dealer.findOne({ where: { email } });
-
-//     if (existingDealer) {
-//       return res.render("admin/registerDealer", {
-//         error: "Dealer already exists with this email",
+//     if (!req.file) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Video file required",
 //       });
 //     }
 
-//     await Dealer.create({
-//       fullname,
-//       email,
-//       contact,
+//     const saveData = await RegionVideo.create({
 //       region,
-//       city,
-//       address,
-//       shop_image: req.file ? req.file.filename : null,
+//       video: req.file.path,
 //     });
 
-//     return res.render("admin/registerDealer", {
-//       success: "Dealer registered successfully",
+//     return res.status(201).json({
+//       success: true,
+//       message: "Video uploaded",
+//       data: saveData,
 //     });
 //   } catch (error) {
-//     console.error(error);
-//     return res.render("admin/registerDealer", {
-//       error: "Server error",
+//     console.log("ERROR =>", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
 //     });
 //   }
 // };
 
+
+export const uploadRegionVideo = async (req, res) => {
+  try {
+    console.log("BODY =>", req.body);
+    console.log("FILE =>", req.file);
+
+    const { region } = req.body;
+
+    // ❌ Validation
+    if (!region) {
+      req.flash("error", "Region required");
+      return res.redirect("videomessage");
+    }
+
+    if (!req.file) {
+      req.flash("error", "Video file required");
+      return res.redirect("videomessage");
+    }
+
+    // ✅ Save data
+    const saveData = await RegionVideo.create({
+      region,
+      video: req.file.path,
+    });
+
+    // ✅ Success message
+    req.flash("success", "Video uploaded successfully");
+    return res.redirect("videomessage"); // or specific page
+
+  } catch (error) {
+    console.log("ERROR =>", error);
+
+    req.flash("error", "Something went wrong");
+    return res.redirect("videomessage");
+  }
+};
 export const registerDealer = async (req, res) => {
   try {
-
     const {
       state,
       dealer_code,
@@ -458,7 +490,6 @@ export const registerDealer = async (req, res) => {
       sales_spoc,
 
       trade_marketing_spoc,
-
     } = req.body;
 
     // Create Dealer
@@ -486,8 +517,7 @@ export const registerDealer = async (req, res) => {
       dealer_id: dealer.id,
       name: trade_marketing_spoc.name,
       email: trade_marketing_spoc.email,
-      contact_number:
-        trade_marketing_spoc.contact_number,
+      contact_number: trade_marketing_spoc.contact_number,
     });
 
     return res.status(201).json({
@@ -495,9 +525,7 @@ export const registerDealer = async (req, res) => {
       message: "Dealer registered successfully",
       dealer_id: dealer.id,
     });
-
   } catch (error) {
-
     console.log("Registration Error:", error);
 
     return res.status(500).json({
@@ -584,11 +612,8 @@ export const registerDealer = async (req, res) => {
 //   }
 // };
 
-
-export const uploadDealersExcel = async ( req,res) => {
-
+export const uploadDealersExcel = async (req, res) => {
   try {
-
     // Check file
     if (!req.file) {
       return res.status(400).json({
@@ -598,16 +623,11 @@ export const uploadDealersExcel = async ( req,res) => {
     }
 
     // Read excel
-    const workbook =
-      XLSX.readFile(req.file.path);
+    const workbook = XLSX.readFile(req.file.path);
 
-    const sheetName =
-      workbook.SheetNames[0];
+    const sheetName = workbook.SheetNames[0];
 
-    const sheetData =
-      XLSX.utils.sheet_to_json(
-        workbook.Sheets[sheetName]
-      );
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     let uploaded = 0;
 
@@ -615,127 +635,84 @@ export const uploadDealersExcel = async ( req,res) => {
 
     // Loop rows
     for (const row of sheetData) {
-
       console.log(row);
 
       // Duplicate check
-      const existingDealer =
-        await Dealer.findOne({
-          where: {
-            dealer_code:
-              row.dealer_code,
-          },
-        });
+      const existingDealer = await Dealer.findOne({
+        where: {
+          dealer_code: row.dealer_code,
+        },
+      });
 
       if (existingDealer) {
-
         skipped++;
 
         continue;
       }
 
       // Create Dealer
-      const dealer =
-        await Dealer.create({
+      const dealer = await Dealer.create({
+        state: row.state,
 
-          state:
-            row.state,
+        dealer_code: row.dealer_code,
 
-          dealer_code:
-            row.dealer_code,
+        shop_name: row.shop_name,
 
-          shop_name:
-            row.shop_name,
+        dealer_person: row.dealer_person,
 
-          dealer_person:
-            row.dealer_person,
+        district: row.district,
 
-          district:
-            row.district,
+        address: row.address,
 
-          address:
-            row.address,
+        pincode: row.pincode,
 
-          pincode:
-            row.pincode,
+        dealer_mobile_number: row.dealer_mobile_number,
+      });
 
-          dealer_mobile_number:
-            row.dealer_mobile_number,
-        });
-
-      console.log(
-        "Dealer Created:",
-        dealer.id
-      );
+      console.log("Dealer Created:", dealer.id);
 
       // Create Sales SPOC
-      const salesData =
-        await SalesSpoc.create({
+      const salesData = await SalesSpoc.create({
+        dealer_id: dealer.id,
 
-          dealer_id:
-            dealer.id,
+        name: row.sales_name,
 
-          name:
-            row.sales_name,
+        email: row.sales_email,
 
-          email:
-            row.sales_email,
+        contact_number: row.sales_contact_number,
+      });
 
-          contact_number:
-            row.sales_contact_number,
-        });
-
-      console.log(
-        "Sales SPOC Created:",
-        salesData.id
-      );
+      console.log("Sales SPOC Created:", salesData.id);
 
       // Create Trade Marketing SPOC
-      const tradeData =
-        await TradeMarketingSpoc.create({
+      const tradeData = await TradeMarketingSpoc.create({
+        dealer_id: dealer.id,
 
-          dealer_id:
-            dealer.id,
+        name: row.trade_name,
 
-          name:
-            row.trade_name,
+        email: row.trade_email,
 
-          email:
-            row.trade_email,
+        contact_number: row.trade_contact_number,
+      });
 
-          contact_number:
-            row.trade_contact_number,
-        });
-
-      console.log(
-        "Trade SPOC Created:",
-        tradeData.id
-      );
+      console.log("Trade SPOC Created:", tradeData.id);
 
       uploaded++;
     }
 
     return res.status(201).json({
-
       success: true,
 
-      message:
-        "Excel uploaded successfully",
+      message: "Excel uploaded successfully",
 
       uploaded,
 
       skipped,
     });
-
   } catch (error) {
-
-    console.log(
-      "Excel Upload Error:",
-      error
-    );
+    console.log("Excel Upload Error:", error);
 
     return res.status(500).json({
-
       success: false,
 
       message: error.message,
@@ -782,6 +759,3 @@ export const getDealers = async (req, res) => {
     });
   }
 };
-
-
-

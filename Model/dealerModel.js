@@ -9,7 +9,6 @@ const Dealer = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-
     state: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -50,11 +49,16 @@ const Dealer = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    isImageUploaded: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue:"no"
+    },
   },
   {
     tableName: "dealers",
     timestamps: true,
-  }
+  },
 );
 
 export default Dealer;

@@ -1,31 +1,30 @@
+// models/regionVideo.js
 import { DataTypes } from "sequelize";
-import { sequelize } from "../../DBConnection/mysqlconnetion.js";
+import { sequelize } from "../DBConnection/mysqlconnetion.js";
 
-const DealerOTP = sequelize.define(
-  "DealerOTP",
+const RegionVideo = sequelize.define(
+  "RegionVideo",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    dealer_mobile_number: {
+
+    state: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    otp: {
+
+    video: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    expiresAt: {
-      type: DataTypes.DATE,
       allowNull: false,
     },
   },
   {
-    tableName: "dealer_otps",
+    tableName: "region_videos",
     timestamps: true,
-  },
+  }
 );
 
-export default DealerOTP;
+export default RegionVideo;

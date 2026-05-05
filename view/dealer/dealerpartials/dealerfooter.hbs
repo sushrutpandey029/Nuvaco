@@ -13,5 +13,14 @@
     }
   }
 </script>
+<script>
+function replayVideo() {
+  const video = document.getElementById("regionVideo");
+  if (video) {
+    video.currentTime = 0;
+    video.play();
+  }
+}
+</script>
 </body>
 </html>

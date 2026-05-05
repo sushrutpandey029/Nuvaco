@@ -6,6 +6,8 @@ import DealerImage from "../../Model/dealer/DealerImage.js";
 import fs from "fs";
 import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 import { processImagesPipeline } from "../../services/image/pipeline.service.js";
+import RegionVideo from "../../Model/regionVideoModel.js";
+import { formatImageArray } from "../../utils/formatImagePath.js";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -23,15 +25,27 @@ export const renderHome = async (req, res) => {
   if (!dealer) {
     return res.redirect("/login");
   }
-  console.log("dealer in home", dealer);
-  const data = await MessageModel.findAll();
-  console.log("mesage model", data);
-  return res.render("dealer/welcome-screen", { data });
+
+  const data = await RegionVideo.findOne({
+    where: { state: dealer.state },
+    order: [["createdAt", "DESC"]],
+    raw: true,
+  });
+
+ 
+  const formatted = data
+    ? { ...data, video: data.video.replace(/\\/g, "/") }
+    : null;
+
+  return res.render("dealer/welcome-screen", {
+    data: formatted,
+    dealer,
+  });
 };
 
 // ✅ Send OTP
 
-export const sendSmsOtp = async (contact, otp) => {
+export const sendSmsOtp = async (dealer_mobile_number, otp) => {
   try {
     const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
 
@@ -41,7 +55,7 @@ export const sendSmsOtp = async (contact, otp) => {
       channel: "Trans",
       DCS: 0,
       flashsms: 0,
-      number: "91" + contact,
+      number: "91" + dealer_mobile_number,
       text: message,
       DLTTemplateId: process.env.SMS_TEMPLATE_ID,
       route: 0,
@@ -59,13 +73,13 @@ export const sendSmsOtp = async (contact, otp) => {
 export const sendOTP = async (req, res) => {
   try {
     console.log("send otp called");
-    const { contact } = req.body;
+    const { dealer_mobile_number } = req.body;
 
-    if (!contact) {
+    if (!dealer_mobile_number) {
       return res.json({ success: false, message: "Contact required" }); // ✅ JSON, not redirect
     }
 
-    const dealer = await Dealer.findOne({ where: { contact } });
+    const dealer = await Dealer.findOne({ where: { dealer_mobile_number } });
 
     if (!dealer) {
       return res.json({ success: false, message: "Dealer not found" }); // ✅ JSON, not redirect
@@ -74,10 +88,10 @@ export const sendOTP = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
-    await DealerOTP.destroy({ where: { contact } });
-    await DealerOTP.create({ contact, otp, expiresAt });
+    await DealerOTP.destroy({ where: { dealer_mobile_number } });
+    await DealerOTP.create({ dealer_mobile_number, otp, expiresAt });
 
-    const smsSent = await sendSmsOtp(contact, otp);
+    const smsSent = await sendSmsOtp(dealer_mobile_number, otp);
 
     if (!smsSent) {
       return res.json({ success: false, message: "Failed to send OTP" }); // ✅ JSON, not redirect
@@ -91,28 +105,30 @@ export const sendOTP = async (req, res) => {
 };
 export const verifyOTP = async (req, res) => {
   try {
-    const { contact, otp } = req.body;
+    const { dealer_mobile_number, otp } = req.body;
 
-    if (!contact || !otp) {
+    if (!dealer_mobile_number || !otp) {
       // ✅ Return JSON so JS can show error inline (OTP field stays visible)
       return res.json({ success: false, message: "All fields required" });
     }
 
-    const otpRecord = await DealerOTP.findOne({ where: { contact, otp } });
+    const otpRecord = await DealerOTP.findOne({
+      where: { dealer_mobile_number, otp },
+    });
 
     if (!otpRecord) {
       return res.json({ success: false, message: "Invalid OTP" });
     }
 
     if (new Date() > otpRecord.expiresAt) {
-      await DealerOTP.destroy({ where: { contact } });
+      await DealerOTP.destroy({ where: { dealer_mobile_number } });
       return res.json({
         success: false,
         message: "OTP expired. Please request a new one",
       });
     }
 
-    const dealer = await Dealer.findOne({ where: { contact } });
+    const dealer = await Dealer.findOne({ where: { dealer_mobile_number } });
 
     if (!dealer) {
       return res.json({ success: false, message: "Dealer not found" });
@@ -121,11 +137,11 @@ export const verifyOTP = async (req, res) => {
     req.session.dealer = {
       id: dealer.id,
       name: dealer.fullname,
-      contact: dealer.contact,
-      region: dealer.region,
+      dealer_mobile_number: dealer.dealer_mobile_number,
+      state: dealer.state,
     };
 
-    await DealerOTP.destroy({ where: { contact } });
+    await DealerOTP.destroy({ where: { dealer_mobile_number } });
 
     // ✅ Return JSON with redirect URL — JS will follow it
     return res.json({ success: true, redirect: "/" });
@@ -154,7 +170,7 @@ export const renderUploadPic = async (req, res) => {
     attributes: ["id", "image", "language"],
     raw: true,
   });
-  console.log("image data in render puld pic file",imageData)
+  console.log("image data in render puld pic file", imageData);
   const formatted = imageData.map((img) => ({
     ...img,
     image: img.image.replace(/\\/g, "/"),
@@ -172,14 +188,13 @@ export const renderFinalPic = async (req, res) => {
       raw: true,
     });
 
-    console.log("image data in final",images)
+    console.log("image data in final", images);
 
     const formatted = images.map((img) => ({
       ...img,
       image: img.image.replace(/\\/g, "/"),
     }));
-console.log("image data in fromat final",formatted)
-
+    console.log("image data in fromat final", formatted);
 
     return res.render("dealer/final-pic", { images: formatted });
   } catch (error) {
@@ -297,14 +312,23 @@ export const uploadDealerImages = async (req, res) => {
   try {
     const { dealer_id, language } = req.body;
 
+    let image_ids = [];
+    try {
+      image_ids = JSON.parse(req.body.image_ids || "[]");
+    } catch {
+      image_ids = [];
+    }
+
     const results = await processImagesPipeline({
       files: req.files,
       dealer_id,
       language,
+      image_ids, // ✅ IMPORTANT
     });
 
     return res.json({
       success: true,
+      message: "Images saved successfully",
       data: results,
     });
 
@@ -317,8 +341,6 @@ export const uploadDealerImages = async (req, res) => {
     });
   }
 };
-
-
 
 // POST — save selected final image
 export const saveFinalImage = async (req, res) => {

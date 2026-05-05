@@ -14,9 +14,9 @@ export const removeBackground = async (buffer) => {
         "X-Api-Key": process.env.REMOVE_BG_API_KEY,
       },
       responseType: "arraybuffer",
-    }
+    },
   );
-  console.log("resp of remove bg in remvobd",response.data)
+  console.log("resp of remove bg in remvobd", response.data);
 
   return response.data;
 };
