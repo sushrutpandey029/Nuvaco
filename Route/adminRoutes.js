@@ -15,6 +15,16 @@ import {
   dealerRegister,
   videoMessage,
   uploadRegionVideo,
+  getDealerDetails,
+  getDealerImages,
+  getRegionVideoList,
+  editStateVideo,
+  deleteRegionVideo,
+  renderEditStateMessage,
+  downloadDealerExcel,
+  renderEditDealer,
+  updateDealer,
+  deleteDealer,
 } from "../Controller/AdminController/Admin.js";
 import dealerUpload from "../middlewares/dealerUpload.js";
 import { upload } from "../middlewares/shopimageupload.js";
@@ -31,8 +41,8 @@ adminrouter.get("/adminprofile", adminProfile);
 adminrouter.get("/dealerlist", dealerList);
 adminrouter.get("/dealerdetail", dealerDetail);
 adminrouter.get("/dealerregister", dealerRegister);
-adminrouter.get("/videomessage", videoMessage);
- adminrouter.post(
+adminrouter.get("/add-state-message", videoMessage);
+adminrouter.post(
   "/upload-region-video",
   Videoupload.single("file"),
   uploadRegionVideo,
@@ -50,5 +60,33 @@ adminrouter.post(
   upload.single("shop_image"),
   registerDealer,
 );
+
+adminrouter.get("/dealerlist", dealerList);
+adminrouter.get("/dealerdetail/:id", getDealerDetails);
+adminrouter.get("/dealer-image/:id", getDealerImages);
+
+adminrouter.get("/state-message-list", getRegionVideoList);
+
+adminrouter.get("/edit-state-message/:id", renderEditStateMessage);
+adminrouter.post(
+  "/edit-state-message/:id",
+  Videoupload.single("file"),
+  editStateVideo,
+);
+
+adminrouter.post("/delete-state-message/:id", deleteRegionVideo);
+adminrouter.get("/download-dealer-excel", downloadDealerExcel);
+
+adminrouter.post(
+  "/upload-dealers",
+  dealerUpload.single("file"),
+  uploadDealersExcel,
+);
+
+adminrouter.get("/editdealer/:id", renderEditDealer);
+
+adminrouter.post("/update-dealer/:id", updateDealer);
+
+adminrouter.get("/delete-dealer/:id", deleteDealer);
 
 export default adminrouter;

@@ -23,12 +23,12 @@ const SalesSpoc = sequelize.define(
 
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
 
     contact_number: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {

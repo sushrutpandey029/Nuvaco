@@ -8,6 +8,8 @@ import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 import { processImagesPipeline } from "../../services/image/pipeline.service.js";
 import RegionVideo from "../../Model/regionVideoModel.js";
 import { formatImageArray } from "../../utils/formatImagePath.js";
+import SalesSpoc from "../../Model/salesSpocModel.js";
+import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -25,6 +27,7 @@ export const renderHome = async (req, res) => {
   if (!dealer) {
     return res.redirect("/login");
   }
+  console.log("dealer in home page", dealer);
 
   const data = await RegionVideo.findOne({
     where: { state: dealer.state },
@@ -32,7 +35,6 @@ export const renderHome = async (req, res) => {
     raw: true,
   });
 
- 
   const formatted = data
     ? { ...data, video: data.video.replace(/\\/g, "/") }
     : null;
@@ -136,7 +138,7 @@ export const verifyOTP = async (req, res) => {
 
     req.session.dealer = {
       id: dealer.id,
-      name: dealer.fullname,
+      name: dealer.dealer_person,
       dealer_mobile_number: dealer.dealer_mobile_number,
       state: dealer.state,
     };
@@ -194,7 +196,6 @@ export const renderFinalPic = async (req, res) => {
       ...img,
       image: img.image.replace(/\\/g, "/"),
     }));
-    console.log("image data in fromat final", formatted);
 
     return res.render("dealer/final-pic", { images: formatted });
   } catch (error) {
@@ -331,7 +332,6 @@ export const uploadDealerImages = async (req, res) => {
       message: "Images saved successfully",
       data: results,
     });
-
   } catch (error) {
     console.log("Controller Error:", error.message);
 
@@ -379,6 +379,11 @@ export const saveFinalImage = async (req, res) => {
       await DealerFinalImage.create({ dealer_id, image_id });
     }
 
+    await Dealer.update(
+      { isImageUploaded: "yes" },
+      { where: { id: dealer_id } },
+    );
+
     return res.status(200).json({
       success: true,
       message: "Final image saved successfully.",
@@ -391,3 +396,112 @@ export const saveFinalImage = async (req, res) => {
     });
   }
 };
+
+export const getDealerProfile = async (req, res) => {
+  try {
+    console.log(":dealer profile");
+    const dealerId = Number(req.params.id);
+
+    // VALIDATE ID
+    if (!dealerId) {
+      req.flash("error", "Invalid dealer id");
+
+      return res.redirect("/admin/dealerlist");
+    }
+
+    // FIND DEALER
+    const dealer = await Dealer.findByPk(dealerId, {
+      include: [
+        {
+          model: SalesSpoc,
+          required: false,
+        },
+
+        {
+          model: TradeMarketingSpoc,
+          required: false,
+        },
+      ],
+    });
+    console.log("dealer data", dealer);
+
+    // CHECK DEALER
+    if (!dealer) {
+      req.flash("error", "Dealer not found");
+
+      return res.redirect("/admin/dealerlist");
+    }
+    return res.render("dealer/profile", {
+      data: dealer,
+    });
+  } catch (error) {
+    console.log("Get Dealer Profile Error:", error);
+
+    req.flash("error", "Something went wrong");
+
+    return res.redirect("/admin/dealerlist");
+  }
+};
+
+// export const getDealerProfile = async (req, res) => {
+
+//   try {
+
+//     const dealerId = Number(req.params.id);
+
+//     if (!dealerId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Dealer ID is required",
+//       });
+//     }
+
+//     const dealer = await Dealer.findOne({
+
+//       where: {
+//         id: dealerId,
+//       },
+
+//       include: [
+
+//         {
+//           model: SalesSpoc,
+//           as: "SalesSpocs",
+//         },
+
+//         {
+//           model: TradeMarketingSpoc,
+//           as: "TradeMarketingSpocs",
+//         },
+//       ],
+//     });
+
+//     if (!dealer) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Dealer not found",
+//       });
+//     }
+
+//     return res.status(200).json({
+
+//       success: true,
+
+//       data: dealer,
+//     });
+
+//   } catch (error) {
+
+//     console.log(
+//       "Get Dealer Profile Error:",
+//       error
+//     );
+
+//     return res.status(500).json({
+
+//       success: false,
+
+//       message: error.message,
+//     });
+//   }
+// };

@@ -35,13 +35,26 @@ const DealerFinalImage = sequelize.define(
   },
 );
 
-// Relations
-// Dealer.hasMany(DealerImage, {
-//   foreignKey: "dealer_id",
-// });
+// ================= RELATIONS =================
 
-// DealerImage.belongsTo(Dealer, {
-//   foreignKey: "dealer_id",
-// });
+// Dealer relation
+Dealer.hasMany(DealerFinalImage, {
+  foreignKey: "dealer_id",
+});
+
+DealerFinalImage.belongsTo(Dealer, {
+  foreignKey: "dealer_id",
+});
+
+
+// DealerImage relation
+DealerImage.hasMany(DealerFinalImage, {
+  foreignKey: "image_id",
+});
+
+DealerFinalImage.belongsTo(DealerImage, {
+  foreignKey: "image_id",
+});
+
 
 export default DealerFinalImage;

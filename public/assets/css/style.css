@@ -312,6 +312,33 @@ body { font-family: 'Segoe UI', sans-serif; }
       .pic-radio-wrap { gap:8px; }
     }
 
+    .info-card{
+  background:#f9f9fb;
+  border:1px solid #ececec;
+  border-radius:14px;
+  padding:18px;
+}
+
+.info-card label{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  color:#7b7b7b;
+  margin-bottom:8px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.info-card p{
+  margin:0;
+  font-size:16px;
+  font-weight:600;
+  color:#2b2b2b;
+  word-break:break-word;
+}
+
+ 
+
 /* =====================
    MOBILE RESPONSIVE
    ===================== */

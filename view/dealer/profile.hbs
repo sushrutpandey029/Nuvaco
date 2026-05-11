@@ -1,0 +1,278 @@
+{{> dealerheader }}
+
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div style="position:relative;z-index:2;width:100%;">
+
+    <!-- Dealer Profile -->
+    <div class="dealer-detail-card">
+
+      <div class="page-topbar">
+
+        <div>
+
+          <h2 class="page-title">
+            Dealer Profile
+          </h2>
+
+          <p class="page-subtitle">
+            Dealer Code :
+            {{data.dealer_code}}
+          </p>
+
+        </div>
+
+      </div>
+
+      <table class="dealer-table">
+
+        <tbody>
+
+          <tr>
+
+            <th>Shop Name</th>
+
+            <td>
+              {{data.shop_name}}
+            </td>
+
+            <th>Dealer Person</th>
+
+            <td>
+              {{data.dealer_person}}
+            </td>
+
+          </tr>
+
+          <tr>
+
+            <th>State</th>
+
+            <td>
+              {{data.state}}
+            </td>
+
+            <th>District</th>
+
+            <td>
+              {{data.district}}
+            </td>
+
+          </tr>
+
+          <tr>
+
+            <th>Mobile Number</th>
+
+            <td>
+              {{data.dealer_mobile_number}}
+            </td>
+
+            <th>Pincode</th>
+
+            <td>
+              {{data.pincode}}
+            </td>
+
+          </tr>
+
+        
+          <tr>
+
+            <th>Club Millenium</th>
+
+            <td >
+              {{data.club_millennium}}
+            </td>
+
+        
+
+            <th>Image Uploaded</th>
+
+            <td >
+
+              {{#if (eq data.isImageUploaded "yes")}}
+
+                <span
+                  style="color:#2e7d32;font-weight:600;"
+                >
+                  Yes
+                </span>
+
+              {{else}}
+
+                <span
+                  style="color:#c62828;font-weight:600;"
+                >
+                  No
+                </span>
+
+              {{/if}}
+
+            </td>
+
+          </tr>
+            <tr>
+
+            <th>Address</th>
+
+            <td colspan="3">
+              {{data.address}}
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- Sales SPOC -->
+    <div
+      class="dealer-detail-card"
+      style="margin-top:30px;"
+    >
+
+      <div class="page-topbar">
+
+        <div>
+
+          <h2 class="page-title">
+            Sales SPOC Details
+          </h2>
+
+        </div>
+
+      </div>
+
+      <table class="dealer-table">
+
+        <thead>
+
+          <tr>
+
+            <th>S.No</th>
+
+            <th>Name</th>
+
+            <th>Email</th>
+
+            <th>Contact Number</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {{#each data.SalesSpocs}}
+
+          <tr>
+
+            <td>
+              {{inc @index}}
+            </td>
+
+            <td>
+              {{this.name}}
+            </td>
+
+            <td>
+              {{this.email}}
+            </td>
+
+            <td>
+              {{this.contact_number}}
+            </td>
+
+          </tr>
+
+          {{/each}}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- Trade Marketing SPOC -->
+    <div
+      class="dealer-detail-card"
+      style="margin-top:30px;"
+    >
+
+      <div class="page-topbar">
+
+        <div>
+
+          <h2 class="page-title">
+            Trade Marketing SPOC Details
+          </h2>
+
+        </div>
+
+      </div>
+
+      <table class="dealer-table">
+
+        <thead>
+
+          <tr>
+
+            <th>S.No</th>
+
+            <th>Name</th>
+
+            <th>Email</th>
+
+            <th>Contact Number</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {{#each data.TradeMarketingSpocs}}
+
+          <tr>
+
+            <td>
+              {{inc @index}}
+            </td>
+
+            <td>
+              {{this.name}}
+            </td>
+
+            <td>
+              {{this.email}}
+            </td>
+
+            <td>
+              {{this.contact_number}}
+            </td>
+
+          </tr>
+
+          {{/each}}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</main>
+
+{{> dealerfooter }}

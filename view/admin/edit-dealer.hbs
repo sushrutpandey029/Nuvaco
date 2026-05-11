@@ -1,0 +1,186 @@
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+
+  <div class="reg-form-card">
+
+    <h5 class="fw-bold text-center mb-4">
+      Edit Dealer
+    </h5>
+
+    <form
+      action="/admin/update-dealer/{{dealer.id}}"
+      method="POST"
+    >
+
+      <div class="row g-3">
+
+        <div class="col-12">
+          <input
+            name="dealer_code"
+            class="form-control reg-input"
+            value="{{dealer.dealer_code}}"
+            placeholder="Dealer Code"
+            required
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="shop_name"
+            class="form-control reg-input"
+            value="{{dealer.shop_name}}"
+            placeholder="Shop Name"
+            required
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="dealer_person"
+            class="form-control reg-input"
+            value="{{dealer.dealer_person}}"
+            placeholder="Dealer Person"
+            required
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="dealer_mobile_number"
+            class="form-control reg-input"
+            value="{{dealer.dealer_mobile_number}}"
+            placeholder="Mobile Number"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="state"
+            class="form-control reg-input"
+            value="{{dealer.state}}"
+            placeholder="State"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="district"
+            class="form-control reg-input"
+            value="{{dealer.district}}"
+            placeholder="District"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="address"
+            class="form-control reg-input"
+            value="{{dealer.address}}"
+            placeholder="Address"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="pincode"
+            class="form-control reg-input"
+            value="{{dealer.pincode}}"
+            placeholder="Pincode"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="club_millennium"
+            class="form-control reg-input"
+            value="{{dealer.club_millennium}}"
+            placeholder="Club Millennium"
+          />
+        </div>
+
+        <!-- SALES SPOC -->
+
+        <div class="col-12">
+          <h6>Sales SPOC</h6>
+        </div>
+
+        <div class="col-12">
+          <input
+            name="sales_spoc[name]"
+            class="form-control reg-input"
+            value="{{dealer.SalesSpocs.[0].name}}"
+            placeholder="Name"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="sales_spoc[email]"
+            class="form-control reg-input"
+            value="{{dealer.SalesSpocs.[0].email}}"
+            placeholder="Email"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="sales_spoc[contact_number]"
+            class="form-control reg-input"
+            value="{{dealer.SalesSpocs.[0].contact_number}}"
+            placeholder="Contact Number"
+          />
+        </div>
+
+        <!-- TRADE SPOC -->
+
+        <div class="col-12">
+          <h6>Trade Marketing SPOC</h6>
+        </div>
+
+        <div class="col-12">
+          <input
+            name="trade_marketing_spoc[name]"
+            class="form-control reg-input"
+            value="{{dealer.TradeMarketingSpocs.[0].name}}"
+            placeholder="Name"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="trade_marketing_spoc[email]"
+            class="form-control reg-input"
+            value="{{dealer.TradeMarketingSpocs.[0].email}}"
+            placeholder="Email"
+          />
+        </div>
+
+        <div class="col-12">
+          <input
+            name="trade_marketing_spoc[contact_number]"
+            class="form-control reg-input"
+            value="{{dealer.TradeMarketingSpocs.[0].contact_number}}"
+            placeholder="Contact Number"
+          />
+        </div>
+
+      </div>
+
+      <div class="d-grid mt-4">
+        <button
+          type="submit"
+          class="btn btn-login"
+        >
+          UPDATE DEALER
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+</main>
+
+{{> footer }}

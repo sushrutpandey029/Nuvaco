@@ -8,7 +8,10 @@
   <div class="pbubble pb4"></div>
   <div class="pbubble pb5"></div>
   <div class="pbubble pb6"></div>
-  {{#if error}}
+ 
+  <div class="center-card">
+
+     {{#if error}}
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
     {{error}}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -20,9 +23,6 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
   {{/if}}
-  <div class="center-card">
-
-    
 
     <form id="AdminProfile" action="/admin/change-password" method="POST">
       <div class="mb-4">

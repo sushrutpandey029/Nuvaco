@@ -64,3 +64,5 @@ const Dealer = sequelize.define(
 );
 
 export default Dealer;
+
+

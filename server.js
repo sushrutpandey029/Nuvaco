@@ -8,7 +8,7 @@ import { createRequire } from "module";
 import flash from "express-flash";
 const require = createRequire(import.meta.url);
 const MySQLStore = require("express-mysql-session")(session);
- 
+
 import { Db_connection, sequelize } from "./DBConnection/mysqlconnetion.js";
 import adminrouter from "./Route/adminRoutes.js";
 import dealerrouter from "./Route/dealerRoutes.js";
@@ -37,6 +37,9 @@ hbs.registerHelper("times", function (n, block) {
 });
 hbs.registerHelper("eq", (a, b) => a === b);
 hbs.registerHelper("gt", (a, b) => a > b);
+hbs.registerHelper("inc", function (value) {
+  return value + 1;
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -1,0 +1,106 @@
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div style="position:relative;z-index:2;width:100%;">
+
+    <div class="dealer-detail-card">
+
+      <div class="page-topbar">
+
+        <div>
+          <h2 class="page-title">
+            Edit State Message
+          </h2>
+        </div>
+
+      </div>
+
+      <form
+        action="/admin/edit-state-message/{{data.id}}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+
+        <!-- State -->
+        <div class="form-group">
+
+          <label>
+            State
+          </label>
+
+          <input
+            type="text"
+            name="state"
+            value="{{data.state}}"
+            class="form-control"
+            required
+          />
+
+        </div>
+
+
+        <!-- Existing Video -->
+        <div class="form-group">
+
+          <label>
+            Existing Video
+          </label>
+
+          <br>
+
+          <video width="260" controls>
+
+            <source
+              src="/{{data.video}}"
+              type="video/mp4"
+            >
+
+          </video>
+
+        </div>
+
+
+        <!-- Upload New Video -->
+        <div class="form-group">
+
+          <label>
+            Upload New Video
+          </label>
+
+          <input
+            type="file"
+            name="file"
+            class="form-control"
+            accept="video/*"
+          />
+
+        </div>
+
+
+        <!-- Submit -->
+        <div class="form-group">
+
+          <button
+            type="submit"
+            class="add-btn"
+          >
+            Update Message
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</main>
+
+{{> footer }}

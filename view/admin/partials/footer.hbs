@@ -1,3 +1,67 @@
+
+<!-- Upload Excel Modal -->
+
+<div
+  class="modal fade"
+  id="uploadExcelModal"
+  tabindex="-1"
+>
+
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <h5 class="modal-title">
+          Upload Dealer Excel
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+
+      </div>
+
+      <form
+        action="/admin/upload-dealers"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+
+        <div class="modal-body">
+
+          <input
+            type="file"
+            name="file"
+            class="form-control"
+            accept=".xlsx,.xls"
+            required
+          />
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button
+            type="submit"
+            class="btn btn-login"
+          >
+            Upload Excel
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
 </div>
 
 <script>
@@ -35,6 +99,107 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="../assets/js/dashboard.js"></script>
 
+{{!-- //for dropdown of action tab in delaer list page --}}
+<script>
+  function handleDealerAction(action, dealerId) {
+    if (!action) return;
+
+    switch(action) {
+      case "details":
+        window.location.href = `/admin/dealerdetail/${dealerId}`;
+        break;
+
+      case "images":
+        window.location.href = `/admin/dealer-images/${dealerId}`;
+        break;
+
+      case "edit":
+        window.location.href = `/admin/edit-dealer/${dealerId}`;
+        break;
+
+      default:
+        break;
+    }
+  }
+</script>
+
+
+{{!-- for table paginatipon --}}
+
+<script>
+  $(document).ready(function () {
+    $('#dataTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      pageLength: 10
+    });
+  });
+</script>
+
+{{!-- for admin dashboard graph --}}
+<script>
+
+  const chartLabels =
+    {{{chartLabels}}};
+
+  const chartData =
+    {{{chartData}}};
+
+  const ctx =
+    document.getElementById(
+      "dealersChart"
+    );
+
+  new Chart(ctx, {
+
+    type: "bar",
+
+    data: {
+
+      labels: chartLabels,
+
+      datasets: [
+        {
+
+          label: "Dealer Data",
+
+          data: chartData,
+
+          backgroundColor: [
+            "#90caf9",
+            "#1a5276",
+            "#fbc02d",
+          ],
+
+          borderRadius: 8,
+
+          barThickness: 60,
+        },
+      ],
+    },
+
+    options: {
+
+      responsive: true,
+
+      plugins: {
+
+        legend: {
+          display: false,
+        },
+      },
+
+      scales: {
+
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+</script>
   
 </body>
 </html>

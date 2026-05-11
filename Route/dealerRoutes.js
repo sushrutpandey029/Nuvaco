@@ -9,9 +9,11 @@ import {
   logout,
   renderLogin,
   uploadDealerImages,
-  saveFinalImage
+  saveFinalImage,
+  getDealerProfile
 } from "../Controller/DealerController/Dealer.js";
 import imagesupload from "../middlewares/imageUpload.js";
+import { deleteDealer, updateDealer } from "../Controller/AdminController/Admin.js";
 
 const dealerrouter = express.Router();
 
@@ -27,4 +29,7 @@ dealerrouter.get("/thankyou", renderThankyouPage);
 
 dealerrouter.post("/upload-dealer-images",imagesupload.array("images", 4), uploadDealerImages);
 dealerrouter.post("/save-final-image", saveFinalImage);
+dealerrouter.get("/profile/:id", getDealerProfile);
+
+
 export default dealerrouter;

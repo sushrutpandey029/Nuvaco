@@ -9,18 +9,46 @@
   <link rel="stylesheet" href="../assets/css/style.css"/>
 </head>
 <body class="dashboard-body">
+  
   <nav class="top-navbar">
-    <div class="d-flex align-items-center gap-3">
-      <button class="sidebar-toggle" id="sidebarToggle"><i class="bi bi-list"></i></button>
-      <div>
-        <div class="logo-small"><span class="nu">NU</span><span class="v-letter">V</span><span class="oco">OCO</span><sup>®</sup></div>
-        <div class="logo-sub">Shaping a new world</div>
+
+  <div class="d-flex align-items-center gap-3">
+
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <div>
+      <div class="logo-small">
+        <span class="nu">NU</span><span class="v-letter">V</span><span class="oco">OCO</span><sup>®</sup>
+      
+        
+      </div>
+
+      <div class="logo-sub">
+        Shaping a new world
       </div>
     </div>
-    <div class="admin-info">Welcome {{dealer.name}} &nbsp;
-      {{!-- <a href="/logout" class="logout-link">(Logout)</a></div> --}}
-      <a href="#" onclick="confirmLogout(event)" class="logout-link">(Logout)</a>
-  </nav>
+
+  </div>
+
+  <div class="admin-info">
+
+    <a href="/profile/{{dealer.id}}" style="text-decoration: none;">
+      Welcome, {{dealer.name}}
+    </a>
+
+    <a
+      href="#"
+      onclick="confirmLogout(event)"
+      class="logout-link"
+    >
+      (Logout)
+    </a>
+
+  </div>
+
+</nav>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <div class="layout-wrapper">
    

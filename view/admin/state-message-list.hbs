@@ -1,0 +1,140 @@
+
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div style="position:relative;z-index:2;width:100%;">
+
+    <!-- Top Header -->
+    <div class="page-topbar">
+
+      <div>
+        <h2 class="page-title">State Message List</h2>
+        <p class="page-subtitle">
+          Total Records : {{total_records}}
+        </p>
+      </div>
+
+      <div>
+        <a href="/admin/add-state-message" class="add-btn">
+          Add Message
+        </a>
+      </div>
+
+    </div>
+
+
+    <!-- Table -->
+    <div class="table-scroll-wrap">
+
+      <table id="dataTable" class="dealer-table">
+
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>State</th>
+            <th>Video</th>
+          
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {{#if videos.length}}
+
+            {{#each videos}}
+
+            <tr>
+
+              <td>{{inc @index}}</td>
+
+              <td>{{this.state}}</td>
+
+              <td>
+
+                <video width="140" height="90" controls>
+                  <source src="/{{this.video}}" type="video/mp4">
+                </video>
+
+              </td>
+
+             
+              <td>
+
+                <a 
+                  href="/admin/edit-state-message/{{this.id}}" 
+                  class="view-link"
+                >
+                  Edit
+                </a>
+
+                &nbsp; | &nbsp;
+
+                {{!-- <a 
+                  href="/admin/delete-state-message/{{this.id}}" 
+                  class="view-link"
+                  onclick="return confirm('Are you sure you want to delete this message?')"
+                >
+                  Delete
+                </a> --}}
+
+                <form
+  action="/admin/delete-state-message/{{this.id}}"
+  method="POST"
+  style="display:inline;"
+  onsubmit="return confirm('Are you sure you want to delete this message?')"
+>
+
+  <button type="submit" class="view-link">
+    Delete
+  </button>
+
+</form>
+
+              </td>
+
+            </tr>
+
+            {{/each}}
+
+          {{else}}
+
+            <tr>
+              <td colspan="5" style="text-align:center;">
+                No Videos Found
+              </td>
+            </tr>
+
+          {{/if}}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- Pagination -->
+    <div class="pagination-wrap">
+
+      {{#if total_pages}}
+
+        <p>
+          Page {{current_page}} of {{total_pages}}
+        </p>
+
+      {{/if}}
+
+    </div>
+
+  </div>
+
+</main>
+
+{{> footer }}
