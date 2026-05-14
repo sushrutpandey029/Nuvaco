@@ -14,7 +14,7 @@ import adminrouter from "./Route/adminRoutes.js";
 import dealerrouter from "./Route/dealerRoutes.js";
 
 dotenv.config();
-
+  
 const app = express();
 const PORT = process.env.PORT || 5050;
 

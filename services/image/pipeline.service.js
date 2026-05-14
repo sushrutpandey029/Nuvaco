@@ -1,6 +1,6 @@
-
-
 import fs from "fs";
+import path from "path";
+
 import Dealer from "../../Model/dealerModel.js";
 import DealerImage from "../../Model/dealer/DealerImage.js";
 
@@ -8,12 +8,12 @@ import { removeBackground } from "./removeBg.service.js";
 import { enhanceImage } from "./enhance.service.js";
 import { saveImage } from "./save.service.js";
 
-export const processImagesPipeline = async ({
-  files,
-  dealer_id,
-  language,
-  image_ids = [],
-}) => {
+import { templates } from "./template.config.js";
+import { placeImageOnTemplate } from "./placeImage.service.js";
+import { enhanceWithGemini } from "./enhanceWithGemini.js";
+
+export const processImagesPipeline = async ({ files, dealer_id, language }) => {
+  console.log("brefore dealer");
 
   // ✅ Dealer validation
   const dealer = await Dealer.findOne({
@@ -24,8 +24,8 @@ export const processImagesPipeline = async ({
   if (!dealer) {
     throw new Error("Dealer not found");
   }
-
-  // ✅ Validations
+  console.log("after dealer", dealer);
+  // ✅ validations
   if (!files || files.length === 0) {
     throw new Error("Images required");
   }
@@ -34,57 +34,73 @@ export const processImagesPipeline = async ({
     throw new Error("Only 4 images allowed");
   }
 
+  // ✅ DELETE OLD GENERATED IMAGES
+  const oldImages = await DealerImage.findAll({
+    where: { dealer_id },
+  });
+
+  console.log("after old images");
+
+  for (const old of oldImages) {
+    try {
+      const filePath = `.${old.image}`;
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (e) {
+      console.log("delete error", e.message);
+    }
+  }
+  console.log("before dealerimage desory");
+  await DealerImage.destroy({
+    where: { dealer_id },
+  });
+
   const results = [];
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const existingId = image_ids[i] ? parseInt(image_ids[i]) : null;
-
-    // 🔥 Step 1: Remove BG
+  // ✅ LOOP USER IMAGES
+  for (const file of files) {
+    console.log("before remve bg");
+    // 🔥 STEP 1 → remove bg
     const bgRemoved = await removeBackground(file.buffer);
-
-    // 🔥 Step 2: Enhance
+    console.log("agter remove bg");
+    // 🔥 STEP 2 → enhance
     const enhanced = await enhanceImage(bgRemoved);
+    console.log("after enchce");
+    // 🔥 STEP 3 → loop templates
+    for (const template of templates) {
+      // 🔥 place person inside template
+      const finalImageBuffer = await placeImageOnTemplate({
+        templatePath: template.image,
 
-    // 🔥 Step 3: Save processed image
-    const imagePath = await saveImage(enhanced);
+        personBuffer: enhanced,
 
-    if (existingId) {
-      // 🔁 UPDATE FLOW
-      const existing = await DealerImage.findOne({
-        where: { id: existingId, dealer_id },
+        top: template.placement.top,
+        left: template.placement.left,
+        width: template.placement.width,
       });
 
-      if (existing) {
-        // 🧹 delete old file
-        try {
-          if (fs.existsSync(existing.image)) {
-            fs.unlinkSync(existing.image);
-          }
-        } catch (e) {
-          console.log("File delete error:", e.message);
-        }
+      //for image enhancement
+      //    const tempDir = path.join(process.cwd(), "temp");
 
-        // ✏️ update record
-        await existing.update({
-          image: imagePath,
-          language,
-        });
+      // // create temp folder if not exists
+      // if (!fs.existsSync(tempDir)) {
+      //   fs.mkdirSync(tempDir, { recursive: true });
+      // }
 
-        results.push(existing);
-      } else {
-        // fallback create
-        const created = await DealerImage.create({
-          dealer_id,
-          language,
-          image: imagePath,
-        });
+      // const tempPath = path.join(tempDir, "final.png");
 
-        results.push(created);
-      }
+      // fs.writeFileSync(tempPath, finalImageBuffer);
+      // console.log("before gmini")
+      // const enhancedBuffer =
+      //   await enhanceWithGemini(tempPath);
 
-    } else {
-      // 🆕 CREATE FLOW
+      // 🔥 save final image
+      const imagePath = await saveImage(finalImageBuffer);
+      // const imagePath = await saveImage(enhancedBuffer);
+
+      // 🔥 DB save
       const created = await DealerImage.create({
         dealer_id,
         language,
@@ -94,14 +110,7 @@ export const processImagesPipeline = async ({
       results.push(created);
     }
   }
-
-  // 🔄 update language for all images
-  await DealerImage.update(
-    { language },
-    { where: { dealer_id } }
-  );
+  console.log("before result");
 
   return results;
 };
-
-

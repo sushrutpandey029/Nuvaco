@@ -9,7 +9,6 @@
 
   <div style="position:relative;z-index:2;width:100%;">
 
-    <!-- Main Card -->
     <div class="dealer-detail-card">
 
       <h2 class="detail-title">
@@ -18,47 +17,132 @@
 
       <!-- Language -->
       <div style="margin-bottom:25px;">
-
         <h3>
-          Language :
-          {{data.[0].language}}
+          Language : {{data.[0].language}}
         </h3>
-
       </div>
 
-      <!-- All Images -->
-      <div
-        style="
-          display:flex;
-          flex-wrap:wrap;
-          gap:20px;
-        "
-      >
+      <!-- FORM -->
+      <form action="/admin/submit-final-image" method="POST">
 
-        {{#each data}}
+        <input
+          type="hidden"
+          name="dealer_id"
+          value="{{data.[0].dealer_id}}"
+        />
 
-        <div style="text-align:center;">
+        <!-- Images -->
+        <div
+          style="
+            display:flex;
+            flex-wrap:wrap;
+            gap:20px;
+          "
+        >
 
-          <img
-            src="{{this.image}}"
-            alt="Dealer Image"
+          {{#each data}}
+
+          <div
             style="
-              width:180px;
-              height:180px;
-              object-fit:cover;
+              text-align:center;
+              border:1px solid #ddd;
+              padding:15px;
               border-radius:12px;
-              border:2px solid #ddd;
             "
-          />
+          >
+
+            <!-- Radio -->
+            <div style="margin-bottom:10px;">
+
+              <input
+                type="radio"
+                name="selected_image"
+                value="{{this.id}}"
+                style="width:20px;height:20px;cursor:pointer;"
+              />
+
+            </div>
+
+            <!-- Image -->
+            <img
+              src="{{this.image}}"
+              alt="Dealer Image"
+              style="
+                width:180px;
+                height:180px;
+                object-fit:cover;
+                border-radius:12px;
+                border:2px solid #ddd;
+              "
+            />
+
+          </div>
+
+          {{/each}}
 
         </div>
 
-        {{/each}}
+        <!-- Buttons -->
+        <div
+          style="
+            margin-top:40px;
+            display:flex;
+            gap:20px;
+          "
+        >
 
-      </div>
+          <!-- Submit Final -->
+          <button
+            type="submit"
+            style="
+              background:#2e7d32;
+              color:#fff;
+              border:none;
+              padding:12px 25px;
+              border-radius:10px;
+              cursor:pointer;
+              font-weight:600;
+            "
+          >
+            Submit Selected Image
+          </button>
+
+      </form>
+
+          <!-- Reject All -->
+          <form
+            action="/admin/reject-dealer-images"
+            method="POST"
+          >
+
+            <input
+              type="hidden"
+              name="dealer_id"
+              value="{{data.[0].dealer_id}}"
+            />
+
+            <button
+              type="submit"
+              onclick="return confirm('Are you sure you want to reject all images?')"
+              style="
+                background:#d32f2f;
+                color:#fff;
+                border:none;
+                padding:12px 25px;
+                border-radius:10px;
+                cursor:pointer;
+                font-weight:600;
+              "
+            >
+              Reject All
+            </button>
+
+          </form>
+
+        </div>
 
       <!-- Final Selected Image -->
-      <div style="margin-top:40px;">
+      <div style="margin-top:50px;">
 
         <h3 style="margin-bottom:20px;">
           Final Selected Image

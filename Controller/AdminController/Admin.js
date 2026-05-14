@@ -165,173 +165,53 @@ export const adminlogin = async (req, res) => {
   }
 };
 
-
-// export const adminDashboard = async (req, res) => {
-//   try {
-
-//     const admin = req.session.admin;
-
-//     if (!admin) {
-//       return res.redirect("login");
-//     }
-
- 
-//     const dealers =
-//       await Dealer.findAll();
-
-  
-//     const totalDealers =
-//       dealers.length;
-
-  
-//     const uploadedPics =
-//       dealers.filter(
-//         (dealer) =>
-//           dealer.isImageUploaded ===
-//           "yes"
-//       ).length;
-
-  
-//     const pendingPics =
-//       dealers.filter(
-//         (dealer) =>
-//           dealer.isImageUploaded ===
-//           "no"
-//       ).length;
-
-   
-//     const onboarded =
-//       totalDealers;
-
-//     return res.render(
-//       "admin/dashboard",
-//       {
-//         admin,
-
-//         totalDealers,
-
-//         onboarded,
-
-//         uploadedPics,
-
-//         pendingPics,
-//       }
-//     );
-
-//   } catch (error) {
-
-//     console.log(
-//       "Dashboard Error:",
-//       error
-//     );
-
-//     req.flash(
-//       "error",
-//       "Something went wrong"
-//     );
-
-//     return res.redirect(
-//       "/admin/login"
-//     );
-//   }
-// };
-
 export const adminDashboard = async (req, res) => {
   try {
-
     const admin = req.session.admin;
 
     if (!admin) {
       return res.redirect("login");
     }
 
-    // =========================
-    // FETCH ALL DEALERS
-    // =========================
+    const dealers = await Dealer.findAll();
 
-    const dealers =
-      await Dealer.findAll();
+    const totalDealers = dealers.length;
 
-    // =========================
-    // COUNTS
-    // =========================
+    const uploadedPics = dealers.filter(
+      (dealer) => dealer.isImageUploaded === "yes",
+    ).length;
 
-    const totalDealers =
-      dealers.length;
+    const pendingPics = dealers.filter(
+      (dealer) => dealer.isImageUploaded === "no",
+    ).length;
 
-    const uploadedPics =
-      dealers.filter(
-        (dealer) =>
-          dealer.isImageUploaded ===
-          "yes"
-      ).length;
+    const onboarded = totalDealers;
 
-    const pendingPics =
-      dealers.filter(
-        (dealer) =>
-          dealer.isImageUploaded ===
-          "no"
-      ).length;
+    const chartLabels = ["Onboarded", "Pics Uploaded", "Pending"];
 
-    const onboarded =
-      totalDealers;
+    const chartData = [onboarded, uploadedPics, pendingPics];
 
-    // =========================
-    // CHART DATA
-    // =========================
+    return res.render("admin/dashboard", {
+      admin,
 
-    const chartLabels = [
-      "Onboarded",
-      "Pics Uploaded",
-      "Pending",
-    ];
+      totalDealers,
 
-    const chartData = [
       onboarded,
+
       uploadedPics,
+
       pendingPics,
-    ];
 
-    return res.render(
-      "admin/dashboard",
-      {
-        admin,
+      chartLabels: JSON.stringify(chartLabels),
 
-        totalDealers,
-
-        onboarded,
-
-        uploadedPics,
-
-        pendingPics,
-
-        chartLabels:
-          JSON.stringify(
-            chartLabels
-          ),
-
-        chartData:
-          JSON.stringify(
-            chartData
-          ),
-      }
-    );
-
+      chartData: JSON.stringify(chartData),
+    });
   } catch (error) {
+    console.log("Dashboard Error:", error);
 
-    console.log(
-      "Dashboard Error:",
-      error
-    );
+    req.flash("error", "Something went wrong");
 
-    req.flash(
-      "error",
-      "Something went wrong"
-    );
-
-    return res.redirect(
-      "/admin/login"
-    );
+    return res.redirect("/admin/login");
   }
 };
 
@@ -395,7 +275,6 @@ export const adminLogout = (req, res) => {
       console.log(err);
       return res.status(500).json({ success: false });
     }
-    // req.session.admin = "";
 
     res.clearCookie("connect.sid");
 
@@ -1765,7 +1644,7 @@ export const getDealerDetails = async (req, res) => {
         },
       ],
     });
-    console.log("deale rdata", JSON.stringify(dealerData, null, 2));
+
     return res.render("admin/view-dealer-detail", {
       data: dealerData,
     });
@@ -2096,7 +1975,6 @@ export const renderEditStateMessage = async (req, res) => {
 
     return res.redirect("back");
   }
-  console.log("region vide", regionVideo);
 
   res.render("admin/state-message-edit", { data: regionVideo });
 };
@@ -2268,5 +2146,378 @@ export const downloadDealerExcel = async (req, res) => {
     req.flash("error", "Error downloading excel");
 
     return res.redirect("/admin/dealerlist");
+  }
+};
+
+export const rejectDealerImage = async (req, res) => {
+  try {
+    const { image_id, reject_reason } = req.body;
+
+    // =========================
+    // VALIDATION
+    // =========================
+
+    if (!image_id) {
+      return res.status(400).json({
+        success: false,
+
+        message: "Image ID required",
+      });
+    }
+
+    if (!reject_reason) {
+      return res.status(400).json({
+        success: false,
+
+        message: "Reject reason required",
+      });
+    }
+
+    // =========================
+    // FIND IMAGE
+    // =========================
+
+    const image = await Dealer.findOne({
+      where: {
+        id: id,
+      },
+
+      include: [
+        {
+          model: Dealer,
+        },
+      ],
+    });
+
+    if (!image) {
+      return res.status(404).json({
+        success: false,
+
+        message: "Image not found",
+      });
+    }
+
+    // =========================
+    // UPDATE IMAGE STATUS
+    // =========================
+
+    image.status = "rejected";
+
+    image.reject_reason = reject_reason;
+
+    await image.save();
+
+    // =========================
+    // MOBILE NUMBER
+    // =========================
+
+    // let mobile =
+    //   numbers ||
+    //   image.Dealer
+    //     ?.dealer_mobile_number;
+
+    // if (!mobile) {
+
+    //   return res.status(400).json({
+
+    //     success: false,
+
+    //     message:
+    //       "Dealer mobile number not found",
+    //   });
+    // }
+
+    // CLEAN NUMBER
+
+    // =========================
+    // SMS MESSAGE
+    // =========================
+    // const otp = 898787;
+    //     const message =
+    //       `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
+    //     // const message =
+    //     //   `Welcome to Nuvoco Super Women Sangini! Your image has been rejected due to ${reject_reason}. STRMCM`;
+
+    //     console.log(
+    //       "MESSAGE =>",
+    //       message
+    //     );
+
+    // =========================
+    // SAME FORMAT AS OTP API
+    // =========================
+
+    const params = {
+      APIKey: process.env.SMS_API_KEY,
+
+      senderid: process.env.SMS_SENDER_ID,
+
+      channel: "Trans",
+
+      DCS: 0,
+
+      flashsms: 0,
+
+      number: "91" + mobile,
+
+      text: message,
+
+      DLTTemplateId: process.env.SMS_TEMPLATE_ID,
+
+      route: 0,
+
+      PEId: process.env.SMS_PE_ID,
+    };
+
+    console.log("SMS PARAMS =>", params);
+
+    // =========================
+    // SEND SMS
+    // =========================
+
+    const response = await axios.get(
+      process.env.SMS_BASE_URL,
+
+      { params },
+    );
+
+    console.log("SMS RESPONSE =>", response.data);
+
+    // =========================
+    // SUCCESS RESPONSE
+    // =========================
+
+    return res.status(200).json({
+      success: true,
+
+      message: "Image rejected and SMS sent successfully",
+
+      sms_response: response.data,
+    });
+  } catch (error) {
+    console.log(
+      "Reject Dealer Image Error =>",
+      error.response?.data || error.message,
+    );
+
+    return res.status(500).json({
+      success: false,
+
+      message: error.response?.data || error.message,
+    });
+  }
+};
+
+export const submitFinalSelectedImage = async (req, res) => {
+  try {
+    const { dealer_id, selected_image } = req.body;
+
+    if (!selected_image) {
+      req.flash("error", "Please select image");
+
+      return res.redirect(`dealer-image/${dealer_id}`);
+    }
+
+    // Check already exists
+    const existing = await DealerFinalImage.findOne({
+      where: { dealer_id },
+    });
+
+    if (existing) {
+      // Update existing
+      await existing.update({
+        image_id: selected_image,
+      });
+    } else {
+      // Create new
+      await DealerFinalImage.create({
+        dealer_id,
+        image_id: selected_image,
+      });
+    }
+
+    // Update dealer status
+    await Dealer.update(
+      {
+        imageStatus: "approved",
+      },
+      {
+        where: { id: dealer_id },
+      },
+    );
+
+    req.flash("success", "Final image selected successfully");
+
+    return res.redirect(`dealer-image/${dealer_id}`);
+  } catch (err) {
+    console.log(err);
+
+    req.flash("error", "Error while selecting image");
+
+    return res.redirect(`dealer-image/${dealer_id}`);
+  }
+};
+
+export const rejectDealerImages = async (req, res) => {
+  const { dealer_id } = req.body;
+  try {
+    if (!dealer_id) {
+      req.flash("error", "Dealer ID required");
+
+      return res.redirect("back");
+    }
+
+    const dealer = await Dealer.findOne({
+      where: {
+        id: dealer_id,
+      },
+    });
+
+    if (!dealer) {
+      req.flash("error", "Dealer not found");
+
+      return res.redirect("back");
+    }
+
+    dealer.imageStatus = "rejected";
+
+    await dealer.save();
+
+    await DealerFinalImage.destroy({
+      where: {
+        dealer_id,
+      },
+    });
+
+    const mobile = dealer.dealer_mobile_number;
+
+    // =========================
+    // SEND SMS
+    // =========================
+
+    // if (mobile) {
+    //   const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is . STRMCM`;
+
+    //   const params = {
+    //     APIKey: process.env.SMS_API_KEY,
+
+    //     senderid: process.env.SMS_SENDER_ID,
+
+    //     channel: "Trans",
+
+    //     DCS: 0,
+
+    //     flashsms: 0,
+
+    //     number: "91" + mobile,
+
+    //     text: message,
+
+    //     DLTTemplateId: process.env.SMS_TEMPLATE_ID,
+
+    //     route: 0,
+
+    //     PEId: process.env.SMS_PE_ID,
+    //   };
+
+    //   console.log("SMS PARAMS =>", params);
+
+    //   const response = await axios.get(process.env.SMS_BASE_URL, { params });
+
+    //   console.log("SMS RESPONSE =>", response.data);
+    // }
+
+    // =========================
+    // SUCCESS
+    // =========================
+
+    req.flash("success", "Dealer images rejected successfully");
+
+    return res.redirect(`dealer-image/${dealer_id}`);
+  } catch (err) {
+    console.log(
+      "Reject Dealer Images Error =>",
+      err.response?.data || err.message,
+    );
+
+    req.flash("error", "Error while rejecting dealer images");
+
+    return res.redirect(`dealer-image/${dealer_id}`);
+  }
+};
+
+export const renderDownloadDealerImage = async (req, res) => {
+  try {
+    const dealers = await Dealer.findAll({ raw: true });
+    console.log("region vide", dealers.slice(0, 5));
+    res.render("admin/download-image", { data: dealers });
+  } catch (err) {
+    console.log("error in geting dealer list", err.response);
+  }
+};
+
+export const getDealerFinalImage = async (req, res) => {
+  try {
+    const { dealer_code } = req.body;
+
+    // =========================
+    // FIND DEALER
+    // =========================
+
+    const dealer = await Dealer.findOne({
+      where: {
+        dealer_code,
+      },
+    });
+
+    if (!dealer) {
+      return res.status(404).json({
+        success: false,
+        message: "Dealer not found",
+      });
+    }
+
+    // =========================
+    // FIND FINAL IMAGE
+    // =========================
+
+    const finalImage = await DealerFinalImage.findOne({
+      where: {
+        dealer_id: dealer.id,
+      },
+
+      include: [
+        {
+          model: DealerImage,
+          attributes: ["image"],
+        },
+      ],
+    });
+
+    if (!finalImage) {
+      return res.status(404).json({
+        success: false,
+        message: "No final image found for dealer",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+
+      data: {
+        dealer_name: dealer.shop_name,
+
+        dealer_code: dealer.dealer_code,
+
+        image: finalImage.DealerImage.image,
+      },
+    });
+  } catch (err) {
+    console.log("Error in getDealerFinalImage", err);
+
+    return res.status(500).json({
+      success: false,
+      message: "Error in fetching dealer image",
+    });
   }
 };

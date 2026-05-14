@@ -2,8 +2,10 @@ import axios from "axios";
 import FormData from "form-data";
 
 export const removeBackground = async (buffer) => {
+  console.log("in revmoc bg");
   const formData = new FormData();
   formData.append("image_file", buffer);
+  console.log("after apend file");
 
   const response = await axios.post(
     "https://api.remove.bg/v1.0/removebg",
@@ -16,7 +18,6 @@ export const removeBackground = async (buffer) => {
       responseType: "arraybuffer",
     },
   );
-  console.log("resp of remove bg in remvobd", response.data);
 
   return response.data;
 };

@@ -10,6 +10,7 @@ import RegionVideo from "../../Model/regionVideoModel.js";
 import { formatImageArray } from "../../utils/formatImagePath.js";
 import SalesSpoc from "../../Model/salesSpocModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
+import path from "path";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -177,7 +178,21 @@ export const renderUploadPic = async (req, res) => {
     ...img,
     image: img.image.replace(/\\/g, "/"),
   }));
-  return res.render("dealer/upload-pic", { images: formatted });
+
+
+  const templatesDir = path.join(process.cwd(), "public/templates");
+
+  const files = fs.readdirSync(templatesDir);
+
+  const templates = files.map((file, index) => ({
+    id: index + 1,
+    name: path.parse(file).name,
+    image: `/templates/${file}`,
+  }));
+
+  console.log("templates",templates)
+
+  return res.render("dealer/upload-pic", { images: formatted,templates });
 };
 
 export const renderFinalPic = async (req, res) => {
@@ -312,20 +327,21 @@ export const renderThankyouPage = async (req, res) => {
 export const uploadDealerImages = async (req, res) => {
   try {
     const { dealer_id, language } = req.body;
-
+console.log("req",req.body)
     let image_ids = [];
     try {
       image_ids = JSON.parse(req.body.image_ids || "[]");
     } catch {
       image_ids = [];
     }
-
+console.log("befreo paroce")
     const results = await processImagesPipeline({
       files: req.files,
       dealer_id,
       language,
-      image_ids, // ✅ IMPORTANT
+      image_ids,
     });
+    console.log("reslults of pipelieb",results)
 
     return res.json({
       success: true,

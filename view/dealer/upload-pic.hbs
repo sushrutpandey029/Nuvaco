@@ -11,60 +11,120 @@
     <div id="uploadAlert" style="display:none;" class="mb-3"></div>
 
     <!-- Preview Row — always render 4 boxes -->
+   
+
+    <div class="row">
+
+  <!-- LEFT SIDE -->
+  <div class="col-md-6">
+
     <div class="row g-3">
-      <div class="col-6 col-md-3">
+
+      <!-- PIC 1 -->
+      <div class="col-6">
         <div class="pic-radio-wrap">
           <label class="pic-box" id="preview-label-0">
             {{#if (gt images.length 0)}}
-              <img id="preview0" src="{{images.[0].image}}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-0" style="display:none;">Uploaded Pic 1</span>
+              <img id="preview0"
+                src="{{images.[0].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
             {{else}}
-              <img id="preview0" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:8px;" />
+              <img id="preview0"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
               <span id="preview-text-0">Uploaded Pic 1</span>
             {{/if}}
           </label>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+
+      <!-- PIC 2 -->
+      <div class="col-6">
         <div class="pic-radio-wrap">
           <label class="pic-box" id="preview-label-1">
             {{#if (gt images.length 1)}}
-              <img id="preview1" src="{{images.[1].image}}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-1" style="display:none;">Uploaded Pic 2</span>
+              <img id="preview1"
+                src="{{images.[1].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
             {{else}}
-              <img id="preview1" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:8px;" />
+              <img id="preview1"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
               <span id="preview-text-1">Uploaded Pic 2</span>
             {{/if}}
           </label>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+
+      <!-- PIC 3 -->
+      <div class="col-6">
         <div class="pic-radio-wrap">
           <label class="pic-box" id="preview-label-2">
             {{#if (gt images.length 2)}}
-              <img id="preview2" src="{{images.[2].image}}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-2" style="display:none;">Uploaded Pic 3</span>
+              <img id="preview2"
+                src="{{images.[2].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
             {{else}}
-              <img id="preview2" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:8px;" />
+              <img id="preview2"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
               <span id="preview-text-2">Uploaded Pic 3</span>
             {{/if}}
           </label>
         </div>
       </div>
-      <div class="col-6 col-md-3">
+
+      <!-- PIC 4 -->
+      <div class="col-6">
         <div class="pic-radio-wrap">
           <label class="pic-box" id="preview-label-3">
             {{#if (gt images.length 3)}}
-              <img id="preview3" src="{{images.[3].image}}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-3" style="display:none;">Uploaded Pic 4</span>
+              <img id="preview3"
+                src="{{images.[3].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
             {{else}}
-              <img id="preview3" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:8px;" />
+              <img id="preview3"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
               <span id="preview-text-3">Uploaded Pic 4</span>
             {{/if}}
           </label>
         </div>
       </div>
+
     </div>
+
+  </div>
+
+
+  <!-- RIGHT SIDE -->
+  <div class="col-md-6">
+
+    {{#each templates}}
+
+      <div class="mb-3">
+
+        <img
+          src="{{this.image}}"
+          alt="{{this.name}}"
+          style="width:100%; border-radius:10px;"
+        />
+
+      </div>
+
+    {{/each}}
+
+  </div>
+
+</div>
 
     <!-- Upload Inputs Row — always render 4 boxes -->
     <div class="row g-3 mt-3">

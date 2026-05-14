@@ -25,6 +25,11 @@ import {
   renderEditDealer,
   updateDealer,
   deleteDealer,
+  rejectDealerImage,
+  submitFinalSelectedImage,
+  rejectDealerImages,
+  renderDownloadDealerImage,
+  getDealerFinalImage
 } from "../Controller/AdminController/Admin.js";
 import dealerUpload from "../middlewares/dealerUpload.js";
 import { upload } from "../middlewares/shopimageupload.js";
@@ -88,5 +93,25 @@ adminrouter.get("/editdealer/:id", renderEditDealer);
 adminrouter.post("/update-dealer/:id", updateDealer);
 
 adminrouter.get("/delete-dealer/:id", deleteDealer);
+adminrouter.post("/reject-dealer-image",rejectDealerImage);
+
+adminrouter.post(
+  "/submit-final-image",
+  submitFinalSelectedImage,
+);
+
+adminrouter.post(
+  "/reject-dealer-images",
+  rejectDealerImages,
+);
+
+adminrouter.get("/download-image",
+  renderDownloadDealerImage
+)
+
+adminrouter.post(
+  "/get-dealer-final-image",
+  getDealerFinalImage,
+);
 
 export default adminrouter;

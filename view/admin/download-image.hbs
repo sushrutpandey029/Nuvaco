@@ -1,0 +1,259 @@
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main
+  class="purple-main"
+  style="
+    align-items:flex-start;
+    padding-top:32px;
+  "
+>
+
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div
+    style="
+      position:relative;
+      z-index:2;
+      width:100%;
+    "
+  >
+
+    <div class="dealer-detail-card">
+
+      <h2 class="detail-title">
+        Download Dealer Image
+      </h2>
+
+      <!-- Dropdown -->
+      <div style="margin-top:30px;">
+
+        <label
+          style="
+            font-weight:600;
+            margin-bottom:10px;
+            display:block;
+          "
+        >
+          Select Dealer
+        </label>
+
+        <input
+          type="text"
+          id="dealerSearch"
+          placeholder="Search dealer..."
+          style="
+            width:100%;
+            padding:12px;
+            border-radius:10px;
+            border:1px solid #ccc;
+            margin-bottom:10px;
+          "
+        />
+
+        <select
+          id="dealerSelect"
+          style="
+            width:100%;
+            padding:12px;
+            border-radius:10px;
+            border:1px solid #ccc;
+          "
+        >
+
+          <option value="">
+            Select Dealer
+          </option>
+
+          {{#each data}}
+
+            <option
+              value="{{this.dealer_code}}"
+            >
+              {{this.dealer_person}}
+              -
+              {{this.dealer_code}}
+            </option>
+
+          {{/each}}
+
+        </select>
+
+      </div>
+
+      <!-- Image Preview -->
+      <div
+        id="imageContainer"
+        style="
+          margin-top:40px;
+          display:none;
+          text-align:center;
+        "
+      >
+
+        <h3 id="dealerName"></h3>
+
+        <img
+          id="dealerImage"
+          src=""
+          alt="Dealer Image"
+          style="
+            width:350px;
+            border-radius:16px;
+            border:3px solid #ddd;
+            margin-top:20px;
+          "
+        />
+
+        <div style="margin-top:20px;">
+
+          <a
+            id="downloadBtn"
+            href=""
+            download
+            style="
+              background:#2e7d32;
+              color:#fff;
+              text-decoration:none;
+              padding:12px 24px;
+              border-radius:10px;
+              font-weight:600;
+            "
+          >
+            Download Image
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+
+  // =========================
+  // SEARCH FILTER
+  // =========================
+
+  const dealerSearch =
+    document.getElementById(
+      "dealerSearch",
+    );
+
+  const dealerSelect =
+    document.getElementById(
+      "dealerSelect",
+    );
+
+  dealerSearch.addEventListener(
+    "keyup",
+    function () {
+
+      const filter =
+        this.value.toLowerCase();
+
+      const options =
+        dealerSelect.options;
+
+      for (
+        let i = 0;
+        i < options.length;
+        i++
+      ) {
+
+        const txt =
+          options[i].text.toLowerCase();
+
+        options[i].style.display =
+          txt.includes(filter)
+            ? ""
+            : "none";
+      }
+    },
+  );
+
+  // =========================
+  // GET IMAGE
+  // =========================
+
+  dealerSelect.addEventListener(
+    "change",
+    async function () {
+
+      const dealer_code =
+        this.value;
+
+      if (!dealer_code) return;
+
+      try {
+
+        const response =
+          await fetch(
+            "/admin/get-dealer-final-image",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body: JSON.stringify({
+                dealer_code,
+              }),
+            },
+          );
+
+        const result =
+          await response.json();
+
+        if (!result.success) {
+
+          alert(result.message);
+
+          return;
+        }
+
+        // =========================
+        // SHOW IMAGE
+        // =========================
+
+        document.getElementById(
+          "imageContainer",
+        ).style.display = "block";
+
+        document.getElementById(
+          "dealerName",
+        ).innerText =
+          result.data.dealer_name;
+
+        document.getElementById(
+          "dealerImage",
+        ).src =
+          result.data.image;
+
+        document.getElementById(
+          "downloadBtn",
+        ).href =
+          result.data.image;
+
+      } catch (err) {
+
+        console.log(err);
+
+        alert(
+          "Error in fetching image",
+        );
+      }
+    },
+  );
+
+</script>
+
+{{> footer }}
