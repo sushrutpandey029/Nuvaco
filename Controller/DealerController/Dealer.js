@@ -5,12 +5,13 @@ import MessageModel from "../../Model/dealer/MessageModel.js";
 import DealerImage from "../../Model/dealer/DealerImage.js";
 import fs from "fs";
 import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
-import { processImagesPipeline } from "../../services/image/pipeline.service.js";
+// import { processImagesPipeline } from "../../services/image/pipeline.service.js";
 import RegionVideo from "../../Model/regionVideoModel.js";
 import { formatImageArray } from "../../utils/formatImagePath.js";
 import SalesSpoc from "../../Model/salesSpocModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import path from "path";
+import { generateBanner } from "../../services/pipeline/generateBanner.js";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -173,12 +174,18 @@ export const renderUploadPic = async (req, res) => {
     attributes: ["id", "image", "language"],
     raw: true,
   });
-  console.log("image data in render puld pic file", imageData);
+
+  // Dealer Data
+  const dealerData = await Dealer.findOne({
+    where: { id: dealer_id },
+    attributes: ["id", "imageStatus"],
+    raw: true,
+  });
+  console.log("dealer data", dealerData);
   const formatted = imageData.map((img) => ({
     ...img,
     image: img.image.replace(/\\/g, "/"),
   }));
-
 
   const templatesDir = path.join(process.cwd(), "public/templates");
 
@@ -190,9 +197,13 @@ export const renderUploadPic = async (req, res) => {
     image: `/templates/${file}`,
   }));
 
-  console.log("templates",templates)
+  console.log("templates", templates);
 
-  return res.render("dealer/upload-pic", { images: formatted,templates });
+  return res.render("dealer/upload-pic", {
+    images: formatted,
+    templates,
+    imageStatus: dealerData?.imageStatus,
+  });
 };
 
 export const renderFinalPic = async (req, res) => {
@@ -324,32 +335,83 @@ export const renderThankyouPage = async (req, res) => {
 //   }
 // };
 
+// export const uploadDealerImages = async (req, res) => {
+//   try {
+//     const { dealer_id, language } = req.body;
+//     console.log("req", req.body);
+//     let image_ids = [];
+//     try {
+//       image_ids = JSON.parse(req.body.image_ids || "[]");
+//     } catch {
+//       image_ids = [];
+//     }
+//     console.log("befreo paroce");
+//     // const results = await processImagesPipeline({
+//     //   files: req.files,
+//     //   dealer_id,
+//     //   language,
+//     //   image_ids,
+//     // });
+//     // console.log("reslults of pipelieb", results);
+
+//     // return res.json({
+//     //   success: true,
+//     //   message: "Images saved successfully",
+//     //   data: results,
+//     // });
+//   } catch (error) {
+//     console.log("Controller Error:", error.message);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// POST — save selected final image
+
 export const uploadDealerImages = async (req, res) => {
   try {
     const { dealer_id, language } = req.body;
-console.log("req",req.body)
-    let image_ids = [];
-    try {
-      image_ids = JSON.parse(req.body.image_ids || "[]");
-    } catch {
-      image_ids = [];
+
+    // validation
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Images required",
+      });
     }
-console.log("befreo paroce")
-    const results = await processImagesPipeline({
-      files: req.files,
-      dealer_id,
-      language,
-      image_ids,
-    });
-    console.log("reslults of pipelieb",results)
+
+    const results = [];
+
+    // loop uploaded files
+    for (const file of req.files) {
+      // IMPORTANT
+      // use file.buffer
+      const finalImagePath = await generateBanner({
+        personBuffer: file.buffer,
+        language,
+        originalName: file.originalname,
+      });
+
+      // DB save
+      const created = await DealerImage.create({
+        dealer_id,
+        language,
+        image: finalImagePath,
+      });
+
+      results.push(created);
+    }
 
     return res.json({
       success: true,
-      message: "Images saved successfully",
+      message: "Images processed successfully",
       data: results,
     });
   } catch (error) {
-    console.log("Controller Error:", error.message);
+    console.log("Controller Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -358,7 +420,6 @@ console.log("befreo paroce")
   }
 };
 
-// POST — save selected final image
 export const saveFinalImage = async (req, res) => {
   try {
     const dealer_id = req.session.dealer.id;

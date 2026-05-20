@@ -7,157 +7,83 @@
 
   <div style="position: relative; z-index: 2; width: 100%">
 
-    <!-- Alert -->
-    <div id="uploadAlert" style="display:none;" class="mb-3"></div>
+    {{#if (eq imageStatus "processing")}}
+      <div class="alert alert-warning text-center mb-4">
+        Your images are under processing.
+      </div>
+    {{/if}}
 
-    <!-- Preview Row — always render 4 boxes -->
-   
+    {{#if (eq imageStatus "approved")}}
+      <div class="alert alert-success text-center mb-4">
+        Your images are approved successfully.
+      </div>
+    {{/if}}
+
+    {{#if (eq imageStatus "rejected")}}
+      <div class="alert alert-danger text-center mb-4">
+        Your uploaded images were rejected. Please upload again.
+      </div>
+    {{/if}}
+
+    <!-- Inline alert for upload feedback -->
+    <div id="uploadAlert" style="display:none;" class="mb-3"></div>
 
     <div class="row">
 
-  <!-- LEFT SIDE -->
-  <div class="col-md-6">
+      <!-- LEFT SIDE — Photo preview -->
+      <div class="col-md-6">
+        <div class="row g-3">
 
-    <div class="row g-3">
+          <!-- PIC 1 (only slot active) -->
+          <div class="col-6">
+            <div class="pic-radio-wrap">
+              <label class="pic-box" id="preview-label-0">
+                {{#if (gt images.length 0)}}
+                  <img id="preview0"
+                    src="{{images.[0].image}}"
+                    alt=""
+                    style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+                {{else}}
+                  <img id="preview0"
+                    src=""
+                    alt=""
+                    style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+                  <span id="preview-text-0">Uploaded Pic 1</span>
+                {{/if}}
+              </label>
+            </div>
+          </div>
 
-      <!-- PIC 1 -->
-      <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-0">
-            {{#if (gt images.length 0)}}
-              <img id="preview0"
-                src="{{images.[0].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview0"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-0">Uploaded Pic 1</span>
-            {{/if}}
-          </label>
         </div>
       </div>
 
-      <!-- PIC 2 -->
-      <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-1">
-            {{#if (gt images.length 1)}}
-              <img id="preview1"
-                src="{{images.[1].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview1"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-1">Uploaded Pic 2</span>
-            {{/if}}
-          </label>
-        </div>
-      </div>
-
-      <!-- PIC 3 -->
-      <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-2">
-            {{#if (gt images.length 2)}}
-              <img id="preview2"
-                src="{{images.[2].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview2"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-2">Uploaded Pic 3</span>
-            {{/if}}
-          </label>
-        </div>
-      </div>
-
-      <!-- PIC 4 -->
-      <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-3">
-            {{#if (gt images.length 3)}}
-              <img id="preview3"
-                src="{{images.[3].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview3"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-3">Uploaded Pic 4</span>
-            {{/if}}
-          </label>
-        </div>
+      <!-- RIGHT SIDE — Template previews -->
+      <div class="col-md-6">
+        {{#each templates}}
+          <div class="mb-3">
+            <img
+              src="{{this.image}}"
+              alt="{{this.name}}"
+              style="width:100%; border-radius:10px;"
+            />
+          </div>
+        {{/each}}
       </div>
 
     </div>
 
-  </div>
-
-
-  <!-- RIGHT SIDE -->
-  <div class="col-md-6">
-
-    {{#each templates}}
-
-      <div class="mb-3">
-
-        <img
-          src="{{this.image}}"
-          alt="{{this.name}}"
-          style="width:100%; border-radius:10px;"
-        />
-
-      </div>
-
-    {{/each}}
-
-  </div>
-
-</div>
-
-    <!-- Upload Inputs Row — always render 4 boxes -->
+    <!-- Upload Input Row -->
     <div class="row g-3 mt-3">
+
+      <!-- Only 1 upload slot is active -->
       <div class="col-6 col-md-3">
         <label class="upload-box w-100" style="cursor:pointer;">
           <input type="file" accept="image/*" class="d-none pic-input"
             data-slot="0"
             data-existing-id="{{images.[0].id}}" />
-          <span id="upload-label-0">{{#if (gt images.length 0)}}Change Pic 1{{else}}Upload Pic 1{{/if}}</span>
-        </label>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="1"
-            data-existing-id="{{images.[1].id}}" />
-          <span id="upload-label-1">{{#if (gt images.length 1)}}Change Pic 2{{else}}Upload Pic 2{{/if}}</span>
-        </label>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="2"
-            data-existing-id="{{images.[2].id}}" />
-          <span id="upload-label-2">{{#if (gt images.length 2)}}Change Pic 3{{else}}Upload Pic 3{{/if}}</span>
-        </label>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="3"
-            data-existing-id="{{images.[3].id}}" />
-          <span id="upload-label-3">{{#if (gt images.length 3)}}Change Pic 4{{else}}Upload Pic 4{{/if}}</span>
+          <span id="upload-label-0">
+            {{#if (gt images.length 0)}}Change Pic 1{{else}}Upload Pic 1{{/if}}
+          </span>
         </label>
       </div>
 
@@ -165,11 +91,16 @@
       <div class="col-12 col-md-12 justify-content-center">
         <select class="region-select mt-3" id="languageSelect">
           <option value="">Select Language of Cutout</option>
-          <option value="HINDI" {{#if (eq images.[0].language "HINDI")}}selected{{/if}}>HINDI</option>
-          <option value="ENGLISH" {{#if (eq images.[0].language "ENGLISH")}}selected{{/if}}>ENGLISH</option>
-          <option value="ODISHA" {{#if (eq images.[0].language "ODISHA")}}selected{{/if}}>ODISHA</option>
+          <option value="HINDI"     {{#if (eq images.[0].language "HINDI")}}selected{{/if}}>HINDI</option>
+          <option value="ENGLISH"   {{#if (eq images.[0].language "ENGLISH")}}selected{{/if}}>ENGLISH</option>
+          <option value="ODIA"      {{#if (eq images.[0].language "ODIA")}}selected{{/if}}>ODIA</option>
+          <option value="PUNJABI"   {{#if (eq images.[0].language "PUNJABI")}}selected{{/if}}>PUNJABI</option>
+          <option value="BENGALI"   {{#if (eq images.[0].language "BENGALI")}}selected{{/if}}>BENGALI</option>
+          <option value="GUJARATI"  {{#if (eq images.[0].language "GUJARATI")}}selected{{/if}}>GUJARATI</option>
+          <option value="ASSAMESE"  {{#if (eq images.[0].language "ASSAMESE")}}selected{{/if}}>ASSAMESE</option>
         </select>
       </div>
+
     </div>
 
     <!-- Action Buttons -->
@@ -178,9 +109,16 @@
         style="border-radius: 50px; display: inline-block; text-decoration: none;">
         Re-Listen
       </a>
+
+      <!--
+        BUG FIX: Button was locked behind `images.length === 4`,
+        but only 1 upload slot exists now.
+        Fix: enable if at least 1 image already exists OR user has selected a new file.
+        JS handles dynamic enable/disable; this just sets the initial server-rendered state.
+      -->
       <a href="#" id="processBtn" class="btn btn-login px-5"
         style="border-radius: 50px; display: inline-block; text-decoration: none;
-               {{#if (eq images.length 4)}}opacity:1; pointer-events:auto;{{else}}opacity:0.5; pointer-events:none;{{/if}}">
+               {{#if (gt images.length 0)}}opacity:1; pointer-events:auto;{{else}}opacity:0.5; pointer-events:none;{{/if}}">
         Process Image
       </a>
     </div>
@@ -191,8 +129,11 @@
 {{> dealerfooter}}
 
 <script>
-  const totalExisting = {{images.length}}; // 0–4
-  const selectedFiles = {}; // slot -> { file, existingId }
+  // How many images already exist in DB for this dealer
+  const totalExisting = {{images.length}};
+
+  // Tracks newly selected files: slot -> { file, existingId }
+  const selectedFiles = {};
 
   function showAlert(type, message) {
     const el = document.getElementById("uploadAlert");
@@ -206,9 +147,9 @@
   }
 
   function setPreview(slot, file) {
-    const img = document.getElementById(`preview${slot}`);
+    const img  = document.getElementById(`preview${slot}`);
     const text = document.getElementById(`preview-text-${slot}`);
-    const label = document.getElementById(`upload-label-${slot}`);
+    const lbl  = document.getElementById(`upload-label-${slot}`);
 
     if (!img) return;
 
@@ -217,30 +158,31 @@
       img.src = e.target.result;
       img.style.display = "block";
       if (text) text.style.display = "none";
-      if (label) label.textContent = file.name.length > 12 ? file.name.substring(0, 12) + "…" : file.name;
+      if (lbl)  lbl.textContent = file.name.length > 12
+        ? file.name.substring(0, 12) + "…"
+        : file.name;
     };
     reader.readAsDataURL(file);
   }
 
+  /**
+   * BUG FIX: was checking (totalExisting + totalSelected) >= 4
+   * Now: ready if at least 1 image exists OR 1 file is newly selected
+   */
   function checkReady() {
-    const processBtn = document.getElementById("processBtn");
+    const processBtn   = document.getElementById("processBtn");
     const totalSelected = Object.keys(selectedFiles).length;
-    const allReady = (totalExisting + totalSelected) >= 4;
+    const allReady = (totalExisting + totalSelected) >= 1;
 
-    if (allReady) {
-      processBtn.style.opacity = "1";
-      processBtn.style.pointerEvents = "auto";
-    } else {
-      processBtn.style.opacity = "0.5";
-      processBtn.style.pointerEvents = "none";
-    }
+    processBtn.style.opacity       = allReady ? "1"    : "0.5";
+    processBtn.style.pointerEvents = allReady ? "auto" : "none";
   }
 
   document.querySelectorAll(".pic-input").forEach((input) => {
     input.addEventListener("change", function () {
-      const slot = parseInt(this.dataset.slot);
+      const slot       = parseInt(this.dataset.slot);
       const existingId = this.dataset.existingId || "";
-      const file = this.files[0];
+      const file       = this.files[0];
       if (!file) return;
 
       selectedFiles[slot] = { file, existingId };
@@ -258,14 +200,14 @@
       return;
     }
 
-    // All 4 exist and nothing changed — just proceed
-    if (totalExisting === 4 && Object.keys(selectedFiles).length === 0) {
+    // All images already exist and nothing new was selected → go straight to final
+    if (totalExisting >= 1 && Object.keys(selectedFiles).length === 0) {
       window.location.href = "/final-pic";
       return;
     }
 
     if (Object.keys(selectedFiles).length === 0) {
-      showAlert("warning", "Please select at least one image to upload.");
+      showAlert("warning", "Please select an image to upload.");
       return;
     }
 
@@ -274,7 +216,7 @@
     formData.append("dealer_id", dealerId);
     formData.append("language", language);
 
-    const slots = Object.keys(selectedFiles).map(Number).sort((a, b) => a - b);
+    const slots    = Object.keys(selectedFiles).map(Number).sort((a, b) => a - b);
     const imageIds = slots.map((slot) => selectedFiles[slot].existingId || "");
 
     slots.forEach((slot) => {
@@ -284,12 +226,12 @@
     formData.append("image_ids", JSON.stringify(imageIds));
 
     const processBtn = document.getElementById("processBtn");
-    processBtn.textContent = "Uploading…";
-    processBtn.style.pointerEvents = "none";
-    processBtn.style.opacity = "0.7";
+    processBtn.textContent          = "Uploading…";
+    processBtn.style.pointerEvents  = "none";
+    processBtn.style.opacity        = "0.7";
 
     try {
-      const res = await fetch("/upload-dealer-images", {
+      const res  = await fetch("/upload-dealer-images", {
         method: "POST",
         body: formData,
       });
@@ -309,7 +251,7 @@
         processBtn.style.pointerEvents = "auto";
       }
     } catch (err) {
-      console.log("err in upload pic", err);
+      console.error("Upload error:", err);
       showAlert("danger", "Something went wrong. Please try again.");
       processBtn.textContent = "Process Image";
       processBtn.style.opacity = "1";

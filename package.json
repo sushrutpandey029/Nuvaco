@@ -27,6 +27,7 @@
     "mysql2": "^3.22.3",
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14",
+    "openai": "^6.38.0",
     "sequelize": "^6.37.8",
     "sharp": "^0.34.5",
     "xlsx": "^0.18.5"

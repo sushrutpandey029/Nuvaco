@@ -10,12 +10,17 @@ import {
   renderLogin,
   uploadDealerImages,
   saveFinalImage,
-  getDealerProfile
+  getDealerProfile,
 } from "../Controller/DealerController/Dealer.js";
 import imagesupload from "../middlewares/imageUpload.js";
-import { deleteDealer, updateDealer } from "../Controller/AdminController/Admin.js";
-
+import {
+  deleteDealer,
+  updateDealer,
+} from "../Controller/AdminController/Admin.js";
+import { isDealerLoggedIn } from "../middlewares/auth/isDealerLoggedIn.js";
 const dealerrouter = express.Router();
+
+// dealerrouter.use(isDealerLoggedIn);
 
 dealerrouter.get("/", renderHome);
 dealerrouter.get("/login", renderLogin);
@@ -27,9 +32,12 @@ dealerrouter.get("/upload-pic", renderUploadPic);
 dealerrouter.get("/final-pic", renderFinalPic);
 dealerrouter.get("/thankyou", renderThankyouPage);
 
-dealerrouter.post("/upload-dealer-images",imagesupload.array("images", 4), uploadDealerImages);
+dealerrouter.post(
+  "/upload-dealer-images",
+  imagesupload.array("images", 4),
+  uploadDealerImages,
+);
 dealerrouter.post("/save-final-image", saveFinalImage);
 dealerrouter.get("/profile/:id", getDealerProfile);
-
 
 export default dealerrouter;

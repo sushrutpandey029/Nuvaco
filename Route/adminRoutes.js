@@ -29,13 +29,16 @@ import {
   submitFinalSelectedImage,
   rejectDealerImages,
   renderDownloadDealerImage,
-  getDealerFinalImage
+  getDealerFinalImage,
 } from "../Controller/AdminController/Admin.js";
 import dealerUpload from "../middlewares/dealerUpload.js";
 import { upload } from "../middlewares/shopimageupload.js";
 import Videoupload from "../middlewares/videoUpload.js";
+import { isAdminLoggedIn } from "../middlewares/auth/isAdminLoggedIn.js";
 
 const adminrouter = express.Router();
+
+// adminrouter.use(isAdminLoggedIn);
 
 adminrouter.post("/adminsigup", AdminRegister);
 adminrouter.get("/login", adminloginview);
@@ -93,25 +96,14 @@ adminrouter.get("/editdealer/:id", renderEditDealer);
 adminrouter.post("/update-dealer/:id", updateDealer);
 
 adminrouter.get("/delete-dealer/:id", deleteDealer);
-adminrouter.post("/reject-dealer-image",rejectDealerImage);
+adminrouter.post("/reject-dealer-image", rejectDealerImage);
 
-adminrouter.post(
-  "/submit-final-image",
-  submitFinalSelectedImage,
-);
+adminrouter.post("/submit-final-image", submitFinalSelectedImage);
 
-adminrouter.post(
-  "/reject-dealer-images",
-  rejectDealerImages,
-);
+adminrouter.post("/reject-dealer-images", rejectDealerImages);
 
-adminrouter.get("/download-image",
-  renderDownloadDealerImage
-)
+adminrouter.get("/download-image", renderDownloadDealerImage);
 
-adminrouter.post(
-  "/get-dealer-final-image",
-  getDealerFinalImage,
-);
+adminrouter.post("/get-dealer-final-image", getDealerFinalImage);
 
 export default adminrouter;

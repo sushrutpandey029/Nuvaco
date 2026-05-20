@@ -138,68 +138,96 @@
 </script>
 
 {{!-- for admin dashboard graph --}}
+
+  
 <script>
 
-  const chartLabels =
-    {{{chartLabels}}};
+const chartLabels = {{{chartLabels}}};
 
-  const chartData =
-    {{{chartData}}};
+const onboardedData = {{{onboardedData}}};
 
-  const ctx =
-    document.getElementById(
-      "dealersChart"
-    );
+const uploadedData = {{{uploadedData}}};
 
-  new Chart(ctx, {
+const cutoutData = {{{cutoutData}}};
 
-    type: "bar",
+const ctx =
+  document.getElementById("dealersChart");
 
-    data: {
+new Chart(ctx, {
 
-      labels: chartLabels,
+  type: "bar",
 
-      datasets: [
-        {
+  data: {
 
-          label: "Dealer Data",
+    labels: chartLabels,
 
-          data: chartData,
+    datasets: [
 
-          backgroundColor: [
-            "#90caf9",
-            "#1a5276",
-            "#fbc02d",
-          ],
-
-          borderRadius: 8,
-
-          barThickness: 60,
-        },
-      ],
-    },
-
-    options: {
-
-      responsive: true,
-
-      plugins: {
-
-        legend: {
-          display: false,
-        },
+      {
+        label: "Onboarded",
+        data: onboardedData,
+        backgroundColor: "#90caf9",
+        borderRadius: 8,
       },
 
-      scales: {
+      {
+        label: "Uploaded",
+        data: uploadedData,
+        backgroundColor: "#1a5276",
+        borderRadius: 8,
+      },
 
-        y: {
-          beginAtZero: true,
-        },
+      {
+  label: "Cutouts",
+  data: cutoutData,
+  backgroundColor: "#fbc02d",
+  borderRadius: 8,
+},
+    ],
+  },
+
+  options: {
+
+    responsive: true,
+
+    plugins: {
+
+      legend: {
+        display: true,
       },
     },
+
+    scales: {
+
+      y: {
+        beginAtZero: true,
+      },
+    },
+  },
+});
+</script>
+
+{{!-- filter button script --}}
+<script>
+
+document
+  .getElementById("filterBtn")
+  .addEventListener("click", () => {
+
+    const state =
+      document.getElementById("stateFilter").value;
+
+    const params = new URLSearchParams();
+
+    if (state) {
+      params.append("state", state);
+    }
+
+    window.location.href =
+      `/admin/dashboard?${params.toString()}`;
   });
 
 </script>
-  
+
 </body>
 </html>

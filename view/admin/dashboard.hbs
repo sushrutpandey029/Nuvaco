@@ -6,13 +6,12 @@
 <!-- MAIN CONTENT -->
 <main class="main-content flex-grow-1 p-4">
 
-    <!-- Summary Cards -->
-
+  
     <!-- Summary Cards -->
 <div class="row g-4 mb-4">
 
     <!-- TOTAL DEALERS -->
-    <div class="col-sm-6 col-xl-3">
+    {{!-- <div class="col-sm-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon bg-primary-soft">
                 <i class="bi bi-people-fill text-primary"></i>
@@ -28,7 +27,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- ONBOARDED -->
     <div class="col-sm-6 col-xl-3">
@@ -62,7 +61,7 @@
                 </div>
 
                 <div class="stat-label">
-                    Pics Uploaded
+                    Uploaded
                 </div>
             </div>
         </div>
@@ -77,11 +76,11 @@
 
             <div>
                 <div class="stat-value">
-                    {{pendingPics}}
+                    {{cutouts}}
                 </div>
 
                 <div class="stat-label">
-                    Pending
+                    Cutouts
                 </div>
             </div>
         </div>
@@ -89,18 +88,58 @@
 
 </div>
     
+  <div class="row mb-4">
+
+  <!-- STATE -->
+  <div class="col-md-4">
+
+    <select id="stateFilter" class="form-select">
+
+      <option value="">All States</option>
+
+      {{#each states}}
+
+        <option
+          value="{{this}}"
+          {{#if (eq ../selectedState this)}}
+            selected
+          {{/if}}
+        >
+          {{this}}
+        </option>
+
+      {{/each}}
+
+    </select>
+
+  </div>
+
+  <!-- BUTTON -->
+  <div class="col-md-2">
+
+    <button
+      id="filterBtn"
+      class="btn btn-primary w-100"
+    >
+      Apply Filter
+    </button>
+
+  </div>
+
+</div>
 
 
     <!-- Bar Chart Card -->
     <div class="chart-card">
-        <h5 class="chart-title">Dealers Onboarded</h5>
-        <div class="chart-legend d-flex gap-4 mb-4">
+        <h5 class="chart-title">Dealers</h5>
+        {{!-- <div class="chart-legend d-flex gap-4 mb-4">
             <span class="legend-dot" style="background:#90caf9;"></span><span class="legend-label">Onboarded</span>
             <span class="legend-dot" style="background:#1a5276;"></span><span class="legend-label">Pic Uploaded</span>
-        </div>
+            <span class="legend-dot" style="background:#1a5276;"></span><span class="legend-label">Pic Uploaded</span>
+        </div> --}}
         <canvas id="dealersChart" height="100"></canvas>
     </div>
-
+    
 </main>
 
 {{> footer }}

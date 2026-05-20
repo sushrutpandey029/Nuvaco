@@ -26,5 +26,5 @@ export const states = [
   "Tripura",
   "Uttar Pradesh",
   "Uttarakhand",
-  "West Bengal"
+  "West Bengal",
 ];

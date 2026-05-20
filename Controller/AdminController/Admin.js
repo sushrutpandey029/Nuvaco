@@ -173,23 +173,71 @@ export const adminDashboard = async (req, res) => {
       return res.redirect("login");
     }
 
+    const { state } = req.query;
+
     const dealers = await Dealer.findAll();
 
+    // summary cards
     const totalDealers = dealers.length;
 
     const uploadedPics = dealers.filter(
       (dealer) => dealer.isImageUploaded === "yes",
     ).length;
 
-    const pendingPics = dealers.filter(
-      (dealer) => dealer.isImageUploaded === "no",
+    const cutouts = dealers.filter(
+      (dealer) => dealer.imageStatus === "approved",
     ).length;
 
     const onboarded = totalDealers;
 
-    const chartLabels = ["Onboarded", "Pics Uploaded", "Pending"];
+    // statewise object
+    const stateData = {};
 
-    const chartData = [onboarded, uploadedPics, pendingPics];
+    dealers.forEach((dealer) => {
+      // STATE FILTER
+      if (state && dealer.state !== state) {
+        return;
+      }
+
+      const dealerState = dealer.state || "Unknown";
+
+      // initialize
+      if (!stateData[dealerState]) {
+        stateData[dealerState] = {
+          onboarded: 0,
+
+          uploaded: 0,
+
+          cutouts: 0,
+        };
+      }
+
+      // onboarded
+      stateData[dealerState].onboarded++;
+
+      // uploaded
+      if (dealer.isImageUploaded === "yes") {
+        stateData[dealerState].uploaded++;
+      }
+
+      if (dealer.imageStatus === "approved") {
+        stateData[dealerState].cutouts++;
+      }
+    });
+
+    // chart arrays
+    const chartLabels = Object.keys(stateData);
+
+    const onboardedData = chartLabels.map(
+      (state) => stateData[state].onboarded,
+    );
+
+    const uploadedData = chartLabels.map((state) => stateData[state].uploaded);
+
+    const cutoutData = chartLabels.map((state) => stateData[state].cutouts);
+
+    // unique states
+    const states = [...new Set(dealers.map((dealer) => dealer.state))];
 
     return res.render("admin/dashboard", {
       admin,
@@ -200,16 +248,22 @@ export const adminDashboard = async (req, res) => {
 
       uploadedPics,
 
-      pendingPics,
+      cutouts,
+
+      states,
+
+      selectedState: state || "",
 
       chartLabels: JSON.stringify(chartLabels),
 
-      chartData: JSON.stringify(chartData),
+      onboardedData: JSON.stringify(onboardedData),
+
+      uploadedData: JSON.stringify(uploadedData),
+
+      cutoutData: JSON.stringify(cutoutData),
     });
   } catch (error) {
-    console.log("Dashboard Error:", error);
-
-    req.flash("error", "Something went wrong");
+    console.log(error);
 
     return res.redirect("/admin/login");
   }
@@ -1686,55 +1740,6 @@ export const getDealerImages = async (req, res) => {
   }
 };
 
-// export const getRegionVideoList = async (req, res) => {
-
-//   try {
-
-//     //  PAGINATION
-
-//     const page = parseInt(req.query.page) || 1;
-
-//     const limit = parseInt(req.query.limit) || 15;
-
-//     const offset = (page - 1) * limit;
-
-//     // FETCH DATA
-//     const { count, rows } = await RegionVideo.findAndCountAll({
-
-//       limit,
-
-//       offset,
-
-//       order: [["id", "DESC"]],
-
-//     });
-
-//     return res.status(200).json({
-
-//       success: true,
-
-//       current_page: page,
-
-//       total_pages: Math.ceil(count / limit),
-
-//       total_records: count,
-
-//       per_page: limit,
-
-//       data: rows,
-//     });
-
-//   } catch (error) {
-//     console.log("Region video List Error:", error);
-
-//     return res.status(500).json({
-//       success: false,
-
-//       message: error.message,
-//     });
-//   }
-// };
-
 export const getRegionVideoList = async (req, res) => {
   try {
     // PAGINATION
@@ -1775,126 +1780,6 @@ export const getRegionVideoList = async (req, res) => {
     return res.redirect("back");
   }
 };
-
-// export const editRegionVideo = async ( req, res ) => {
-
-//   try {
-//     const videoId = Number(req.params.id);
-
-//     // FIND VIDEO
-
-//     const regionVideo = await RegionVideo.findByPk( videoId );
-
-//     if (!regionVideo) {
-//       return res.status(404).json({
-
-//         success: false,
-//         message: "Video not found",
-//       });
-//     }
-
-//     //  Get Body DataTypes
-//     const { state } = req.body;
-
-//     // update DataTypes
-//     await regionVideo.update({
-
-//       state: state || regionVideo.region,
-
-//       video: req.file? req.file.path : regionVideo.video,
-//     });
-
-//     return res.status(200).json({
-//       success: true,
-
-//       message: "Region video updated successfully",
-
-//       data: regionVideo,
-//     });
-
-//   } catch (error) {
-//     console.log("Edit Region Video Erro:", error);
-
-//     return res.status(500).json({
-
-//       success: false,
-
-//       message: error.message,
-//     });
-
-//   }
-// };
-
-// export const deleteRegionVideo = async ( req, res) => {
-
-//     try {
-
-//       const videoId =
-//         Number(req.params.id);
-
-//       // =========================
-//       // FIND VIDEO
-//       // =========================
-
-//       const regionVideo =
-//         await RegionVideo.findByPk(
-//           videoId
-//         );
-
-//       if (!regionVideo) {
-
-//         return res.status(404).json({
-
-//           success: false,
-
-//           message:
-//             "Video not found",
-//         });
-//       }
-
-//       // =========================
-//       // DELETE VIDEO FILE
-//       // =========================
-
-//       if (
-//         regionVideo.video &&
-//         fs.existsSync(regionVideo.video)
-//       ) {
-
-//         fs.unlinkSync(
-//           regionVideo.video
-//         );
-//       }
-
-//       // =========================
-//       // DELETE DB RECORD
-//       // =========================
-
-//       await regionVideo.destroy();
-
-//       return res.status(200).json({
-
-//         success: true,
-
-//         message:
-//           "Region video deleted successfully",
-//       });
-
-//     } catch (error) {
-
-//       console.log(
-//         "Delete Region Video Error:",
-//         error
-//       );
-
-//       return res.status(500).json({
-
-//         success: false,
-
-//         message: error.message,
-//       });
-//     }
-// };
 
 export const editStateVideo = async (req, res) => {
   try {
