@@ -1,0 +1,146 @@
+{{> header admin=admin }}
+{{> sidebar }}
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+  <div class="pbubble pb4"></div>
+  <div
+  class="d-flex justify-content-end mb-3"
+>
+
+  <button
+    type="button"
+    class="btn btn-login"
+    data-bs-toggle="modal"
+    data-bs-target="#uploadExcelModal"
+  >
+    Upload Dealer Excel
+  </button>
+
+</div>
+  <div class="reg-form-card">
+    <h5 class="fw-bold text-center mb-4" style="color:#1a1a2e;">Register New Dealer</h5>
+
+    {{#if error}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{error}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {{/if}}
+    {{#if success}}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{success}}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {{/if}}
+
+   <form id="AdminProfile" action="/admin/registration-delars" method="POST">
+
+  <div class="row g-3">
+
+    <!-- Dealer Code -->
+    <div class="col-12">
+      <input name="dealer_code" class="form-control reg-input" placeholder="Dealer Code" required />
+    </div>
+
+    <!-- Shop Name -->
+    <div class="col-12">
+      <input name="shop_name" class="form-control reg-input" placeholder="Shop Name" required />
+    </div>
+
+    <!-- Dealer Person -->
+    <div class="col-12">
+      <input name="dealer_person" class="form-control reg-input" placeholder="Dealer Person Name" required />
+    </div>
+
+    <!-- Mobile -->
+    <div class="col-12">
+      <input name="dealer_mobile_number" class="form-control reg-input" placeholder="Mobile Number"  maxlength="10"
+  minlength="10"
+  pattern="[0-9]{10}"
+  inputmode="numeric" required />
+    </div>
+
+    <!-- State -->
+    <div class="col-12">
+      <select name="state" class="form-select reg-input" required>
+        <option value="">Select State</option>
+        {{#each states}}
+          <option value="{{this}}">{{this}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <!-- District -->
+    <div class="col-12">
+      <input name="district" class="form-control reg-input" placeholder="District" required />
+    </div>
+
+    <!-- Address -->
+    <div class="col-12">
+      <input name="address" class="form-control reg-input" placeholder="Address" required />
+    </div>
+
+    <!-- Pincode -->
+    <div class="col-12">
+      <input name="pincode" class="form-control reg-input" placeholder="Pincode" required />
+    </div>
+
+      <!-- Club Millenium -->
+    <div class="col-12">
+      <input name="club_millennium" class="form-control reg-input" placeholder="club_millennium" required />
+    </div>
+
+
+    <!-- SALES SPOC -->
+    <div class="col-12">
+      <h6>Sales SPOC</h6>
+    </div>
+
+    <div class="col-12">
+      <input name="sales_spoc[name]" class="form-control reg-input" placeholder="Name"  />
+    </div>
+
+    <div class="col-12">
+      <input name="sales_spoc[email]" class="form-control reg-input" placeholder="Email"  />
+    </div>
+
+    <div class="col-12">
+      <input name="sales_spoc[contact_number]" class="form-control reg-input" placeholder="Contact Number"
+       maxlength="10"
+  minlength="10"
+  pattern="[0-9]{10}"
+  inputmode="numeric"  />
+    </div>
+
+    <!-- TRADE MARKETING SPOC -->
+    <div class="col-12">
+      <h6>Trade Marketing SPOC</h6>
+    </div>
+
+    <div class="col-12">
+      <input name="trade_marketing_spoc[name]" class="form-control reg-input" placeholder="Name"  />
+    </div>
+
+    <div class="col-12">
+      <input name="trade_marketing_spoc[email]" class="form-control reg-input" placeholder="Email"  />
+    </div>
+
+    <div class="col-12">
+      <input name="trade_marketing_spoc[contact_number]" class="form-control reg-input" placeholder="Contact Number"  maxlength="10"
+  minlength="10"
+  pattern="[0-9]{10}"
+  inputmode="numeric" />
+    </div>
+
+  </div>
+
+  <div class="d-grid mt-4">
+    <button type="submit" class="btn btn-login">REGISTER DEALER</button>
+  </div>
+
+</form>
+  </div>
+</main>
+{{> footer }}

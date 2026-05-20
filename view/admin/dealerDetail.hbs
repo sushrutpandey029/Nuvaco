@@ -1,0 +1,64 @@
+{{> header admin=admin }}
+{{> sidebar }}
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+  <div style="position:relative;z-index:2;width:100%;">
+    <div class="table-scroll-wrap">
+      <table class="dealer-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Dealer Name</th>
+            <th>State</th>
+            <th>Pic Uploaded</th>
+            <th>Action</th>
+            <th>Image</th>
+          </tr>
+        </thead>
+
+
+       <tbody>
+  {{#each dealers}}
+  <tr>
+    <td>{{inc @index}}</td>
+
+    <!-- ✅ correct field -->
+    <td>{{this.shop_name}}</td>
+
+    <!-- ✅ state instead of region -->
+    <td>{{this.state}}</td>
+
+    <td>
+      <!-- ✅ correct field -->
+      {{#if (eq this.isImageUploaded "yes")}}
+        <span style="color:#2e7d32;font-weight:600;">Yes</span>
+      {{else}}
+        <span style="color:#c62828;font-weight:600;">No</span>
+      {{/if}}
+    </td>
+
+    <td>
+      <a href="dealerdetail/{{this.id}}" class="view-link">View</a>
+     
+    </td>
+   <td>
+  {{#if (eq this.isImageUploaded "yes")}}
+    <a href="/admin/view-image/{{this.id}}" class="view-link">
+      View
+    </a>
+  {{else}}
+    -
+  {{/if}}
+</td>
+  </tr>
+  {{/each}}
+</tbody>
+
+
+      </table>
+    </div>
+  </div>
+</main>
+{{> footer }}

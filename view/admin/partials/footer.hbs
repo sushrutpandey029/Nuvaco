@@ -1,0 +1,233 @@
+
+<!-- Upload Excel Modal -->
+
+<div
+  class="modal fade"
+  id="uploadExcelModal"
+  tabindex="-1"
+>
+
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+
+        <h5 class="modal-title">
+          Upload Dealer Excel
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+
+      </div>
+
+      <form
+        action="/admin/upload-dealers"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+
+        <div class="modal-body">
+
+          <input
+            type="file"
+            name="file"
+            class="form-control"
+            accept=".xlsx,.xls"
+            required
+          />
+
+        </div>
+
+        <div class="modal-footer">
+
+          <button
+            type="submit"
+            class="btn btn-login"
+          >
+            Upload Excel
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+<script>
+  async function confirmLogout(event) {
+    event.preventDefault();
+
+    const confirmAction = confirm("Are you sure you want to logout?");
+
+    if (confirmAction) {
+      try {
+
+        window.location.href = "/admin/adminlogout";
+        {{!-- const res = await fetch("/adminlogout", {
+          method: "POST",
+          credentials: "include"
+        }); --}}
+
+        {{!-- const data = await res.json(); --}}
+
+        {{!-- if (data.success) {
+          // ✅ Redirect to login page
+          window.location.href = "/login";
+        } else {
+          alert("Logout failed");
+        } --}}
+
+      } catch (err) {
+        console.error("Logout failed", err);
+      }
+    }
+  }
+</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="../assets/js/dashboard.js"></script>
+
+{{!-- //for dropdown of action tab in delaer list page --}}
+<script>
+  function handleDealerAction(action, dealerId) {
+    if (!action) return;
+
+    switch(action) {
+      case "details":
+        window.location.href = `/admin/dealerdetail/${dealerId}`;
+        break;
+
+      case "images":
+        window.location.href = `/admin/dealer-images/${dealerId}`;
+        break;
+
+      case "edit":
+        window.location.href = `/admin/edit-dealer/${dealerId}`;
+        break;
+
+      default:
+        break;
+    }
+  }
+</script>
+
+
+{{!-- for table paginatipon --}}
+
+<script>
+  $(document).ready(function () {
+    $('#dataTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      pageLength: 10
+    });
+  });
+</script>
+
+{{!-- for admin dashboard graph --}}
+
+  
+<script>
+
+const chartLabels = {{{chartLabels}}};
+
+const onboardedData = {{{onboardedData}}};
+
+const uploadedData = {{{uploadedData}}};
+
+const cutoutData = {{{cutoutData}}};
+
+const ctx =
+  document.getElementById("dealersChart");
+
+new Chart(ctx, {
+
+  type: "bar",
+
+  data: {
+
+    labels: chartLabels,
+
+    datasets: [
+
+      {
+        label: "Onboarded",
+        data: onboardedData,
+        backgroundColor: "#90caf9",
+        borderRadius: 8,
+      },
+
+      {
+        label: "Uploaded",
+        data: uploadedData,
+        backgroundColor: "#1a5276",
+        borderRadius: 8,
+      },
+
+      {
+  label: "Cutouts",
+  data: cutoutData,
+  backgroundColor: "#fbc02d",
+  borderRadius: 8,
+},
+    ],
+  },
+
+  options: {
+
+    responsive: true,
+
+    plugins: {
+
+      legend: {
+        display: true,
+      },
+    },
+
+    scales: {
+
+      y: {
+        beginAtZero: true,
+      },
+    },
+  },
+});
+</script>
+
+{{!-- filter button script --}}
+<script>
+
+document
+  .getElementById("filterBtn")
+  .addEventListener("click", () => {
+
+    const state =
+      document.getElementById("stateFilter").value;
+
+    const params = new URLSearchParams();
+
+    if (state) {
+      params.append("state", state);
+    }
+
+    window.location.href =
+      `/admin/dashboard?${params.toString()}`;
+  });
+
+</script>
+
+</body>
+</html>

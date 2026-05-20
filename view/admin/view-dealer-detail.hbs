@@ -1,0 +1,149 @@
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div style="position:relative;z-index:2;width:100%;">
+
+    <!-- Dealer Details -->
+    <div class="dealer-detail-card">
+  <h2 class="detail-title">Dealer Details</h2>
+     
+
+      <table class="dealer-table">
+
+        <tbody>
+
+          <tr>
+            <th>Shop Name</th>
+            <td>{{data.shop_name}}</td>
+
+            <th>Dealer Code</th>
+            <td>{{data.dealer_code}}</td>
+          </tr>
+          <tr>
+            <th>Dealer Person</th>
+            <td>{{data.dealer_person}}</td>
+
+            <th>Mobile Number</th>
+            <td>{{data.dealer_mobile_number}}</td>
+          </tr>
+
+          <tr>
+            <th>State</th>
+            <td>{{data.state}}</td>
+
+            <th>District</th>
+            <td>{{data.district}}</td>
+          </tr>
+
+          <tr>
+            <th>Pincode</th>
+            <td>{{data.pincode}}</td>
+
+            <th>Address</th>
+            <td>{{data.address}}</td>
+          </tr>
+          <tr>
+            <th>Image Uploaded</th>
+            <td> {{#if (eq data.isImageUploaded "yes")}}
+            <span>Yes</span>
+          {{else}}
+            <span>No</span>
+          {{/if}}</td>
+  <th>Club Millenium</th>
+
+            <td >
+              {{data.club_millennium}}
+            </td>
+
+          </tr>
+         
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- Sales SPOC -->
+    <div class="dealer-detail-card" style="margin-top:30px;">
+
+      <h2 class="detail-title">Sales SPOC Details</h2>
+
+      <table class="dealer-table">
+
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact Number</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {{#each data.SalesSpocs}}
+          <tr>
+
+            <td>{{inc @index}}</td>
+            <td>{{this.name}}</td>
+            <td>{{this.email}}</td>
+            <td>{{this.contact_number}}</td>
+
+          </tr>
+          {{/each}}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- Trade Marketing SPOC -->
+    <div class="dealer-detail-card" style="margin-top:30px;">
+
+      <h2 class="detail-title">Trade Marketing SPOC Details</h2>
+
+      <table class="dealer-table">
+
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact Number</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {{#each data.TradeMarketingSpocs}}
+          <tr>
+
+            <td>{{inc @index}}</td>
+            <td>{{this.name}}</td>
+            <td>{{this.email}}</td>
+            <td>{{this.contact_number}}</td>
+
+          </tr>
+          {{/each}}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</main>
+
+{{> footer }}

@@ -1,0 +1,178 @@
+{{> header admin=admin }}
+{{> sidebar }}
+
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div style="position:relative;z-index:2;width:100%;">
+
+    <div class="dealer-detail-card">
+
+      <h2 class="detail-title">
+        Dealer Images
+      </h2>
+
+      <!-- Language -->
+      <div style="margin-bottom:25px;">
+        <h3>
+          Language : {{data.[0].language}}
+        </h3>
+      </div>
+
+      <!-- FORM -->
+      <form action="/admin/submit-final-image" method="POST">
+
+        <input
+          type="hidden"
+          name="dealer_id"
+          value="{{data.[0].dealer_id}}"
+        />
+
+        <!-- Images -->
+        <div
+          style="
+            display:flex;
+            flex-wrap:wrap;
+            gap:20px;
+          "
+        >
+
+          {{#each data}}
+
+          <div
+            style="
+              text-align:center;
+              border:1px solid #ddd;
+              padding:15px;
+              border-radius:12px;
+            "
+          >
+
+            <!-- Radio -->
+            <div style="margin-bottom:10px;">
+
+              <input
+                type="radio"
+                name="selected_image"
+                value="{{this.id}}"
+                style="width:20px;height:20px;cursor:pointer;"
+              />
+
+            </div>
+
+            <!-- Image -->
+            <img
+              src="{{this.image}}"
+              alt="Dealer Image"
+              style="
+                width:180px;
+                height:180px;
+                object-fit:cover;
+                border-radius:12px;
+                border:2px solid #ddd;
+              "
+            />
+
+          </div>
+
+          {{/each}}
+
+        </div>
+
+        <!-- Buttons -->
+        <div
+          style="
+            margin-top:40px;
+            display:flex;
+            gap:20px;
+          "
+        >
+
+          <!-- Submit Final -->
+          <button
+            type="submit"
+            style="
+              background:#2e7d32;
+              color:#fff;
+              border:none;
+              padding:12px 25px;
+              border-radius:10px;
+              cursor:pointer;
+              font-weight:600;
+            "
+          >
+            Submit Selected Image
+          </button>
+
+      </form>
+
+          <!-- Reject All -->
+          <form
+            action="/admin/reject-dealer-images"
+            method="POST"
+          >
+
+            <input
+              type="hidden"
+              name="dealer_id"
+              value="{{data.[0].dealer_id}}"
+            />
+
+            <button
+              type="submit"
+              onclick="return confirm('Are you sure you want to reject all images?')"
+              style="
+                background:#d32f2f;
+                color:#fff;
+                border:none;
+                padding:12px 25px;
+                border-radius:10px;
+                cursor:pointer;
+                font-weight:600;
+              "
+            >
+              Reject All
+            </button>
+
+          </form>
+
+        </div>
+
+      <!-- Final Selected Image -->
+      <div style="margin-top:50px;">
+
+        <h3 style="margin-bottom:20px;">
+          Final Selected Image
+        </h3>
+
+        {{#each data}}
+
+          {{#if this.DealerFinalImages.length}}
+
+            <img
+              src="{{this.image}}"
+              alt="Final Selected"
+              style="
+                width:260px;
+                border-radius:14px;
+                border:4px solid #2e7d32;
+                box-shadow:0 4px 12px rgba(0,0,0,0.15);
+              "
+            />
+
+          {{/if}}
+
+        {{/each}}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+{{> footer }}
