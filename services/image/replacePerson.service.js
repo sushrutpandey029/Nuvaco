@@ -1,9 +1,11 @@
 import fs from "fs";
 import OpenAI, { toFile } from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+//   const { data, info } = await sharp(imagePath)
+//     .resize({ height: targetHeight, fit: "contain" })
+//     .ensureAlpha()
+//     .raw()
+//     .toBuffer({ resolveWithObject: true });
 
 export const replacePersonInBanner = async ({
   templatePath,
@@ -186,3 +188,5 @@ Everything else must remain unchanged and visually identical to the original ban
 
 //   return Buffer.from(image_base64, "base64");
 // };
+
+ 
