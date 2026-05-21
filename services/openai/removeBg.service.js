@@ -34,7 +34,7 @@ export const removeBackgroundOpenAI = async (imagePath) => {
   // NOTE: openai.images.edit() is an inpainting API and requires a mask.
   // The correct approach for background removal via OpenAI is to use
   // gpt-image-1 with a detailed prompt to re-render on transparent bg.
-  return await removeBackgroundWithOpenAI(buffer, mimeType, ext);
+  // return await removeBackgroundWithOpenAI(buffer, mimeType, ext);
 };
 
 /**
@@ -73,69 +73,65 @@ const removeBackgroundWithRemoveBg = async (buffer, mimeType) => {
  * Uses OpenAI gpt-image-1 edit with a white mask to isolate the person.
  * This is a best-effort fallback — remove.bg is more reliable.
  */
-const removeBackgroundWithOpenAI = async (buffer, mimeType, ext) => {
-  console.log("Using OpenAI gpt-image-1 for background removal");
+// const removeBackgroundWithOpenAI = async (buffer, mimeType, ext) => {
+//   console.log("Using OpenAI gpt-image-1 for background removal");
 
-  // Dynamic import to avoid errors if openai not installed
-  const { default: OpenAI, toFile } = await import("openai");
+//   // Dynamic import to avoid errors if openai not installed
+//   const { default: OpenAI, toFile } = await import("openai");
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+//   const openai = new OpenAI({
+//     apiKey: process.env.OPENAI_API_KEY,
+//   });
 
-  // OpenAI images.edit requires PNG for transparent output
-  // Convert to PNG first using sharp if needed
-  let pngBuffer = buffer;
-  if (ext !== ".png") {
-    const sharp = (await import("sharp")).default;
-    pngBuffer = await sharp(buffer).png().toBuffer();
-  }
+//   // OpenAI images.edit requires PNG for transparent output
+//   // Convert to PNG first using sharp if needed
+//   let pngBuffer = buffer;
+//   if (ext !== ".png") {
+//     const sharp = (await import("sharp")).default;
+//     pngBuffer = await sharp(buffer).png().toBuffer();
+//   }
 
-  const imageFile = await toFile(pngBuffer, "person.png", {
-    type: "image/png",
-  });
+//   const imageFile = await toFile(pngBuffer, "person.png", {
+//     type: "image/png",
+//   });
 
-  // Create an all-white mask (tells OpenAI: edit entire image)
-  const sharp = (await import("sharp")).default;
-  const { width, height } = await sharp(pngBuffer).metadata();
+//   // Create an all-white mask (tells OpenAI: edit entire image)
+//   const sharp = (await import("sharp")).default;
+//   const { width, height } = await sharp(pngBuffer).metadata();
 
-  const maskBuffer = await sharp({
-    create: {
-      width,
-      height,
-      channels: 4,
-      background: { r: 255, g: 255, b: 255, alpha: 255 },
-    },
-  })
-    .png()
-    .toBuffer();
+//   const maskBuffer = await sharp({
+//     create: {
+//       width,
+//       height,
+//       channels: 4,
+//       background: { r: 255, g: 255, b: 255, alpha: 255 },
+//     },
+//   })
+//     .png()
+//     .toBuffer();
 
-  const maskFile = await toFile(maskBuffer, "mask.png", {
-    type: "image/png",
-  });
+//   const maskFile = await toFile(maskBuffer, "mask.png", {
+//     type: "image/png",
+//   });
 
-  const result = await openai.images.edit({
-    model: "gpt-image-1",
-    image: imageFile,
-    mask: maskFile,
-    prompt: `
-      Extract ONLY the person from this image.
-      Make the entire background completely transparent.
-      Keep the person's body, face, hair, and clothing perfectly intact.
-      Output: transparent PNG with only the person visible.
-    `,
-    n: 1,
-    size: "1024x1024",
-  });
+//   const result = await openai.images.edit({
+//     model: "gpt-image-1",
+//     image: imageFile,
+//     mask: maskFile,
+//     prompt: `
+//       Extract ONLY the person from this image.
+//       Make the entire background completely transparent.
+//       Keep the person's body, face, hair, and clothing perfectly intact.
+//       Output: transparent PNG with only the person visible.
+//     `,
+//     n: 1,
+//     size: "1024x1024",
+//   });
 
-  const image_base64 = result.data[0].b64_json;
-  console.log("Background removed via OpenAI");
-  return Buffer.from(image_base64, "base64");
-};
-
-
-
-
+//   const image_base64 = result.data[0].b64_json;
+//   console.log("Background removed via OpenAI");
+//   return Buffer.from(image_base64, "base64");
+// };
 
 // import fs from "fs";
 
