@@ -12,6 +12,7 @@ import SalesSpoc from "../../Model/salesSpocModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import path from "path";
 import { generateBanner } from "../../services/pipeline/generateBanner.js";
+import { getPersonalizedVideo,getVideoStatus } from "../../services/video/videoPipeline.js";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -37,14 +38,27 @@ export const renderHome = async (req, res) => {
     raw: true,
   });
 
+    console.log("region video data", data);
+
   const formatted = data
     ? { ...data, video: data.video.replace(/\\/g, "/") }
     : null;
 
+      const videoPath = await getPersonalizedVideo(dealer);
+
   return res.render("dealer/welcome-screen", {
     data: formatted,
     dealer,
+     videoPath: videoPath || null,
   });
+};
+
+
+export const videoStatus = async (req, res) => {
+  const dealer = req.session.dealer;
+  if (!dealer) return res.status(401).json({ error: "Unauthorized" });
+  const status = await getVideoStatus(dealer.id);
+  return res.json(status);
 };
 
 // ✅ Send OTP

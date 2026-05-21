@@ -1,55 +1,103 @@
+
+
+
+
 {{> dealerheader dealer=dealer}}
-    
-    
-    <main class="purple-main">
-      <div class="pbubble pb1"></div><div class="pbubble pb2"></div>
-      <div class="pbubble pb3"></div><div class="pbubble pb4"></div><div class="pbubble pb5"></div>
-      <div style="position:relative;z-index:2;width:100%;max-width:460px;">
 
-{{#if data}}
-  <video id="regionVideo" width="100%" controls style="border-radius:12px;">
-    <source src="/{{data.video}}" type="video/mp4">
-    Your browser does not support video.
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px); /* header height minus karo */
+  }
+
+  #dealerVideo {
+    width: 100%;
+    height: 100%;
+    max-height: calc(100vh - 60px);
+    object-fit: contain; /* poora video visible rahega */
+    display: block;
+  }
+
+  #processingMsg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 1.2rem;
+    text-align: center;
+    background: rgba(0,0,0,0.6);
+    padding: 20px 30px;
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+<div class="video-wrapper">
+
+  <video id="dealerVideo" controls autoplay playsinline>
+    {{#if videoPath}}
+      <source src="{{videoPath}}" type="video/mp4">
+    {{else}}
+      <source src="/uploads/videos/default.mp4" type="video/mp4">
+    {{/if}}
   </video>
-{{else}}
-  <p class="text-white text-center">No video available</p>
-{{/if}}
 
-<div class="d-flex justify-content-center mt-3">
-  <a href="javascript:void(0)" onclick="replayVideo()" class="btn btn-login px-5 me-3">
-    Re-Listen
-  </a>
+  <div id="processingMsg" {{#if videoPath}}style="display:none"{{/if}}>
+    <div class="spinner"></div>
+     Aapka personalized video ban raha hai...
+  </div>
 
-  <a href="/upload-pic" class="btn btn-login px-5">
-    Next
-  </a>
 </div>
 
-
-{{!--  
-        <div class="video-select-box mb-3" onclick="document.getElementById('vidFile').click()">
-          <i class="bi bi-play-circle text-primary me-2" style="font-size:1.4rem;"></i>
-          Video 
-          <input type="file" id="vidFile" accept="video/*" class="d-none"
-            onchange="document.getElementById('vidName').textContent = this.files[0] ? this.files[0].name : ''"/>
-        </div>
-        <p id="vidName" class="text-center text-white fw-semibold mb-3" style="font-size:0.85rem;min-height:1.2em;word-break:break-all;"></p>
-        <div class="d-flex justify-content-center">
-          <a href="#" class="btn btn-login px-5 me-3"
-            style="border-radius:50px;display:inline-block;text-decoration:none;">
-            Re-Listen
-          </a>
-          <a href="/upload-pic" class="btn btn-login px-5"
-            style="border-radius:50px;display:inline-block;text-decoration:none;">
-           Next
-          </a>
-        </div> --}}
-
-
-      </div>
-    </main>
-
+<script>
+{{#unless videoPath}}
+const poll = setInterval(async () => {
+  try {
+    const res = await fetch('/video-status');
+    const data = await res.json();
+    if (data.status === 'ready' && data.videoPath) {
+      clearInterval(poll);
+      document.getElementById('processingMsg').style.display = 'none';
+      const video = document.getElementById('dealerVideo');
+      video.src = data.videoPath;
+      video.load();
+      video.play();
+    }
+  } catch(e) {
+    console.error('Poll error:', e);
+  }
+}, 3000);
+{{/unless}}
+</script>
 
 {{> dealerfooter}}
-
-  

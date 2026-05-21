@@ -1,7 +1,10 @@
-.env
+/node_modules
 
-uploads/
+/.env
 
-public/generated/
+/public/uploads
 
-node_modules/
+/uploads
+
+*.mp4
+*.zip

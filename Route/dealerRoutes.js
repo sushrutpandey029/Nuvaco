@@ -11,6 +11,7 @@ import {
   uploadDealerImages,
   saveFinalImage,
   getDealerProfile,
+  videoStatus,
 } from "../Controller/DealerController/Dealer.js";
 import imagesupload from "../middlewares/imageUpload.js";
 import {
@@ -39,5 +40,6 @@ dealerrouter.post(
 );
 dealerrouter.post("/save-final-image", saveFinalImage);
 dealerrouter.get("/profile/:id", getDealerProfile);
+dealerrouter.get("/video-status", videoStatus);
 
 export default dealerrouter;

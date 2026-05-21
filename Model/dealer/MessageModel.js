@@ -9,19 +9,38 @@ const MessageModel = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    region: {
-      type: DataTypes.STRING,
+    state: {
+      type: DataTypes.STRING,   // state name — e.g. "Gurgaon", "Mumbai"
       allowNull: false,
+      unique: true,
     },
-    image: {
+    video_path: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,          // base video path — /uploads/videos/gurgaon.mp4
+    },
+    name_timestamp: {
+      type: DataTypes.FLOAT,
+      allowNull: true,          // second pe naam aata hai — e.g. 8.5
+    },
+    elevenlabs_voice_id: {
+      type: DataTypes.STRING,
+      allowNull: true,          // ElevenLabs cloned voice ID for this region head
+    },
+    name_prefix: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: "",         // e.g. "" ya "Shri" ya "Dear"
+    },
+    name_suffix: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: " ji",      // e.g. " ji" ya " bhai"
     },
   },
   {
     tableName: "message",
     timestamps: true,
-  },
+  }
 );
 
 export default MessageModel;
