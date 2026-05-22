@@ -172,6 +172,83 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
+export const resendOTP = async (req, res) => {
+  try {
+    console.log("========== RESEND OTP ==========");
+
+    const { dealer_mobile_number } = req.body;
+
+    // ✅ Validate mobile number
+    if (
+      !dealer_mobile_number ||
+      !/^[0-9]{10}$/.test(dealer_mobile_number)
+    ) {
+      return res.json({
+        success: false,
+        message: "Invalid mobile number",
+      });
+    }
+
+    // ✅ Check dealer exists
+    const dealer = await Dealer.findOne({
+      where: { dealer_mobile_number },
+    });
+
+    if (!dealer) {
+      return res.json({
+        success: false,
+        message: "Dealer not found",
+      });
+    }
+
+   
+    // ✅ Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    console.log("NEW OTP:", otp);
+
+    // ✅ Expiry time
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+
+    // ✅ Delete old OTP
+    await DealerOTP.destroy({
+      where: { dealer_mobile_number },
+    });
+
+    // ✅ Save new OTP
+    await DealerOTP.create({
+      dealer_mobile_number,
+      otp,
+      expiresAt,
+    });
+
+    // ✅ Send SMS
+    const smsSent = await sendSmsOtp(
+      dealer_mobile_number,
+      otp
+    );
+
+    if (!smsSent) {
+      return res.json({
+        success: false,
+        message: "Failed to send OTP",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "OTP resent successfully",
+    });
+  } catch (err) {
+    console.log("RESEND OTP ERROR =>", err);
+
+    return res.json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
 export const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -408,7 +485,7 @@ export const uploadDealerImages = async (req, res) => {
       "GUJARATI",
       "BENGALI",
       "PUNJABI",
-      "MARATHI",
+      "ENGLISH",
       "ODIA",
       "ASSAMESE",
     ];

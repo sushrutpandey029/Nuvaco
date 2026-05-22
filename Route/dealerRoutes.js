@@ -12,6 +12,7 @@ import {
   saveFinalImage,
   getDealerProfile,
   videoStatus,
+  resendOTP,
 } from "../Controller/DealerController/Dealer.js";
 import imagesupload from "../middlewares/imageUpload.js";
 import {
@@ -27,6 +28,7 @@ dealerrouter.get("/", renderHome);
 dealerrouter.get("/login", renderLogin);
 dealerrouter.post("/send-otp", sendOTP);
 dealerrouter.post("/verify-otp", verifyOTP);
+dealerrouter.post("/resend-otp", resendOTP);
 dealerrouter.get("/logout", logout);
 
 dealerrouter.get("/upload-pic", renderUploadPic);
