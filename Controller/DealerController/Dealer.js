@@ -12,7 +12,11 @@ import SalesSpoc from "../../Model/salesSpocModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import path from "path";
 import { generateBanner } from "../../services/pipeline/generateBanner.js";
-import { getPersonalizedVideo, getVideoStatus } from "../../services/video/videoPipeline.js";
+import {
+  getPersonalizedVideo,
+  getVideoStatus,
+} from "../../services/video/videoPipeline.js";
+import { processDealerBannerPipeline } from "../../services/pipeline/processDealerBannerPipeline.service.js";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -52,7 +56,6 @@ export const renderHome = async (req, res) => {
     videoPath: videoPath || null,
   });
 };
-
 
 export const videoStatus = async (req, res) => {
   const dealer = req.session.dealer;
@@ -201,17 +204,28 @@ export const renderUploadPic = async (req, res) => {
     image: img.image.replace(/\\/g, "/"),
   }));
 
-  const templatesDir = path.join(process.cwd(), "public/templates");
+  const templatesDir = path.join(process.cwd(), "public/frontendTemp");
 
   const files = fs.readdirSync(templatesDir);
 
   const templates = files.map((file, index) => ({
     id: index + 1,
     name: path.parse(file).name,
-    image: `/templates/${file}`,
+    image: `/frontendTemp/${file}`,
   }));
 
-  console.log("templates", templates);
+  console.log("frontendTemp", templates);
+  // const templatesDir = path.join(process.cwd(), "public/templates");
+
+  // const files = fs.readdirSync(templatesDir);
+
+  // const templates = files.map((file, index) => ({
+  //   id: index + 1,
+  //   name: path.parse(file).name,
+  //   image: `/templates/${file}`,
+  // }));
+
+  // console.log("templates", templates);
 
   return res.render("dealer/upload-pic", {
     images: formatted,
@@ -396,28 +410,18 @@ export const uploadDealerImages = async (req, res) => {
         message: "Images required",
       });
     }
-
-    const results = [];
-
-    // loop uploaded files
-    for (const file of req.files) {
-      // IMPORTANT
-      // use file.buffer
-      const finalImagePath = await generateBanner({
-        personBuffer: file.buffer,
-        language,
-        originalName: file.originalname,
+    if (!language) {
+      return res.status(400).json({
+        success: false,
+        message: "language required",
       });
-
-      // DB save
-      const created = await DealerImage.create({
-        dealer_id,
-        language,
-        image: finalImagePath,
-      });
-
-      results.push(created);
     }
+
+    const results = await processDealerBannerPipeline({
+      files: req.files,
+      dealer_id,
+      language,
+    });
 
     return res.json({
       success: true,
@@ -433,6 +437,55 @@ export const uploadDealerImages = async (req, res) => {
     });
   }
 };
+
+// export const uploadDealerImages = async (req, res) => {
+//   try {
+//     const { dealer_id, language } = req.body;
+
+//     // validation
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Images required",
+//       });
+//     }
+
+//     const results = [];
+
+//     // loop uploaded files
+//     for (const file of req.files) {
+//       // IMPORTANT
+//       // use file.buffer
+//       const finalImagePath = await generateBanner({
+//         personBuffer: file.buffer,
+//         language,
+//         originalName: file.originalname,
+//       });
+
+//       // DB save
+//       const created = await DealerImage.create({
+//         dealer_id,
+//         language,
+//         image: finalImagePath,
+//       });
+
+//       results.push(created);
+//     }
+
+//     return res.json({
+//       success: true,
+//       message: "Images processed successfully",
+//       data: results,
+//     });
+//   } catch (error) {
+//     console.log("Controller Error:", error);
+
+//     return res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 export const saveFinalImage = async (req, res) => {
   try {
