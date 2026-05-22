@@ -225,7 +225,9 @@ body { font-family: 'Segoe UI', sans-serif; }
 .pw-input:focus { border-bottom-color: var(--primary); color: var(--text-dark); }
 .pw-input::placeholder { color: #bbb; }
 
-/* Dealer list table */
+/* =====================
+   DEALER TABLE (OLD – kept for compatibility)
+   ===================== */
 .dealer-table { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(100,90,200,0.13); width: 100%; }
 .dealer-table th {
   font-weight: 700; font-size: 0.95rem; color: #1a1a2e;
@@ -290,36 +292,34 @@ body { font-family: 'Segoe UI', sans-serif; }
   padding-right: 46px; cursor: pointer; width: 100%; max-width: 420px;
 }
 
+.pic-radio-wrap { display:flex; align-items:center; gap:12px; }
+.pic-radio-wrap input[type="radio"] {
+  appearance:none; -webkit-appearance:none;
+  width:34px; height:34px; border-radius:50%;
+  background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);
+  border:none; cursor:pointer; flex-shrink:0; transition:background 0.18s;
+}
+.pic-radio-wrap input[type="radio"]:checked { background:#7c6fe0; box-shadow:0 2px 14px rgba(124,111,224,0.45); }
+.pic-box {
+  background:rgba(255,255,255,0.50); border:1.5px solid rgba(255,255,255,0.70);
+  border-radius:12px; height:180px; flex:1;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.95rem; color:#444; cursor:pointer; transition:background 0.18s;
+}
+.pic-box:hover { background:rgba(255,255,255,0.70); }
+@media(max-width:575px){
+  .pic-box { height:120px; font-size:0.82rem; }
+  .pic-radio-wrap input[type="radio"] { width:26px; height:26px; }
+  .pic-radio-wrap { gap:8px; }
+}
 
- .pic-radio-wrap { display:flex; align-items:center; gap:12px; }
-    .pic-radio-wrap input[type="radio"] {
-      appearance:none; -webkit-appearance:none;
-      width:34px; height:34px; border-radius:50%;
-      background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.15);
-      border:none; cursor:pointer; flex-shrink:0; transition:background 0.18s;
-    }
-    .pic-radio-wrap input[type="radio"]:checked { background:#7c6fe0; box-shadow:0 2px 14px rgba(124,111,224,0.45); }
-    .pic-box {
-      background:rgba(255,255,255,0.50); border:1.5px solid rgba(255,255,255,0.70);
-      border-radius:12px; height:180px; flex:1;
-      display:flex; align-items:center; justify-content:center;
-      font-size:0.95rem; color:#444; cursor:pointer; transition:background 0.18s;
-    }
-    .pic-box:hover { background:rgba(255,255,255,0.70); }
-    @media(max-width:575px){
-      .pic-box { height:120px; font-size:0.82rem; }
-      .pic-radio-wrap input[type="radio"] { width:26px; height:26px; }
-      .pic-radio-wrap { gap:8px; }
-    }
-
-    .info-card{
+.info-card {
   background:#f9f9fb;
   border:1px solid #ececec;
   border-radius:14px;
   padding:18px;
 }
-
-.info-card label{
+.info-card label {
   display:block;
   font-size:13px;
   font-weight:600;
@@ -328,8 +328,7 @@ body { font-family: 'Segoe UI', sans-serif; }
   text-transform:uppercase;
   letter-spacing:0.5px;
 }
-
-.info-card p{
+.info-card p {
   margin:0;
   font-size:16px;
   font-weight:600;
@@ -337,7 +336,266 @@ body { font-family: 'Segoe UI', sans-serif; }
   word-break:break-word;
 }
 
- 
+/* =====================
+   DEALER LIST PAGE – NEW STYLES
+   ===================== */
+
+/* Top bar: title + buttons + search */
+.page-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.page-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.dealer-count-badge {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 11px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.page-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Search box */
+.dl-search-wrap {
+  position: relative;
+}
+.dl-search-wrap .dl-search-icon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 15px;
+  pointer-events: none;
+}
+.dl-search-input {
+  padding: 8px 12px 8px 34px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: 50px;
+  background: rgba(255,255,255,0.85);
+  font-size: 13px;
+  color: #333;
+  width: 210px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.dl-search-input::placeholder { color: #aaa; }
+.dl-search-input:focus {
+  border-color: var(--primary);
+  background: #fff;
+}
+
+/* Add / Download buttons */
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.12s;
+  white-space: nowrap;
+}
+.add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.add-btn-outline {
+  background: rgba(255,255,255,0.20);
+  border: 1.5px solid rgba(255,255,255,0.6);
+  color: #fff;
+}
+.add-btn-solid {
+  background: #fff;
+  border: 1.5px solid #fff;
+  color: var(--primary);
+}
+
+/* Show entries + footer bar */
+.dl-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: 1px solid #efefef;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
+}
+
+.dl-show-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+.dl-show-wrap select {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+.dl-show-wrap select:focus { border-color: var(--primary); }
+
+.dl-info-text {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Pagination */
+.dl-pagination {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.dl-pg-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.dl-pg-btn:hover { background: var(--primary-soft); border-color: var(--primary-light); color: var(--primary); }
+.dl-pg-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.dl-pg-btn:disabled, .dl-pg-btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* Table card wrapper */
+.dl-table-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 32px rgba(100,90,200,0.13);
+}
+
+/* New dealer table styles – override old .dealer-table */
+.dealer-table thead tr {
+  background: #f4f3fc;
+}
+.dealer-table th {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888 !important;
+  padding: 13px 14px !important;
+  text-align: left !important;
+  border-right: none !important;
+  border-bottom: 1px solid #ebebf5 !important;
+  white-space: nowrap;
+}
+.dealer-table td {
+  padding: 13px 14px !important;
+  font-size: 13px !important;
+  text-align: left !important;
+  border-right: none !important;
+  border-bottom: 1px solid #f0f0f7 !important;
+  vertical-align: middle;
+}
+.dealer-table tbody tr:last-child td { border-bottom: none !important; }
+.dealer-table tbody tr:hover { background: #f9f8ff; }
+
+/* State badge */
+.state-badge {
+  display: inline-block;
+  background: #eeedfe;
+  color: #3c3489;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Pic Uploaded badges */
+.pic-badge-yes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eaf3de;
+  color: #3b6d11;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.pic-badge-no {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fcebeb;
+  color: #a32d2d;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* Action links */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.14s, border-color 0.14s;
+  cursor: pointer;
+  color: var(--primary);
+}
+.action-btn:hover { background: #eeedfe; border-color: #afa9ec; color: var(--primary); }
+.action-btn.del { color: #a32d2d; }
+.action-btn.del:hover { background: #fcebeb; border-color: #f09595; }
+
+/* Dealer name bold */
+.dealer-name { font-weight: 600; color: #1a1a2e; }
+.shop-name { color: #6b7280; }
+
+/* Serial number muted */
+.sno-cell { color: #aaa; font-size: 12px; }
 
 /* =====================
    MOBILE RESPONSIVE
@@ -391,7 +649,7 @@ body { font-family: 'Segoe UI', sans-serif; }
 
   /* Dealer table – scrollable */
   .table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .dealer-table th, .dealer-table td { padding: 12px 10px; font-size: 0.82rem; white-space: nowrap; }
+  .dealer-table th, .dealer-table td { white-space: nowrap; }
 
   /* Video page */
   .video-select-box { padding: 28px 16px; }
@@ -403,9 +661,25 @@ body { font-family: 'Segoe UI', sans-serif; }
   .login-right { min-height: 60vh; }
   .logo-ring { width: 180px; height: 180px; }
   .logo-ring .logo-text { font-size: 1.6rem; }
+
+  /* Dealer list page responsive */
+  .page-topbar { flex-direction: column; align-items: flex-start; }
+  .page-topbar-right { width: 100%; justify-content: space-between; }
+  .dl-search-input { width: 160px; }
+  .add-btn { padding: 7px 14px; font-size: 12px; }
+  .dl-footer-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .dl-pagination { flex-wrap: wrap; }
 }
 
 @media (max-width: 400px) {
   .pic-box { height: 110px; }
   .center-card { padding: 20px 12px; }
+  .dl-search-input { width: 130px; }
 }
+
+
+
+
+
+
+

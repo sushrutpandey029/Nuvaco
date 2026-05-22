@@ -1,99 +1,259 @@
 {{> header admin=admin }}
 {{> sidebar }}
+
 <main class="purple-main" style="align-items:flex-start; padding-top:32px;">
   <div class="pbubble pb1"></div>
   <div class="pbubble pb2"></div>
   <div class="pbubble pb3"></div>
-  <div style="position:relative;z-index:2;width:100%;">
-     <!-- Top Header -->
+
+  <div style="position:relative; z-index:2; width:100%;">
+
+    <!-- ── Top Bar ── -->
     <div class="page-topbar">
 
-      <div>
-  
-
-      <div style="display:flex; gap:12px;">
- <a href="/admin/download-dealer-excel" class="add-btn">
-      Download Excel
-    </a>
-
-        <a href="/admin/dealerregister" class="add-btn">
-          Add Dealer
-        </a>
+      <!-- Left: Title + count -->
+      <div class="page-topbar-left">
+        <h1 class="page-title">Dealer List</h1>
+        <span class="dealer-count-badge">{{dealers.length}} entries</span>
       </div>
 
+      <!-- Right: Search + buttons -->
+      <div class="page-topbar-right">
+
+        <!-- Search -->
+        <div class="dl-search-wrap">
+          <span class="dl-search-icon">&#128269;</span>
+          <input
+            type="text"
+            id="dlSearchInput"
+            class="dl-search-input"
+            placeholder="Search dealers…"
+            oninput="dlFilter()"
+          >
+        </div>
+
+        <!-- Download Excel -->
+        <a href="/admin/download-dealer-excel" class="add-btn add-btn-outline">
+          &#8681; Download Excel
+        </a>
+
+        <!-- Add Dealer -->
+        <a href="/admin/dealerregister" class="add-btn add-btn-solid">
+          &#43; Add Dealer
+        </a>
+
+      </div>
     </div>
-    <div class="table-scroll-wrap">
-      <table id="dataTable" class="dealer-table">
-        <thead>
-          <tr>
-            <th>S.No</th>
-             <th>State</th>
-            <th>Dealer Name</th>
-            <th>Shop Name</th>
-           
-            <th>Pic Uploaded</th>
-            <th>Action</th>
-            <th>Image</th>
-          </tr>
-        </thead>
+    <!-- ── End Top Bar ── -->
 
 
-       <tbody>
-  {{#each dealers}}
-  <tr>
-    <td>{{inc @index}}</td>
-     <!-- ✅ state instead of region -->
-    <td>{{this.state}}</td>
+    <!-- ── Table Card ── -->
+    <div class="dl-table-card">
+      <div class="table-scroll-wrap">
+        <table id="dataTable" class="dealer-table" style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="width:54px;">#</th>
+              <th style="width:130px;">State</th>
+              <th>Dealer Name</th>
+              <th>Shop Name</th>
+              <th style="width:120px; text-align:center;">Pic Uploaded</th>
+              <th style="width:170px; text-align:center;">Actions</th>
+              <th style="width:80px; text-align:center;">Image</th>
+            </tr>
+          </thead>
 
+          <tbody id="dlTableBody">
+            {{#each dealers}}
+            <tr>
 
-   
-    <td>{{this.dealer_person}}</td>
-    <td>{{this.shop_name}}</td>
+              <!-- Serial No -->
+              <td class="sno-cell">{{inc @index}}</td>
 
-   
-    <td>
-      <!-- ✅ correct field -->
-      {{#if (eq this.isImageUploaded "yes")}}
-        <span style="color:#2e7d32;font-weight:600;">Yes</span>
-      {{else}}
-        <span style="color:#c62828;font-weight:600;">No</span>
-      {{/if}}
-    </td>
+              <!-- State badge -->
+              <td>
+                <span class="state-badge">{{this.state}}</span>
+              </td>
 
-    <td>
-      <a href="dealerdetail/{{this.id}}" class="view-link">View</a>
-      <a href="/admin/editdealer/{{this.id}}" class="view-link">
-  Edit
-</a>
+              <!-- Dealer Name -->
+              <td class="dealer-name">{{this.dealer_person}}</td>
 
-<a
-  href="/admin/delete-dealer/{{this.id}}"
-  class="view-link"
-  onclick="return confirm('Are you sure you want to delete this dealer?')"
->
-  Delete
-</a>
-     {{!-- <a href="dealerdetail/{{this.id}}" class="view-link">Edit</a>
+              <!-- Shop Name -->
+              <td class="shop-name">{{this.shop_name}}</td>
 
-<a href="dealerdetail/{{this.id}}" class="view-link">Delete</a>
-      --}}
-    </td>
-   <td>
-  {{#if (eq this.isImageUploaded "yes")}}
-    <a href="dealer-image/{{this.id}}" class="view-link">
-      View
-    </a>
-  {{else}}
-    -
-  {{/if}}
-</td>
-  </tr>
-  {{/each}}
-</tbody>
+              <!-- Pic Uploaded -->
+              <td style="text-align:center;">
+                {{#if (eq this.isImageUploaded "yes")}}
+                  <span class="pic-badge-yes">&#10003; Yes</span>
+                {{else}}
+                  <span class="pic-badge-no">&#10007; No</span>
+                {{/if}}
+              </td>
 
+              <!-- Actions -->
+              <td style="text-align:center; white-space:nowrap;">
+                <a href="dealerdetail/{{this.id}}" class="action-btn">
+                  &#128065; View
+                </a>
+                <a href="/admin/editdealer/{{this.id}}" class="action-btn">
+                  &#9998; Edit
+                </a>
+                <a
+                  href="/admin/delete-dealer/{{this.id}}"
+                  class="action-btn del"
+                  onclick="return confirm('Are you sure you want to delete this dealer?')"
+                >
+                  &#128465; Delete
+                </a>
+              </td>
 
-      </table>
+              <!-- Image -->
+              <td style="text-align:center;">
+                {{#if (eq this.isImageUploaded "yes")}}
+                  <a href="dealer-image/{{this.id}}" class="action-btn">
+                    &#128247;
+                  </a>
+                {{else}}
+                  <span style="color:#ccc;">—</span>
+                {{/if}}
+              </td>
+
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Footer: show entries + info + pagination ── -->
+      <div class="dl-footer-bar">
+
+        <!-- Show N entries -->
+        <div class="dl-show-wrap">
+          Show
+          <select id="dlPageSize" onchange="dlChangeSize(this.value)">
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          entries
+        </div>
+
+        <!-- Showing X–Y of Z -->
+        <span class="dl-info-text" id="dlInfoText"></span>
+
+        <!-- Pagination -->
+        <div class="dl-pagination" id="dlPagination"></div>
+
+      </div>
     </div>
+    <!-- ── End Table Card ── -->
+
   </div>
 </main>
+
 {{> footer }}
+
+
+<!-- ══════════════════════════════════════
+     Dealer List: Search + Pagination JS
+     (No Bootstrap dependency)
+     ══════════════════════════════════════ -->
+<script>
+(function () {
+  // Grab all rows once
+  const allRows = Array.from(document.querySelectorAll('#dlTableBody tr'));
+  let filtered = allRows.slice();
+  let page = 1;
+  let pageSize = 10;
+
+  // ── Filter by search ──
+  window.dlFilter = function () {
+    const q = document.getElementById('dlSearchInput').value.toLowerCase().trim();
+    filtered = allRows.filter(function (row) {
+      return row.innerText.toLowerCase().includes(q);
+    });
+    page = 1;
+    render();
+  };
+
+  // ── Change page size ──
+  window.dlChangeSize = function (val) {
+    pageSize = parseInt(val, 10);
+    page = 1;
+    render();
+  };
+
+  // ── Go to page ──
+  window.dlGoPage = function (p) {
+    page = p;
+    render();
+  };
+
+  // ── Render visible rows + footer ──
+  function render() {
+    var total = filtered.length;
+    var totalPages = Math.max(1, Math.ceil(total / pageSize));
+    if (page > totalPages) page = totalPages;
+
+    var start = (page - 1) * pageSize;
+    var end = Math.min(start + pageSize, total);
+
+    // Show/hide rows
+    allRows.forEach(function (row) { row.style.display = 'none'; });
+    filtered.slice(start, end).forEach(function (row) { row.style.display = ''; });
+
+    // Info text
+    document.getElementById('dlInfoText').textContent =
+      total === 0
+        ? 'No entries found'
+        : 'Showing ' + (start + 1) + '–' + end + ' of ' + total + ' entries';
+
+    // Pagination
+    buildPagination(totalPages);
+  }
+
+  function buildPagination(totalPages) {
+    var pg = document.getElementById('dlPagination');
+    var html = '';
+
+    // Prev
+    html += '<button class="dl-pg-btn' + (page === 1 ? ' disabled' : '') + '" ' +
+            (page === 1 ? 'disabled' : 'onclick="dlGoPage(' + (page - 1) + ')"') +
+            '>&laquo;</button>';
+
+    // Page numbers with ellipsis
+    var pages = [];
+    if (totalPages <= 7) {
+      for (var i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push('…');
+      var s = Math.max(2, page - 1);
+      var e = Math.min(totalPages - 1, page + 1);
+      for (var j = s; j <= e; j++) pages.push(j);
+      if (page < totalPages - 2) pages.push('…');
+      pages.push(totalPages);
+    }
+
+    pages.forEach(function (p) {
+      if (p === '…') {
+        html += '<span class="dl-pg-btn" style="cursor:default;border:none;">…</span>';
+      } else {
+        html += '<button class="dl-pg-btn' + (p === page ? ' active' : '') + '" ' +
+                'onclick="dlGoPage(' + p + ')">' + p + '</button>';
+      }
+    });
+
+    // Next
+    html += '<button class="dl-pg-btn' + (page === totalPages ? ' disabled' : '') + '" ' +
+            (page === totalPages ? 'disabled' : 'onclick="dlGoPage(' + (page + 1) + ')"') +
+            '>&raquo;</button>';
+
+    pg.innerHTML = html;
+  }
+
+  // Initial render on page load
+  render();
+})();
+</script>
