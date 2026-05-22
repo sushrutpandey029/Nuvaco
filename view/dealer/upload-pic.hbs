@@ -53,6 +53,65 @@
               </label>
             </div>
           </div>
+            <!-- PIC 2 -->
+       <div class="col-6">
+        <div class="pic-radio-wrap">
+          <label class="pic-box" id="preview-label-1">
+            {{#if (gt images.length 1)}}
+              <img id="preview1"
+                src="{{images.[1].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+            {{else}}
+              <img id="preview1"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+              <span id="preview-text-1">Uploaded Pic 2</span>
+            {{/if}}
+          </label>
+        </div>
+      </div> 
+
+      <!-- PIC 3 -->
+      <div class="col-6">
+        <div class="pic-radio-wrap">
+          <label class="pic-box" id="preview-label-2">
+            {{#if (gt images.length 2)}}
+              <img id="preview2"
+                src="{{images.[2].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+            {{else}}
+              <img id="preview2"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+              <span id="preview-text-2">Uploaded Pic 3</span>
+            {{/if}}
+          </label>
+        </div>
+      </div> 
+
+      <!-- PIC 4 -->
+      <div class="col-6">
+        <div class="pic-radio-wrap">
+          <label class="pic-box" id="preview-label-3">
+            {{#if (gt images.length 3)}}
+              <img id="preview3"
+                src="{{images.[3].image}}"
+                alt=""
+                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+            {{else}}
+              <img id="preview3"
+                src=""
+                alt=""
+                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+              <span id="preview-text-3">Uploaded Pic 4</span>
+            {{/if}}
+          </label>
+        </div>
+      </div>
 
         </div>
       </div>
@@ -84,6 +143,30 @@
           <span id="upload-label-0">
             {{#if (gt images.length 0)}}Change Pic 1{{else}}Upload Pic 1{{/if}}
           </span>
+        </label>
+      </div>
+       <div class="col-6 col-md-3">
+        <label class="upload-box w-100" style="cursor:pointer;">
+          <input type="file" accept="image/*" class="d-none pic-input"
+            data-slot="1"
+            data-existing-id="{{images.[1].id}}" />
+          <span id="upload-label-1">{{#if (gt images.length 1)}}Change Pic 2{{else}}Upload Pic 2{{/if}}</span>
+        </label>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="upload-box w-100" style="cursor:pointer;">
+          <input type="file" accept="image/*" class="d-none pic-input"
+            data-slot="2"
+            data-existing-id="{{images.[2].id}}" />
+          <span id="upload-label-2">{{#if (gt images.length 2)}}Change Pic 3{{else}}Upload Pic 3{{/if}}</span>
+        </label>
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="upload-box w-100" style="cursor:pointer;">
+          <input type="file" accept="image/*" class="d-none pic-input"
+            data-slot="3"
+            data-existing-id="{{images.[3].id}}" />
+          <span id="upload-label-3">{{#if (gt images.length 3)}}Change Pic 4{{else}}Upload Pic 4{{/if}}</span>
         </label>
       </div>
 

@@ -1,18 +1,12 @@
 import fs from "fs";
 import path from "path";
 import OpenAI, { toFile } from "openai";
-import sharp from "sharp";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-
-
 // DEBUG OUTPUT DIR
 const DEBUG_DIR = "public/debug";
-const TRANSLATED_TEMPLATE_PATH = path.join(
-  DEBUG_DIR,
-  "step3_template_translated.jpeg",
-);
+const TRANSLATED_TEMPLATE_PATH = path.join(DEBUG_DIR, "step3_template_translated.jpeg");
 
 /**
  * Replaces all Hindi text strings in the banner template using AI.
@@ -31,24 +25,6 @@ export const replaceTemplateText = async ({
   sourceTexts,
   convertedTexts,
 }) => {
-  const resizedMaskBuffer = await sharp("public/masks/nuvoco_text_mask.png")
-  .resize({
-    width: 1024,
-    height: 1536,
-    fit: "fill",
-  })
-  .png()
-  .toBuffer();
-
-const maskFile = await toFile(resizedMaskBuffer, "mask.png", {
-  type: "image/png",
-});
-//   const maskBuffer = fs.readFileSync("public/masks/mask1.png");
-//   // const maskBuffer = fs.readFileSync("public/masks/nuvoco_text_mask.png");
-
-// const maskFile = await toFile(maskBuffer, "mask.png", {
-//   type: "image/png",
-// });
   // ─────────────────────────────────────────
   // Check if anything actually changed
   // If all texts are identical (Hindi language), skip AI entirely
@@ -59,15 +35,11 @@ const maskFile = await toFile(resizedMaskBuffer, "mask.png", {
   );
 
   if (changedEntries.length === 0) {
-    console.log(
-      "replaceTemplateText: No text changes needed — returning original template",
-    );
+    console.log("replaceTemplateText: No text changes needed — returning original template");
     return templatePath;
   }
 
-  console.log(
-    `replaceTemplateText: Replacing ${changedEntries.length} text(s) via AI...`,
-  );
+  console.log(`replaceTemplateText: Replacing ${changedEntries.length} text(s) via AI...`);
 
   // ─────────────────────────────────────────
   // Build replacement instruction list for the AI prompt
@@ -87,33 +59,15 @@ const maskFile = await toFile(resizedMaskBuffer, "mask.png", {
     throw new Error(`Template not found: ${templatePath}`);
   }
 
-const resizedTemplateBuffer = await sharp(templatePath)
-  .resize({
-    width: 1024,
-    height: 1536,
-    fit: "fill",
-  })
-  .jpeg({ quality: 95 })
-  .toBuffer();
+  const templateBuffer = fs.readFileSync(templatePath);
 
-const templateFile = await toFile(
-  resizedTemplateBuffer,
-  "template.jpeg",
-  {
+  const templateFile = await toFile(templateBuffer, "template.jpeg", {
     type: "image/jpeg",
-  }
-);
-
-  // const templateBuffer = fs.readFileSync(templatePath);
-
-  // const templateFile = await toFile(templateBuffer, "template.jpeg", {
-  //   type: "image/jpeg",
-  // });
+  });
 
   const result = await openai.images.edit({
     model: "gpt-image-1",
     image: [templateFile],
-    // mask: maskFile,
     prompt: `
 You are doing ONE task only: replace specific text strings in this banner image.
 
@@ -129,6 +83,11 @@ RULES FOR EACH REPLACEMENT:
 - Keep the EXACT same alignment (center/left)
 - Keep the EXACT same line breaks
 
+SPECIAL RULE FOR "मेरा भरोसा":
+- This text appears inside a white badge/logo shape in the banner
+- Replace ONLY the text characters — keep the badge shape, background, and all surrounding elements completely unchanged
+- "मेरा भरोसा" is user-facing text, NOT a protected brand name — it must be replaced
+
 DO NOT CHANGE ANYTHING ELSE:
 - Do NOT change NUVOCO, ZERO M, IWC+, or any other brand names
 - Do NOT change any icons, symbols, or graphic elements
@@ -136,18 +95,9 @@ DO NOT CHANGE ANYTHING ELSE:
 - Do NOT move or resize any element
 - Do NOT add or remove any visual element
 
-Preserve ALL punctuation and symbols exactly as provided.
-Do NOT remove quotation marks or decorative punctuation.
-
-IMPORTANT:
-- The opening and closing quotation marks are mandatory
-- Do NOT remove quotation marks
-- Preserve both opening and closing quotes exactly
-- Quotes must remain visible in final image
-
 Only the specified text characters change. Everything else stays pixel-identical.
     `.trim(),
-   size: "1024x1536",
+    size: "1024x1536",
   });
 
   // ─────────────────────────────────────────
@@ -161,9 +111,7 @@ Only the specified text characters change. Everything else stays pixel-identical
   const translatedBuffer = Buffer.from(result.data[0].b64_json, "base64");
   fs.writeFileSync(TRANSLATED_TEMPLATE_PATH, translatedBuffer);
 
-  console.log(
-    `replaceTemplateText: Translated template saved → ${TRANSLATED_TEMPLATE_PATH}`,
-  );
+  console.log(`replaceTemplateText: Translated template saved → ${TRANSLATED_TEMPLATE_PATH}`);
 
   return TRANSLATED_TEMPLATE_PATH;
 };

@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import sharp from "sharp";
 
 import { removeBackgroundOpenAI } from "../openai/removeBg.service.js";
 import { transliterateTagline } from "../openai/transliterate.service.js";
@@ -9,7 +8,6 @@ import { replaceTemplateText } from "../image/replaceTemplateText.service.js";
 import { replacePersonInBanner } from "../image/replacePerson.service.js";
 import { saveImage } from "../image/saveImage.service.js";
 import { createTempFile } from "../../utils/createTempFile.js";
-import { enhanceBanner } from "../image/enhanceBanner.service.js";
 
 // ─────────────────────────────────────────
 // ALL HINDI SOURCE TEXTS IN THE BANNER
@@ -17,11 +15,8 @@ import { enhanceBanner } from "../image/enhanceBanner.service.js";
 // Keys are used to match source → converted in the AI prompt.
 // ─────────────────────────────────────────
 const SOURCE_TEXTS = {
- headline: `"हर मौसम में घर की
-फुलप्रूफ सुरक्षा के लिए
-मेरा भरोसा
-NUVOCO
-ZERO M IWC+ "`,
+  headline: "हर मौसम में घर की फुलप्रूफ सुरक्षा के लिए",
+  brandName: "मेरा भरोसा",
   bullet1: "जंग प्रूफ",
   bullet2: "दरार प्रूफ",
   bullet3: "लीकेज प्रूफ",
@@ -162,22 +157,7 @@ export const generateBanner = async ({
     } catch (compositeError) {
       throw new Error(`Banner compositing failed: ${compositeError.message}`);
     }
-finalBannerBuffer = await enhanceBanner(finalBannerBuffer);
-// finalBannerBuffer = await sharp(finalBannerBuffer)
-//   .resize({
-//     width: 3456,
-//     height: 5184,
-//     fit: "fill",
-//     kernel: sharp.kernel.lanczos3,
-//   })
-//   .sharpen({
-//     sigma: 0.8,
-//   })
-//   .jpeg({
-//     quality: 98,
-//     mozjpeg: true,
-//   })
-//   .toBuffer();
+
     // DEBUG — save final composite
     const debugFinalPath = path.join(DEBUG_DIR, "step4_final_banner.jpg");
     fs.writeFileSync(debugFinalPath, finalBannerBuffer);
