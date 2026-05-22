@@ -11,7 +11,7 @@ import { formatImageArray } from "../../utils/formatImagePath.js";
 import SalesSpoc from "../../Model/salesSpocModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import path from "path";
-import { generateBanner } from "../../services/pipeline/generateBanner.js";
+import { generateBanner } from "../../services/pipeline/generateBannerold.js";
 import {
   getPersonalizedVideo,
   getVideoStatus,
@@ -403,6 +403,16 @@ export const uploadDealerImages = async (req, res) => {
   try {
     const { dealer_id, language } = req.body;
 
+    const allowedLanguages = [
+      "HINDI",
+      "GUJARATI",
+      "BENGALI",
+      "PUNJABI",
+      "MARATHI",
+      "ODIA",
+      "ASSAMESE",
+    ];
+
     // validation
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({
@@ -410,10 +420,10 @@ export const uploadDealerImages = async (req, res) => {
         message: "Images required",
       });
     }
-    if (!language) {
+    if (!allowedLanguages.includes(language?.toUpperCase())) {
       return res.status(400).json({
         success: false,
-        message: "language required",
+        message: "Invalid language",
       });
     }
 

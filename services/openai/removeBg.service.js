@@ -64,7 +64,10 @@ const removeBackgroundWithRemoveBg = async (buffer, mimeType) => {
     throw new Error(`remove.bg API error: ${response.status} — ${errText}`);
   }
 
-  const resultBuffer = await response.buffer();
+  // const resultBuffer = await response.buffer();
+  const arrayBuffer = await response.arrayBuffer();
+
+const resultBuffer = Buffer.from(arrayBuffer);
   console.log("Background removed via remove.bg");
   return resultBuffer; // Returns PNG with transparent background
 };
@@ -130,42 +133,5 @@ const removeBackgroundWithRemoveBg = async (buffer, mimeType) => {
 
 //   const image_base64 = result.data[0].b64_json;
 //   console.log("Background removed via OpenAI");
-//   return Buffer.from(image_base64, "base64");
-// };
-
-// import fs from "fs";
-
-// import OpenAI, { toFile } from "openai";
-
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
-
-// export const removeBackgroundOpenAI = async (imagePath) => {
-//   console.log("image path", imagePath);
-
-//   // read file buffer
-//   const buffer = fs.readFileSync(imagePath);
-
-//   // convert to OpenAI file
-//   const imageFile = await toFile(buffer, "person.jpeg", {
-//     type: "image/jpeg",
-//   });
-
-//   const result = await openai.images.edit({
-//     model: "gpt-image-1",
-
-//     image: imageFile,
-
-//     prompt: `
-// Remove background completely.
-// Keep only the person.
-// Transparent PNG.
-// Professional quality.
-// `,
-//   });
-
-//   const image_base64 = result.data[0].b64_json;
-
 //   return Buffer.from(image_base64, "base64");
 // };

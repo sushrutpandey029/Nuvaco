@@ -4,11 +4,7 @@ import sharp from "sharp";
  * Replace banner tagline while preserving
  * original style/layout as much as possible.
  */
-export const replaceBannerText = async ({
-  imageBuffer,
-  translatedText,
-}) => {
-
+export const replaceBannerText = async ({ imageBuffer, translatedText }) => {
   const meta = await sharp(imageBuffer).metadata();
 
   const IW = meta.width;
@@ -109,15 +105,11 @@ ${escapeXml(line)}
  * Split text into balanced 2 lines
  */
 function splitIntoTwoLines(text) {
-
   const words = text.split(" ");
 
   const mid = Math.ceil(words.length / 2);
 
-  return [
-    words.slice(0, mid).join(" "),
-    words.slice(mid).join(" "),
-  ];
+  return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")];
 }
 
 function escapeXml(str) {
