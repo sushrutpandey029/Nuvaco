@@ -9,7 +9,7 @@ import {
   logout,
   renderLogin,
   uploadDealerImages,
-  saveFinalImage,
+  // saveFinalImage,
   getDealerProfile,
   videoStatus,
   resendOTP,
@@ -40,7 +40,7 @@ dealerrouter.post(
   imagesupload.array("images", 4),
   uploadDealerImages,
 );
-dealerrouter.post("/save-final-image", saveFinalImage);
+// dealerrouter.post("/save-final-image", saveFinalImage);
 dealerrouter.get("/profile/:id", getDealerProfile);
 dealerrouter.get("/video-status", videoStatus);
 

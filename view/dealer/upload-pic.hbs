@@ -1,263 +1,487 @@
 {{> dealerheader dealer=dealer}}
 
-<main class="purple-main" style="align-items: flex-start; padding-top: 32px">
+<style>
+/* ── Upload Page Enhancements ──
+   Uses existing purple-main background.
+   Only adds styles for the upload card internals.
+*/
+
+.upload-page-card {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 24px;
+  padding: 28px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Photo slot boxes ── */
+.photo-slot-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo-slot-box {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.30);
+  border: 2px dashed rgba(255,255,255,0.60);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.photo-slot-box:hover {
+  border-color: rgba(255,255,255,0.90);
+  background: rgba(255,255,255,0.42);
+  transform: translateY(-2px);
+}
+.photo-slot-box img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.photo-slot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  padding: 12px;
+}
+.photo-slot-placeholder .slot-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+.photo-slot-placeholder span {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.80);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Slot number badge */
+.slot-number {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.30);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Uploaded overlay tick */
+.slot-uploaded-tick {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #3b6d11;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Upload trigger label button */
+.slot-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.25);
+  border: 1.5px solid rgba(255,255,255,0.55);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s;
+  text-align: center;
+}
+.slot-upload-btn:hover {
+  background: rgba(255,255,255,0.40);
+}
+
+/* ── Template preview ── */
+.template-preview-wrap img {
+  width: 100%;
+  border-radius: 14px;
+  display: block;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  margin-bottom: 12px;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* ── Language select ── */
+.lang-select-styled {
+  width: 100%;
+  padding: 13px 44px 13px 18px;
+  border-radius: 50px;
+  border: 1.5px solid rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  backdrop-filter: blur(6px);
+}
+.lang-select-styled:focus {
+  border-color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.30);
+}
+.lang-select-styled option {
+  background: #6c63c4;
+  color: #fff;
+}
+
+/* ── Divider ── */
+.upload-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.20);
+  margin: 4px 0;
+}
+
+/* ── Action buttons ── */
+.upload-btn-relisten {
+  flex: 1;
+  padding: 14px;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.60);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  letter-spacing: 0.02em;
+  transition: background 0.18s, transform 0.12s;
+}
+.upload-btn-relisten:hover {
+  background: rgba(255,255,255,0.28);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.upload-btn-process {
+  flex: 1;
+  padding: 14px;
+  border-radius: 50px;
+  background: #fff;
+  border: 2px solid #fff;
+  color: #6c63c4;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  letter-spacing: 0.02em;
+  transition: opacity 0.18s, transform 0.12s;
+  cursor: pointer;
+}
+.upload-btn-process:hover { opacity: 0.88; transform: translateY(-1px); color: #6c63c4; }
+.upload-btn-process.is-disabled { opacity: 0.45; pointer-events: none; }
+
+/* ── Inline alert ── */
+#uploadAlert {
+  display: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ── Status alerts override ── */
+.upload-status-alert {
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  margin-bottom: 16px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 575px) {
+  .upload-page-card { padding: 18px 14px; border-radius: 18px; }
+  .upload-btn-relisten, .upload-btn-process { font-size: 0.88rem; padding: 12px; }
+}
+</style>
+
+<main class="purple-main" style="align-items:flex-start; padding-top:28px; padding-bottom:28px;">
   <div class="pbubble pb1"></div>
   <div class="pbubble pb2"></div>
   <div class="pbubble pb3"></div>
 
-  <div style="position: relative; z-index: 2; width: 100%">
+  <div style="position:relative; z-index:2; width:100%;">
+  <div class="upload-page-card">
 
+    <!-- ── Status Alerts ── -->
     {{#if (eq imageStatus "processing")}}
-      <div class="alert alert-warning text-center mb-4">
-        Your images are under processing.
-      </div>
+    <div class="alert alert-warning upload-status-alert" role="alert">
+      ⏳ Your images are under processing.
+    </div>
     {{/if}}
-
     {{#if (eq imageStatus "approved")}}
-      <div class="alert alert-success text-center mb-4">
-        Your images are approved successfully.
-      </div>
+    <div class="alert alert-success upload-status-alert" role="alert">
+      ✅ Your images are approved successfully.
+    </div>
     {{/if}}
-
     {{#if (eq imageStatus "rejected")}}
-      <div class="alert alert-danger text-center mb-4">
-        Your uploaded images were rejected. Please upload again.
-      </div>
+    <div class="alert alert-danger upload-status-alert" role="alert">
+      ❌ Your uploaded images were rejected. Please upload again.
+    </div>
     {{/if}}
 
-    <!-- Inline alert for upload feedback -->
-    <div id="uploadAlert" style="display:none;" class="mb-3"></div>
+    <!-- Inline upload feedback -->
+    <div id="uploadAlert"></div>
 
-    <div class="row">
+    <!-- ── Main Grid: Photos + Template ── -->
+    <div class="row g-3 mb-3">
 
-      <!-- LEFT SIDE — Photo preview -->
-      <div class="col-md-6">
-        <div class="row g-3">
+      <!-- LEFT: 2×2 Photo Grid -->
+      <div class="col-12 col-md-6">
+        <span class="section-label">Your Photos</span>
+        <div class="row g-2">
 
-          <!-- PIC 1 (only slot active) -->
+          <!-- Slot 0 -->
           <div class="col-6">
-            <div class="pic-radio-wrap">
-              <label class="pic-box" id="preview-label-0">
+            <div class="photo-slot-wrap">
+              <div class="photo-slot-box" onclick="document.querySelectorAll('.pic-input')[0].click()">
+                <span class="slot-number">1</span>
                 {{#if (gt images.length 0)}}
-                  <img id="preview0"
-                    src="{{images.[0].image}}"
-                    alt=""
-                    style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+                  <img id="preview0" src="{{images.[0].image}}" alt="" />
+                  <span class="slot-uploaded-tick">✓</span>
                 {{else}}
-                  <img id="preview0"
-                    src=""
-                    alt=""
-                    style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-                  <span id="preview-text-0">Uploaded Pic 1</span>
+                  <img id="preview0" src="" alt="" style="display:none;" />
+                  <div class="photo-slot-placeholder" id="preview-text-0">
+                    <div class="slot-icon">📷</div>
+                    <span>Tap to add</span>
+                  </div>
                 {{/if}}
+              </div>
+              <input type="file" accept="image/*" class="d-none pic-input" data-slot="0" data-existing-id="{{images.[0].id}}" />
+              <label class="slot-upload-btn" onclick="document.querySelectorAll('.pic-input')[0].click()">
+                <span id="upload-label-0">{{#if (gt images.length 0)}}&#9998; Change{{else}}&#8679; Upload{{/if}}</span>
               </label>
             </div>
           </div>
-            <!-- PIC 2 -->
-       <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-1">
-            {{#if (gt images.length 1)}}
-              <img id="preview1"
-                src="{{images.[1].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview1"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-1">Uploaded Pic 2</span>
-            {{/if}}
-          </label>
-        </div>
-      </div> 
 
-      <!-- PIC 3 -->
-      <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-2">
-            {{#if (gt images.length 2)}}
-              <img id="preview2"
-                src="{{images.[2].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview2"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-2">Uploaded Pic 3</span>
-            {{/if}}
-          </label>
-        </div>
-      </div> 
-
-      <!-- PIC 4 -->
-      <div class="col-6">
-        <div class="pic-radio-wrap">
-          <label class="pic-box" id="preview-label-3">
-            {{#if (gt images.length 3)}}
-              <img id="preview3"
-                src="{{images.[3].image}}"
-                alt=""
-                style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-            {{else}}
-              <img id="preview3"
-                src=""
-                alt=""
-                style="display:none; width:100%; height:220px; object-fit:cover; border-radius:8px;" />
-              <span id="preview-text-3">Uploaded Pic 4</span>
-            {{/if}}
-          </label>
-        </div>
-      </div>
-
-        </div>
-      </div>
-
-      <!-- RIGHT SIDE — Template previews -->
-      <div class="col-md-6">
-        {{#each templates}}
-          <div class="mb-3">
-            <img
-              src="{{this.image}}"
-              alt="{{this.name}}"
-              style="width:100%; border-radius:10px;"
-            />
+          <!-- Slot 1 -->
+          <div class="col-6">
+            <div class="photo-slot-wrap">
+              <div class="photo-slot-box" onclick="document.querySelectorAll('.pic-input')[1].click()">
+                <span class="slot-number">2</span>
+                {{#if (gt images.length 1)}}
+                  <img id="preview1" src="{{images.[1].image}}" alt="" />
+                  <span class="slot-uploaded-tick">✓</span>
+                {{else}}
+                  <img id="preview1" src="" alt="" style="display:none;" />
+                  <div class="photo-slot-placeholder" id="preview-text-1">
+                    <div class="slot-icon">📷</div>
+                    <span>Tap to add</span>
+                  </div>
+                {{/if}}
+              </div>
+              <input type="file" accept="image/*" class="d-none pic-input" data-slot="1" data-existing-id="{{images.[1].id}}" />
+              <label class="slot-upload-btn" onclick="document.querySelectorAll('.pic-input')[1].click()">
+                <span id="upload-label-1">{{#if (gt images.length 1)}}&#9998; Change{{else}}&#8679; Upload{{/if}}</span>
+              </label>
+            </div>
           </div>
-        {{/each}}
+
+          <!-- Slot 2 -->
+          <div class="col-6">
+            <div class="photo-slot-wrap">
+              <div class="photo-slot-box" onclick="document.querySelectorAll('.pic-input')[2].click()">
+                <span class="slot-number">3</span>
+                {{#if (gt images.length 2)}}
+                  <img id="preview2" src="{{images.[2].image}}" alt="" />
+                  <span class="slot-uploaded-tick">✓</span>
+                {{else}}
+                  <img id="preview2" src="" alt="" style="display:none;" />
+                  <div class="photo-slot-placeholder" id="preview-text-2">
+                    <div class="slot-icon">📷</div>
+                    <span>Tap to add</span>
+                  </div>
+                {{/if}}
+              </div>
+              <input type="file" accept="image/*" class="d-none pic-input" data-slot="2" data-existing-id="{{images.[2].id}}" />
+              <label class="slot-upload-btn" onclick="document.querySelectorAll('.pic-input')[2].click()">
+                <span id="upload-label-2">{{#if (gt images.length 2)}}&#9998; Change{{else}}&#8679; Upload{{/if}}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Slot 3 -->
+          <div class="col-6">
+            <div class="photo-slot-wrap">
+              <div class="photo-slot-box" onclick="document.querySelectorAll('.pic-input')[3].click()">
+                <span class="slot-number">4</span>
+                {{#if (gt images.length 3)}}
+                  <img id="preview3" src="{{images.[3].image}}" alt="" />
+                  <span class="slot-uploaded-tick">✓</span>
+                {{else}}
+                  <img id="preview3" src="" alt="" style="display:none;" />
+                  <div class="photo-slot-placeholder" id="preview-text-3">
+                    <div class="slot-icon">📷</div>
+                    <span>Tap to add</span>
+                  </div>
+                {{/if}}
+              </div>
+              <input type="file" accept="image/*" class="d-none pic-input" data-slot="3" data-existing-id="{{images.[3].id}}" />
+              <label class="slot-upload-btn" onclick="document.querySelectorAll('.pic-input')[3].click()">
+                <span id="upload-label-3">{{#if (gt images.length 3)}}&#9998; Change{{else}}&#8679; Upload{{/if}}</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT: Template Preview -->
+      <div class="col-12 col-md-6">
+        <span class="section-label">Template Preview</span>
+        <div class="template-preview-wrap">
+          {{#each templates}}
+          <img src="{{this.image}}" alt="{{this.name}}" />
+          {{/each}}
+        </div>
       </div>
 
     </div>
 
-    <!-- Upload Input Row -->
-    <div class="row g-3 mt-3">
+    <hr class="upload-divider">
 
-      <!-- Only 1 upload slot is active -->
-      <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="0"
-            data-existing-id="{{images.[0].id}}" />
-          <span id="upload-label-0">
-            {{#if (gt images.length 0)}}Change Pic 1{{else}}Upload Pic 1{{/if}}
-          </span>
-        </label>
-      </div>
-       <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="1"
-            data-existing-id="{{images.[1].id}}" />
-          <span id="upload-label-1">{{#if (gt images.length 1)}}Change Pic 2{{else}}Upload Pic 2{{/if}}</span>
-        </label>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="2"
-            data-existing-id="{{images.[2].id}}" />
-          <span id="upload-label-2">{{#if (gt images.length 2)}}Change Pic 3{{else}}Upload Pic 3{{/if}}</span>
-        </label>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="upload-box w-100" style="cursor:pointer;">
-          <input type="file" accept="image/*" class="d-none pic-input"
-            data-slot="3"
-            data-existing-id="{{images.[3].id}}" />
-          <span id="upload-label-3">{{#if (gt images.length 3)}}Change Pic 4{{else}}Upload Pic 4{{/if}}</span>
-        </label>
-      </div>
-
-      <!-- Language Select -->
-      <div class="col-12 col-md-12 justify-content-center">
-        <select class="region-select mt-3" id="languageSelect">
-          <option value="">Select Language of Cutout</option>
-          <option value="HINDI"     {{#if (eq images.[0].language "HINDI")}}selected{{/if}}>HINDI</option>
-          <option value="ENGLISH"   {{#if (eq images.[0].language "ENGLISH")}}selected{{/if}}>ENGLISH</option>
-          <option value="ODIA"      {{#if (eq images.[0].language "ODIA")}}selected{{/if}}>ODIA</option>
-          <option value="PUNJABI"   {{#if (eq images.[0].language "PUNJABI")}}selected{{/if}}>PUNJABI</option>
-          <option value="BENGALI"   {{#if (eq images.[0].language "BENGALI")}}selected{{/if}}>BENGALI</option>
-          <option value="GUJARATI"  {{#if (eq images.[0].language "GUJARATI")}}selected{{/if}}>GUJARATI</option>
-          <option value="ASSAMESE"  {{#if (eq images.[0].language "ASSAMESE")}}selected{{/if}}>ASSAMESE</option>
-        </select>
-      </div>
-
+    <!-- ── Language Select ── -->
+    <div class="mb-3 mt-3">
+      <span class="section-label">Language of Cutout</span>
+      <select class="lang-select-styled" id="languageSelect">
+        <option value="">Select Language</option>
+        <option value="HINDI"    {{#if (eq images.[0].language "HINDI")}}selected{{/if}}>Hindi</option>
+        <option value="ENGLISH"  {{#if (eq images.[0].language "ENGLISH")}}selected{{/if}}>English</option>
+        <option value="ODIA"     {{#if (eq images.[0].language "ODIA")}}selected{{/if}}>Odia</option>
+        <option value="PUNJABI"  {{#if (eq images.[0].language "PUNJABI")}}selected{{/if}}>Punjabi</option>
+        <option value="BENGALI"  {{#if (eq images.[0].language "BENGALI")}}selected{{/if}}>Bengali</option>
+        <option value="GUJARATI" {{#if (eq images.[0].language "GUJARATI")}}selected{{/if}}>Gujarati</option>
+        <option value="ASSAMESE" {{#if (eq images.[0].language "ASSAMESE")}}selected{{/if}}>Assamese</option>
+      </select>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="text-center mt-4">
-      <a href="/" class="btn btn-login px-5 me-3"
-        style="border-radius: 50px; display: inline-block; text-decoration: none;">
-        Re-Listen
+    <!-- ── Action Buttons ── -->
+    <div class="d-flex gap-3 mt-3">
+      <a href="/" class="upload-btn-relisten">&#9654; Re-Listen</a>
+      <a href="#" id="processBtn"
+        class="upload-btn-process {{#unless (gt images.length 0)}}is-disabled{{/unless}}"
+        style="{{#if (gt images.length 0)}}opacity:1; pointer-events:auto;{{else}}opacity:0.45; pointer-events:none;{{/if}}">
+        Process Image &#8594;
       </a>
-
-      <!--
-        BUG FIX: Button was locked behind `images.length === 4`,
-        but only 1 upload slot exists now.
-        Fix: enable if at least 1 image already exists OR user has selected a new file.
-        JS handles dynamic enable/disable; this just sets the initial server-rendered state.
-      -->
-      <a href="#" id="processBtn" class="btn btn-login px-5"
-        style="border-radius: 50px; display: inline-block; text-decoration: none;
-               {{#if (gt images.length 0)}}opacity:1; pointer-events:auto;{{else}}opacity:0.5; pointer-events:none;{{/if}}">
-        Process Image
-      </a>
     </div>
 
+  </div>
   </div>
 </main>
 
 {{> dealerfooter}}
 
 <script>
-  // How many images already exist in DB for this dealer
   const totalExisting = {{images.length}};
-
-  // Tracks newly selected files: slot -> { file, existingId }
   const selectedFiles = {};
 
   function showAlert(type, message) {
     const el = document.getElementById("uploadAlert");
-    el.className = `alert alert-${type} alert-dismissible fade show`;
-    el.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-    el.style.setProperty("display", "block", "important");
+    const map = {
+      warning: { bg:"#fff8e1", color:"#b45309", border:"#fde68a" },
+      success: { bg:"#eaf3de", color:"#3b6d11", border:"#b7e09a" },
+      danger:  { bg:"#fcebeb", color:"#a32d2d", border:"#f5bcbc" }
+    };
+    const c = map[type] || map.warning;
+    el.style.cssText = `display:block; padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; background:${c.bg}; color:${c.color}; border:1px solid ${c.border}; margin-bottom:16px;`;
+    el.textContent = message;
   }
 
   function hideAlert() {
-    document.getElementById("uploadAlert").style.setProperty("display", "none", "important");
+    document.getElementById("uploadAlert").style.display = "none";
   }
 
   function setPreview(slot, file) {
     const img  = document.getElementById(`preview${slot}`);
     const text = document.getElementById(`preview-text-${slot}`);
     const lbl  = document.getElementById(`upload-label-${slot}`);
-
     if (!img) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       img.src = e.target.result;
       img.style.display = "block";
       if (text) text.style.display = "none";
-      if (lbl)  lbl.textContent = file.name.length > 12
-        ? file.name.substring(0, 12) + "…"
-        : file.name;
+      // add green tick dynamically
+      const box = img.closest('.photo-slot-box');
+      if (box && !box.querySelector('.slot-uploaded-tick')) {
+        const tick = document.createElement('span');
+        tick.className = 'slot-uploaded-tick';
+        tick.textContent = '✓';
+        box.appendChild(tick);
+      }
+      if (lbl) lbl.textContent = file.name.length > 10 ? file.name.substring(0,10)+"…" : file.name;
     };
     reader.readAsDataURL(file);
   }
 
-  /**
-   * BUG FIX: was checking (totalExisting + totalSelected) >= 4
-   * Now: ready if at least 1 image exists OR 1 file is newly selected
-   */
   function checkReady() {
-    const processBtn   = document.getElementById("processBtn");
+    const processBtn    = document.getElementById("processBtn");
     const totalSelected = Object.keys(selectedFiles).length;
-    const allReady = (totalExisting + totalSelected) >= 1;
-
-    processBtn.style.opacity       = allReady ? "1"    : "0.5";
+    const allReady      = (totalExisting + totalSelected) >= 1;
+    processBtn.style.opacity       = allReady ? "1"    : "0.45";
     processBtn.style.pointerEvents = allReady ? "auto" : "none";
   }
 
@@ -267,7 +491,6 @@
       const existingId = this.dataset.existingId || "";
       const file       = this.files[0];
       if (!file) return;
-
       selectedFiles[slot] = { file, existingId };
       setPreview(slot, file);
       hideAlert();
@@ -277,66 +500,43 @@
 
   async function uploadImages() {
     const language = document.getElementById("languageSelect").value;
-
-    if (!language) {
-      showAlert("warning", "Please select a language before uploading.");
-      return;
-    }
-
-    // All images already exist and nothing new was selected → go straight to final
-    if (totalExisting >= 1 && Object.keys(selectedFiles).length === 0) {
-      window.location.href = "/final-pic";
-      return;
-    }
-
-    if (Object.keys(selectedFiles).length === 0) {
-      showAlert("warning", "Please select an image to upload.");
-      return;
-    }
+    if (!language) { showAlert("warning", "Please select a language before uploading."); return; }
+    if (totalExisting >= 1 && Object.keys(selectedFiles).length === 0) { window.location.href = "/final-pic"; return; }
+    if (Object.keys(selectedFiles).length === 0) { showAlert("warning", "Please select an image to upload."); return; }
 
     const dealerId = "{{dealer.id}}";
     const formData = new FormData();
     formData.append("dealer_id", dealerId);
     formData.append("language", language);
-
     const slots    = Object.keys(selectedFiles).map(Number).sort((a, b) => a - b);
     const imageIds = slots.map((slot) => selectedFiles[slot].existingId || "");
-
-    slots.forEach((slot) => {
-      formData.append("images", selectedFiles[slot].file);
-    });
-
+    slots.forEach((slot) => { formData.append("images", selectedFiles[slot].file); });
     formData.append("image_ids", JSON.stringify(imageIds));
 
     const processBtn = document.getElementById("processBtn");
-    processBtn.textContent          = "Uploading…";
-    processBtn.style.pointerEvents  = "none";
-    processBtn.style.opacity        = "0.7";
+    processBtn.textContent = "Uploading…";
+    processBtn.style.pointerEvents = "none";
+    processBtn.style.opacity = "0.7";
 
     try {
-      const res  = await fetch("/upload-dealer-images", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res  = await fetch("/upload-dealer-images", { method: "POST", body: formData });
       const data = await res.json();
-
       if (data.success) {
         showAlert("success", "Images saved successfully!");
-        processBtn.textContent = "Process Image";
+        processBtn.textContent = "Process Image →";
         processBtn.style.opacity = "1";
         processBtn.style.pointerEvents = "auto";
         setTimeout(() => { window.location.href = "/final-pic"; }, 1000);
       } else {
         showAlert("danger", data.message || "Upload failed.");
-        processBtn.textContent = "Process Image";
+        processBtn.textContent = "Process Image →";
         processBtn.style.opacity = "1";
         processBtn.style.pointerEvents = "auto";
       }
     } catch (err) {
       console.error("Upload error:", err);
       showAlert("danger", "Something went wrong. Please try again.");
-      processBtn.textContent = "Process Image";
+      processBtn.textContent = "Process Image →";
       processBtn.style.opacity = "1";
       processBtn.style.pointerEvents = "auto";
     }

@@ -1,103 +1,204 @@
-
-
-
-
 {{> dealerheader dealer=dealer}}
 
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #000;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background: linear-gradient(135deg, #b3b8f0 0%, #8f94e0 40%, #9fa5e8 100%);
   }
 
   .video-wrapper {
     position: relative;
     width: 100%;
     flex: 1;
-    background: #000;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - 60px); /* header height minus karo */
+    min-height: calc(100vh - 60px);
+    padding: 24px 20px;
+  }
+
+  /* Bubbles */
+  .pbubble { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.15); pointer-events: none; }
+  .pb1 { width: 200px; height: 200px; top: -50px; right: 80px; }
+  .pb2 { width: 120px; height: 120px; bottom: 80px; right: 200px; }
+  .pb3 { width: 60px;  height: 60px;  top: 160px; right: 30px; background: rgba(124,111,224,0.3); }
+
+  /* Video card */
+  .video-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(100,90,200,0.18);
+    padding: 28px 28px 24px;
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .video-card-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    align-self: flex-start;
   }
 
   #dealerVideo {
     width: 100%;
-    height: 100%;
-    max-height: calc(100vh - 60px);
-    object-fit: contain; /* poora video visible rahega */
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #f4f3fc;
     display: block;
   }
 
+  /* Processing state */
   #processingMsg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 20px;
+    width: 100%;
     text-align: center;
-    background: rgba(0,0,0,0.6);
-    padding: 20px 30px;
-    border-radius: 12px;
-    backdrop-filter: blur(6px);
   }
 
   .spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255,255,255,0.2);
-    border-top-color: #fff;
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(124,111,224,0.15);
+    border-top-color: #7c6fe0;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .processing-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  .processing-sub {
+    font-size: 0.82rem;
+    color: #9ca3af;
+    margin-top: -6px;
   }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .btn-action {
+    flex: 1;
+    border-radius: 50px;
+    padding: 13px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.18s, transform 0.12s;
+    letter-spacing: 0.02em;
+  }
+  .btn-action:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid #7c6fe0;
+    color: #7c6fe0;
+  }
+  .btn-solid {
+    background: linear-gradient(90deg, #a89eea, #7c6fe0);
+    color: #fff;
+  }
+
+  @media (max-width: 600px) {
+    .video-card { padding: 20px 16px 18px; border-radius: 16px; }
+    .btn-action { font-size: 0.88rem; padding: 11px 0; }
   }
 </style>
 
 <div class="video-wrapper">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
 
-  <video id="dealerVideo" controls autoplay playsinline>
-    {{#if videoPath}}
-      <source src="{{videoPath}}" type="video/mp4">
-    {{else}}
-      <source src="/uploads/videos/default.mp4" type="video/mp4">
-    {{/if}}
-  </video>
+  <div class="video-card">
 
-  <div id="processingMsg" {{#if videoPath}}style="display:none"{{/if}}>
-    <div class="spinner"></div>
-     Aapka personalized video ban raha hai...
+    <span class="video-card-title">Your Personalised Video</span>
+
+    <!-- Video -->
+    <video id="dealerVideo" controls autoplay playsinline {{#unless videoPath}}style="display:none"{{/unless}}>
+      {{#if videoPath}}
+        <source src="{{videoPath}}" type="video/mp4">
+      {{else}}
+        <source src="/uploads/videos/default.mp4" type="video/mp4">
+      {{/if}}
+    </video>
+
+    <!-- Processing state -->
+    <div id="processingMsg" {{#if videoPath}}style="display:none"{{/if}}>
+      <div class="spinner"></div>
+      <p class="processing-text">Aapka personalized video ban raha hai...</p>
+      <p class="processing-sub">Thoda wait karein, yeh 1–2 minute le sakta hai.</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row" id="btnRow" style="display:{{#if videoPath}}flex{{else}}none{{/if}};">
+      <a href="javascript:void(0)" onclick="replayVideo()" class="btn-action btn-outline">
+        &#9654; Re-Listen
+      </a>
+      <a href="/upload-pic" class="btn-action btn-solid">
+        Next &#8594;
+      </a>
+    </div>
+
   </div>
-
 </div>
 
 <script>
-{{#unless videoPath}}
-const poll = setInterval(async () => {
-  try {
-    const res = await fetch('/video-status');
-    const data = await res.json();
-    if (data.status === 'ready' && data.videoPath) {
-      clearInterval(poll);
-      document.getElementById('processingMsg').style.display = 'none';
-      const video = document.getElementById('dealerVideo');
-      video.src = data.videoPath;
-      video.load();
-      video.play();
-    }
-  } catch(e) {
-    console.error('Poll error:', e);
+  function replayVideo() {
+    var video = document.getElementById('dealerVideo');
+    video.currentTime = 0;
+    video.play();
   }
-}, 3000);
-{{/unless}}
+
+  {{#unless videoPath}}
+  var poll = setInterval(async function () {
+    try {
+      var res  = await fetch('/video-status');
+      var data = await res.json();
+      if (data.status === 'ready' && data.videoPath) {
+        clearInterval(poll);
+
+        var video = document.getElementById('dealerVideo');
+        video.src = data.videoPath;
+        video.load();
+        video.play();
+        video.style.display = 'block';
+
+        document.getElementById('processingMsg').style.display = 'none';
+        document.getElementById('btnRow').style.display = 'flex';
+      }
+    } catch (e) {
+      console.error('Poll error:', e);
+    }
+  }, 3000);
+  {{/unless}}
 </script>
 
 {{> dealerfooter}}

@@ -1,17 +1,140 @@
- {{> dealerheader dealer=dealer}}
- 
- <main class="purple-main">
-      <div class="pbubble pb1"></div><div class="pbubble pb2"></div>
-      <div class="pbubble pb3"></div><div class="pbubble pb4"></div><div class="pbubble pb5"></div>
-      <div style="position:relative;z-index:2;width:100%;max-width:700px;">
- 
-        <div class="video-select-box mb-3" >
-       <p>Thank you for participating,
-        we will share printed picture at earliest.</p>
-        </div>
+{{> dealerheader dealer=dealer}}
 
-      </div>
-    </main>
+<style>
+.thankyou-card {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 24px;
+  padding: 48px 36px;
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
 
+.thankyou-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.30);
+  border: 2px solid rgba(255,255,255,0.60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
 
-      {{> dealerfooter}}
+.thankyou-heading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.thankyou-sub {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 360px;
+}
+
+.thankyou-divider {
+  width: 48px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.50);
+}
+
+.thankyou-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.40);
+  border-radius: 50px;
+  padding: 8px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.90);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.thankyou-home-btn {
+  display: inline-block;
+  padding: 13px 36px;
+  border-radius: 50px;
+  background: #fff;
+  color: #6c63c4;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: opacity 0.18s, transform 0.12s;
+  margin-top: 4px;
+}
+.thankyou-home-btn:hover {
+  opacity: 0.88;
+  color: #6c63c4;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+  .thankyou-card { padding: 36px 20px; }
+  .thankyou-heading { font-size: 1.35rem; }
+}
+</style>
+
+<main class="purple-main">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+  <div class="pbubble pb4"></div>
+  <div class="pbubble pb5"></div>
+
+  <div class="thankyou-card">
+
+    <!-- Icon -->
+    <div class="thankyou-icon">🎉</div>
+
+    <!-- Badge -->
+    <span class="thankyou-badge">
+      ✓ Submission Complete
+    </span>
+
+    <!-- Heading -->
+    <h1 class="thankyou-heading">Thank You!</h1>
+
+    <div class="thankyou-divider"></div>
+
+    <!-- Message -->
+    <p class="thankyou-sub">
+      Your photo has been received successfully.<br>
+      We'll get your personalised printed picture ready and share it with you at the earliest.
+    </p>
+
+    <p class="thankyou-sub" style="font-size:0.85rem; color:rgba(255,255,255,0.60); margin-top:-4px;">
+      We appreciate your participation with <strong style="color:rgba(255,255,255,0.85);">Nuvoco</strong>. 🙏
+    </p>
+
+    <!-- Home button -->
+    <a href="/" class="thankyou-home-btn">
+      &#8592; Back to Home
+    </a>
+
+  </div>
+</main>
+
+{{> dealerfooter}}

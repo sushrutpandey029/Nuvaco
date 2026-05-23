@@ -1,59 +1,242 @@
 {{> dealerheader }}
 
-<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
-  <div class="pbubble pb1"></div><div class="pbubble pb2"></div><div class="pbubble pb3"></div>
-  <div style="position:relative;z-index:2;width:100%;">
+<style>
+/* ── Final Pic Selection Page ── */
 
-    <!-- Alert -->
-    <div id="finalAlert" style="display:none;" class="mb-3"></div>
+.final-page-card {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 24px;
+  padding: 28px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
 
-    <div class="row g-3">
-      {{#each images}}
-      <div class="col-3">
-        <div class="pic-radio-wrap">
-          <input
-            type="radio"
-            name="dealerPic"
-            id="pic{{@index}}"
-            value="{{this.id}}"
-            class="final-pic-radio"
-          />
-          <label class="pic-box" for="pic{{@index}}">
-            <img
-              src="{{this.image}}"
-              height="230px"
-              width="230px"
-            />
-          </label>
-        </div>
-      </div>
-      {{/each}}
+.section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+  margin-bottom: 14px;
+  display: block;
+}
+
+/* ── Selectable image card ── */
+.final-pic-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.final-pic-item input[type="radio"] {
+  display: none;
+}
+
+.final-pic-card {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  background: rgba(255,255,255,0.15);
+  transition: border-color 0.2s, transform 0.18s, box-shadow 0.18s;
+  position: relative;
+}
+.final-pic-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  border-color: rgba(255,255,255,0.55);
+}
+
+/* Selected state */
+.final-pic-item input[type="radio"]:checked + .final-pic-card {
+  border-color: #fff;
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.30), 0 8px 28px rgba(0,0,0,0.20);
+  transform: translateY(-3px);
+}
+
+.final-pic-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+/* Checkmark overlay – hidden by default */
+.final-pic-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  color: #6c63c4;
+  font-size: 14px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.18s, transform 0.18s;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.final-pic-item input[type="radio"]:checked + .final-pic-card .final-pic-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Pic number badge */
+.pic-num-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  z-index: 3;
+  letter-spacing: 0.04em;
+}
+
+/* ── Divider ── */
+.upload-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.20);
+  margin: 20px 0;
+}
+
+/* ── Inline alert ── */
+#finalAlert {
+  display: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* ── Buttons ── */
+.final-btn-reupload {
+  flex: 1;
+  padding: 14px;
+  border-radius: 50px;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.60);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  transition: background 0.18s, transform 0.12s;
+}
+.final-btn-reupload:hover {
+  background: rgba(255,255,255,0.28);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.final-btn-submit {
+  flex: 1;
+  padding: 14px;
+  border-radius: 50px;
+  background: #fff;
+  border: 2px solid #fff;
+  color: #6c63c4;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.12s;
+}
+.final-btn-submit:hover { opacity: 0.88; color: #6c63c4; transform: translateY(-1px); }
+
+/* ── Hint text ── */
+.select-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 575px) {
+  .final-page-card { padding: 18px 14px; border-radius: 18px; }
+  .final-btn-reupload, .final-btn-submit { font-size: 0.88rem; padding: 12px; }
+}
+</style>
+
+<main class="purple-main" style="align-items:flex-start; padding-top:28px; padding-bottom:28px;">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+
+  <div style="position:relative; z-index:2; width:100%;">
+  <div class="final-page-card">
+
+    <!-- Inline alert -->
+    <div id="finalAlert"></div>
+
+    <!-- Section label -->
+    <span class="section-label">Preview Photos</span>
+<p class="select-hint mb-3">
+  Please preview your generated photos and continue to the next page.
+</p>
+    <!-- Image Grid -->
+ <div class="row g-3 mb-2">
+  {{#each images}}
+  <div class="col-6 col-md-3">
+    <div class="final-pic-card">
+      <img src="{{this.image}}" alt="Photo {{inc @index}}" />
+      <span class="pic-num-badge">Photo {{inc @index}}</span>
     </div>
+  </div>
+  {{/each}}
+</div>
 
-    <div class="text-center mt-4">
-      <a href="/upload-pic" class="btn btn-login me-3 px-5" style="border-radius:50px;display:inline-block;text-decoration:none;">
-        Re-upload
-      </a>
-      <a href="#" id="submitBtn" class="btn btn-login px-5" style="border-radius:50px;display:inline-block;text-decoration:none;opacity:0.5;pointer-events:none;">
-        Submit
-      </a>
-    </div>
+    <hr class="upload-divider">
 
+    <!-- Action Buttons -->
+  <div class="d-flex gap-3">
+  <a href="/upload-pic" class="final-btn-reupload">
+    &#8592; Back
+  </a>
+
+  <a href="/thankyou" class="final-btn-submit"
+     style="opacity:1; pointer-events:auto;">
+    Next &#8594;
+  </a>
+</div>
+
+  </div>
   </div>
 </main>
 
 {{> dealerfooter}}
 
-<script>
+{{!-- <script>
   function showAlert(type, message) {
     const el = document.getElementById("finalAlert");
-    el.className = `alert alert-${type} alert-dismissible fade show`;
-    el.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-    el.style.setProperty("display", "block", "important");
+    const map = {
+      warning: { bg:"#fff8e1", color:"#b45309", border:"#fde68a" },
+      success: { bg:"#eaf3de", color:"#3b6d11", border:"#b7e09a" },
+      danger:  { bg:"#fcebeb", color:"#a32d2d", border:"#f5bcbc" }
+    };
+    const c = map[type] || map.warning;
+    el.style.cssText = `display:block; padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; background:${c.bg}; color:${c.color}; border:1px solid ${c.border}; margin-bottom:16px;`;
+    el.textContent = message;
   }
 
   function hideAlert() {
-    document.getElementById("finalAlert").style.setProperty("display", "none", "important");
+    document.getElementById("finalAlert").style.display = "none";
   }
 
   // Enable submit when any radio is selected
@@ -76,33 +259,31 @@
     }
 
     const imageId = selected.value;
-
     this.textContent = "Submitting…";
     this.style.pointerEvents = "none";
     this.style.opacity = "0.7";
 
     try {
-      const res = await fetch("/save-final-image", {
+      const res  = await fetch("/save-final-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image_id: imageId }),
       });
-
       const data = await res.json();
 
       if (data.success) {
         window.location.href = "/thankyou";
       } else {
         showAlert("danger", data.message || "Submission failed.");
-        this.textContent = "Submit";
+        this.textContent = "Submit ✓";
         this.style.opacity = "1";
         this.style.pointerEvents = "auto";
       }
     } catch (err) {
       showAlert("danger", "Something went wrong. Please try again.");
-      this.textContent = "Submit";
+      this.textContent = "Submit ✓";
       this.style.opacity = "1";
       this.style.pointerEvents = "auto";
     }
   });
-</script>
+</script> --}}

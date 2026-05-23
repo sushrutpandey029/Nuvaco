@@ -1,5 +1,5 @@
 export const LANGUAGE_TEMPLATES = {
-  HINDI: "public/templates/hindi/templatebg.jpg",
+  HINDI: "public/templates/hindi/templatebg.jpeg",
 
   GUJARATI: "public/templates/gujarati/templatebg.jpg",
 
