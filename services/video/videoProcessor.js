@@ -8,9 +8,9 @@ export const spliceNameIntoVideo = async (
   baseVideoPath, nameAudioPath, nameTimestamp, outputPath
 ) => {
 
-  // Original video 4sec-6sec mute hoga — dynamic naam wahan bolega
-  const muteStart = nameTimestamp;      // 4 sec (DB se aata hai)
-  const muteEnd = nameTimestamp + 2.0;  // 6 sec (2 second window fixed)
+
+  const muteStart = nameTimestamp;      
+  const muteEnd = nameTimestamp + 2.0;  
 
   const { stdout } = await execAsync(
     `ffprobe -v quiet -print_format json -show_streams "${nameAudioPath}"`
@@ -19,7 +19,6 @@ export const spliceNameIntoVideo = async (
   const audioStream = probe.streams.find(s => s.codec_type === "audio");
   const nameDuration = parseFloat(audioStream?.duration || 1.5);
 
-  // Naam audio ko 2 sec window mein fit karo
   const clampedDuration = Math.min(nameDuration, 2.0);
 
   console.log(`Splice: mute=${muteStart}s to ${muteEnd}s, naam duration=${nameDuration}s, clamped=${clampedDuration}s`);
@@ -41,7 +40,7 @@ export const spliceNameIntoVideo = async (
     "${outputPath}"`;
 
   await execAsync(cmd);
-  console.log(`✅ Video spliced: ${outputPath}`);
+  console.log(`Video spliced: ${outputPath}`);
   return outputPath;
 };
 
@@ -49,7 +48,7 @@ export const cleanupTempFile = (filePath) => {
   try {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
-      console.log(`🗑️ Deleted: ${filePath}`);
+      console.log(`Deleted: ${filePath}`);
     }
   } catch (err) {
     console.warn("Cleanup warning:", err.message);

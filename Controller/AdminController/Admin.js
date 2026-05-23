@@ -2193,53 +2193,169 @@ export const rejectDealerImage = async (req, res) => {
   }
 };
 
+
+const sendApprovalSms = async (mobile_number, shop_name) => {
+  try {
+    const message = `Congratulations! Your image for ${shop_name} has been approved by Nuvoco. Thank you for participating. STRMCM`;
+
+    const params = {
+      APIKey: process.env.SMS_API_KEY,
+      senderid: process.env.SMS_SENDER_ID,
+      channel: "Trans",
+      DCS: 0,
+      flashsms: 0,
+      number: "91" + mobile_number,
+      text: message,
+      DLTTemplateId: process.env.SMS_TEMPLATE_ID_BANNER_APPROVED,
+      route: 0,
+      PEId: process.env.SMS_PE_ID,
+    };
+
+    const response = await axios.get(process.env.SMS_BASE_URL, { params });
+    console.log("Approval SMS Response =>", response.data);
+    return response.data ? true : false;
+  } catch (error) {
+    console.log("Approval SMS Error:", error.message);
+    return false;
+  }
+};
+
 export const submitFinalSelectedImage = async (req, res) => {
   try {
     const { dealer_id, selected_image } = req.body;
 
     if (!selected_image) {
       req.flash("error", "Please select image");
-
       return res.redirect(`dealer-image/${dealer_id}`);
     }
 
-    // Check already exists
+    
     const existing = await DealerFinalImage.findOne({
       where: { dealer_id },
     });
 
     if (existing) {
-      // Update existing
-      await existing.update({
-        image_id: selected_image,
-      });
+      await existing.update({ image_id: selected_image });
     } else {
-      // Create new
       await DealerFinalImage.create({
         dealer_id,
         image_id: selected_image,
       });
     }
 
-    // Update dealer status
+  
     await Dealer.update(
-      {
-        imageStatus: "approved",
-      },
-      {
-        where: { id: dealer_id },
-      },
+      { imageStatus: "approved" },
+      { where: { id: dealer_id } }
     );
 
+   
+    const dealer = await Dealer.findOne({
+      where: { id: dealer_id },
+      attributes: ["dealer_mobile_number", "shop_name"],
+      raw: true,
+    });
+
+    if (dealer && dealer.dealer_mobile_number) {
+      const smsSent = await sendApprovalSms(
+        dealer.dealer_mobile_number,
+        dealer.shop_name || "your shop"
+      );
+
+      if (!smsSent) {
+        console.log("⚠️ SMS failed but image approved successfully");
+      }
+    } else {
+      console.log("⚠️ Dealer mobile number not found, SMS skipped");
+    }
+
     req.flash("success", "Final image selected successfully");
-
     return res.redirect(`dealer-image/${dealer_id}`);
+
   } catch (err) {
-    console.log(err);
-
+    console.log("submitFinalSelectedImage Error =>", err);
     req.flash("error", "Error while selecting image");
-
     return res.redirect(`dealer-image/${dealer_id}`);
+  }
+};
+
+
+
+// export const submitFinalSelectedImage = async (req, res) => {
+//   try {
+//     const { dealer_id, selected_image } = req.body;
+
+//     if (!selected_image) {
+//       req.flash("error", "Please select image");
+
+//       return res.redirect(`dealer-image/${dealer_id}`);
+//     }
+
+//     // Check already exists
+//     const existing = await DealerFinalImage.findOne({
+//       where: { dealer_id },
+//     });
+
+//     if (existing) {
+//       // Update existing
+//       await existing.update({
+//         image_id: selected_image,
+//       });
+//     } else {
+//       // Create new
+//       await DealerFinalImage.create({
+//         dealer_id,
+//         image_id: selected_image,
+//       });
+//     }
+
+//     // Update dealer status
+//     await Dealer.update(
+//       {
+//         imageStatus: "approved",
+//       },
+//       {
+//         where: { id: dealer_id },
+//       },
+//     );
+
+//     req.flash("success", "Final image selected successfully");
+
+//     return res.redirect(`dealer-image/${dealer_id}`);
+//   } catch (err) {
+//     console.log(err);
+
+//     req.flash("error", "Error while selecting image");
+
+//     return res.redirect(`dealer-image/${dealer_id}`);
+//   }
+// };
+
+
+
+const sendRejectionSms = async (mobile_number) => {
+  try {
+    const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is 123456. STRMCM`;
+
+    const params = {
+      APIKey: process.env.SMS_API_KEY,
+      senderid: process.env.SMS_SENDER_ID,
+      channel: "Trans",
+      DCS: 0,
+      flashsms: 0,
+      number: "91" + mobile_number,
+      text: message,
+      DLTTemplateId: process.env.SMS_TEMPLATE_ID_BANNER_REJECTED,
+      route: 0,
+      PEId: process.env.SMS_PE_ID,
+    };
+
+    const response = await axios.get(process.env.SMS_BASE_URL, { params });
+    console.log("Rejection SMS Response =>", response.data);
+    return response.data ? true : false;
+  } catch (error) {
+    console.log("Rejection SMS Error:", error.message);
+    return false;
   }
 };
 
@@ -2248,88 +2364,137 @@ export const rejectDealerImages = async (req, res) => {
   try {
     if (!dealer_id) {
       req.flash("error", "Dealer ID required");
-
       return res.redirect("back");
     }
 
     const dealer = await Dealer.findOne({
-      where: {
-        id: dealer_id,
-      },
+      where: { id: dealer_id },
     });
 
     if (!dealer) {
       req.flash("error", "Dealer not found");
-
       return res.redirect("back");
     }
 
+   
     dealer.imageStatus = "rejected";
-
     await dealer.save();
 
+   
     await DealerFinalImage.destroy({
-      where: {
-        dealer_id,
-      },
+      where: { dealer_id },
     });
 
+  
     const mobile = dealer.dealer_mobile_number;
 
-    // =========================
-    // SEND SMS
-    // =========================
-
-    // if (mobile) {
-    //   const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is . STRMCM`;
-
-    //   const params = {
-    //     APIKey: process.env.SMS_API_KEY,
-
-    //     senderid: process.env.SMS_SENDER_ID,
-
-    //     channel: "Trans",
-
-    //     DCS: 0,
-
-    //     flashsms: 0,
-
-    //     number: "91" + mobile,
-
-    //     text: message,
-
-    //     DLTTemplateId: process.env.SMS_TEMPLATE_ID,
-
-    //     route: 0,
-
-    //     PEId: process.env.SMS_PE_ID,
-    //   };
-
-    //   console.log("SMS PARAMS =>", params);
-
-    //   const response = await axios.get(process.env.SMS_BASE_URL, { params });
-
-    //   console.log("SMS RESPONSE =>", response.data);
-    // }
-
-    // =========================
-    // SUCCESS
-    // =========================
+    if (mobile) {
+      const smsSent = await sendRejectionSms(mobile);
+      if (!smsSent) {
+        console.log("⚠️ SMS failed but images rejected successfully");
+      }
+    } else {
+      console.log("⚠️ Dealer mobile number not found, SMS skipped");
+    }
 
     req.flash("success", "Dealer images rejected successfully");
-
     return res.redirect(`dealer-image/${dealer_id}`);
+
   } catch (err) {
-    console.log(
-      "Reject Dealer Images Error =>",
-      err.response?.data || err.message,
-    );
-
+    console.log("Reject Dealer Images Error =>", err.response?.data || err.message);
     req.flash("error", "Error while rejecting dealer images");
-
     return res.redirect(`dealer-image/${dealer_id}`);
   }
 };
+
+
+// export const rejectDealerImages = async (req, res) => {
+//   const { dealer_id } = req.body;
+//   try {
+//     if (!dealer_id) {
+//       req.flash("error", "Dealer ID required");
+
+//       return res.redirect("back");
+//     }
+
+//     const dealer = await Dealer.findOne({
+//       where: {
+//         id: dealer_id,
+//       },
+//     });
+
+//     if (!dealer) {
+//       req.flash("error", "Dealer not found");
+
+//       return res.redirect("back");
+//     }
+
+//     dealer.imageStatus = "rejected";
+
+//     await dealer.save();
+
+//     await DealerFinalImage.destroy({
+//       where: {
+//         dealer_id,
+//       },
+//     });
+
+//     const mobile = dealer.dealer_mobile_number;
+
+//     // =========================
+//     // SEND SMS
+//     // =========================
+
+//     // if (mobile) {
+//     //   const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is . STRMCM`;
+
+//     //   const params = {
+//     //     APIKey: process.env.SMS_API_KEY,
+
+//     //     senderid: process.env.SMS_SENDER_ID,
+
+//     //     channel: "Trans",
+
+//     //     DCS: 0,
+
+//     //     flashsms: 0,
+
+//     //     number: "91" + mobile,
+
+//     //     text: message,
+
+//     //     DLTTemplateId: process.env.SMS_TEMPLATE_ID,
+
+//     //     route: 0,
+
+//     //     PEId: process.env.SMS_PE_ID,
+//     //   };
+
+//     //   console.log("SMS PARAMS =>", params);
+
+//     //   const response = await axios.get(process.env.SMS_BASE_URL, { params });
+
+//     //   console.log("SMS RESPONSE =>", response.data);
+//     // }
+
+//     // =========================
+//     // SUCCESS
+//     // =========================
+
+//     req.flash("success", "Dealer images rejected successfully");
+
+//     return res.redirect(`dealer-image/${dealer_id}`);
+//   } catch (err) {
+//     console.log(
+//       "Reject Dealer Images Error =>",
+//       err.response?.data || err.message,
+//     );
+
+//     req.flash("error", "Error while rejecting dealer images");
+
+//     return res.redirect(`dealer-image/${dealer_id}`);
+//   }
+// };
 
 export const renderDownloadDealerImage = async (req, res) => {
   try {
