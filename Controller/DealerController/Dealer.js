@@ -479,6 +479,7 @@ export const uploadDealerImages = async (req, res) => {
       // =========================
 
       const admins = await AdminModel.findAll({
+        where:{role:"ADMIN"},
         attributes: ["email"],
       });
 

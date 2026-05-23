@@ -1,31 +1,43 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../DBConnection/mysqlconnetion.js";
 
-const AdminModel = sequelize.define('nuvaco_admin', {
-  fullname: {
-    type: DataTypes.STRING,
-    allowNull: false,
+const AdminModel = sequelize.define(
+  "nuvaco_admin",
+  {
+   role: {
+      type: DataTypes.ENUM(
+        "ADMIN",
+        "STORM"
+      ),
+      allowNull: false,
+      defaultValue: "ADMIN",
+    },
+    fullname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    phonenumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    accessToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  {
+    tableName: "nuvaco_admins",
+    timestamps: true,
   },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  phonenumber: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  accessToken: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    defaultValue: null
-  },
-}, {
-  tableName: 'nuvaco_admins',
-  timestamps: true,
-});
+);
 
 export default AdminModel;
