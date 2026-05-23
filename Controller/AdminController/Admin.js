@@ -17,78 +17,184 @@ import DealerImage from "../../Model/dealer/DealerImage.js";
 import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 import ExcelJS from "exceljs";
 
+// export const AdminRegister = async (req, res) => {
+//   try {
+//     const { fullname, email, password, phonenumber } = req.body;
+
+//     if (!fullname || !email || !password || !phonenumber) {
+//       return res.status(400).json({ message: "All fields are required" });
+//     }
+
+//     const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
+//     if (isDuplicateEmail) {
+//       return res.status(400).json({ message: "Email already exists" });
+//     }
+
+//     const hashpassword = await bcrypt.hash(password, 10);
+
+//     const newAdmin = await AdminModel.create({
+//       fullname,
+//       email,
+//       password: hashpassword,
+//       phonenumber,
+//     });
+
+//     await sendMail({
+//       to: newAdmin.email,
+//       subject: "Welcome to Nuvaco",
+//       html: `
+//   <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:20px;">
+//     <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:30px;">
+
+//       <h2 style="color:#333; text-align:center;">Welcome to Nuvaco</h2>
+
+//       <p style="font-size:16px; color:#555;">
+//         Hi <strong>${newAdmin.fullname}</strong>,
+//       </p>
+
+//       <p style="font-size:15px; color:#555;">
+//         Your admin account has been successfully created. You can now access the platform using your credentials below:
+//       </p>
+
+//       <div style="background:#f1f1f1; padding:15px; border-radius:6px; margin:20px 0;">
+//         <p style="margin:5px 0;"><strong>Email:</strong> ${newAdmin.email}</p>
+//         <p style="margin:5px 0;"><strong>Password:</strong> ${password}</p>
+//       </div>
+
+//       <p style="font-size:14px; color:#777;">
+//         For security reasons, we recommend changing your password after your first login.
+//       </p>
+
+//       <div style="text-align:center; margin:30px 0;">
+//         <a href="http://localhost:3000/"
+//            style="background:#007bff; color:#fff; padding:12px 20px; text-decoration:none; border-radius:5px;">
+//           Login to Dashboard
+//         </a>
+//       </div>
+
+//       <p style="font-size:12px; color:#aaa; text-align:center;">
+//         © ${new Date().getFullYear()} Nuvaco. All rights reserved.
+//       </p>
+
+//     </div>
+//   </div>
+//   `,
+//     });
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Admin registered successfully",
+//       data: newAdmin,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// };
+
 export const AdminRegister = async (req, res) => {
   try {
-    const { fullname, email, password, phonenumber } = req.body;
+    const { fullname, email, password, phonenumber, role } = req.body;
 
-    if (!fullname || !email || !password || !phonenumber) {
-      return res.status(400).json({ message: "All fields are required" });
+    // =========================
+    // VALIDATION
+    // =========================
+
+    if (!fullname || !email || !password || !phonenumber || !role) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
-    const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
+    // =========================
+    // VALID ROLE
+    // =========================
+
+    const allowedRoles = ["ADMIN", "STORM"];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
+
+    // =========================
+    // DUPLICATE EMAIL
+    // =========================
+
+    const isDuplicateEmail = await AdminModel.findOne({
+      where: { email },
+    });
+
     if (isDuplicateEmail) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({
+        message: "Email already exists",
+      });
     }
+
+    // =========================
+    // HASH PASSWORD
+    // =========================
 
     const hashpassword = await bcrypt.hash(password, 10);
 
+    // =========================
+    // CREATE ADMIN
+    // =========================
+
     const newAdmin = await AdminModel.create({
+      role,
+
       fullname,
+
       email,
+
       password: hashpassword,
+
       phonenumber,
     });
 
+    // =========================
+    // SEND MAIL
+    // =========================
+
     await sendMail({
       to: newAdmin.email,
-      subject: "Welcome to Nuvaco",
-      html: `
-  <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:20px;">
-    <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:30px;">
-      
-      <h2 style="color:#333; text-align:center;">Welcome to Nuvaco</h2>
-      
-      <p style="font-size:16px; color:#555;">
-        Hi <strong>${newAdmin.fullname}</strong>,
-      </p>
 
-      <p style="font-size:15px; color:#555;">
-        Your admin account has been successfully created. You can now access the platform using your credentials below:
-      </p>
+      subject: "Welcome to Nuvoco",
 
-      <div style="background:#f1f1f1; padding:15px; border-radius:6px; margin:20px 0;">
-        <p style="margin:5px 0;"><strong>Email:</strong> ${newAdmin.email}</p>
-        <p style="margin:5px 0;"><strong>Password:</strong> ${password}</p>
-      </div>
+      template: "admin/welcomeAdmin",
 
-      <p style="font-size:14px; color:#777;">
-        For security reasons, we recommend changing your password after your first login.
-      </p>
+      context: {
+        fullname: newAdmin.fullname,
 
-      <div style="text-align:center; margin:30px 0;">
-        <a href="http://localhost:3000/" 
-           style="background:#007bff; color:#fff; padding:12px 20px; text-decoration:none; border-radius:5px;">
-          Login to Dashboard
-        </a>
-      </div>
+        email: newAdmin.email,
 
-      <p style="font-size:12px; color:#aaa; text-align:center;">
-        © ${new Date().getFullYear()} Nuvaco. All rights reserved.
-      </p>
+        password,
 
-    </div>
-  </div>
-  `,
+        role: newAdmin.role,
+
+        loginUrl: process.env.ADMIN_PANEL_URL,
+      },
     });
+
+    // =========================
+    // RESPONSE
+    // =========================
 
     return res.status(201).json({
       success: true,
+
       message: "Admin registered successfully",
+
       data: newAdmin,
     });
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",
+
       error: error.message,
     });
   }
@@ -152,7 +258,11 @@ export const adminlogin = async (req, res) => {
     // ✅ 6. Store session (simple login)
     req.session.admin = {
       id: admin.id,
+
+      role: admin.role,
+
       email: admin.email,
+
       fullname: admin.fullname,
     };
 
