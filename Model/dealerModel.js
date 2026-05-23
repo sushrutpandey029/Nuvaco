@@ -65,7 +65,7 @@ const Dealer = sequelize.define(
     imageStatus: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: "pending",
+      defaultValue: "not_uploaded",
     },
   },
   {

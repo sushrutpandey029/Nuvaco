@@ -2331,13 +2331,66 @@ export const rejectDealerImages = async (req, res) => {
   }
 };
 
+// export const renderDownloadDealerImage = async (req, res) => {
+//   try {
+//     const dealers = await Dealer.findAll({
+//       where: { isImageUploaded: "yes", imageStatus: "approved" },
+//       raw: true,
+//     });
+//     console.log("dealer list", dealers.slice(0, 5));
+//     res.render("admin/download-image", { data: dealers });
+//   } catch (err) {
+//     console.log("error in geting dealer list", err.response);
+//   }
+// };
+
 export const renderDownloadDealerImage = async (req, res) => {
   try {
-    const dealers = await Dealer.findAll({ raw: true });
-    console.log("region vide", dealers.slice(0, 5));
-    res.render("admin/download-image", { data: dealers });
+    const status = req.query.status || "approved";
+
+    const dealers = await Dealer.findAll({
+      where: {
+        isImageUploaded: "yes",
+        imageStatus: status,
+      },
+
+      raw: true,
+    });
+    console.log("dealer in render down inage", dealers);
+    res.render("admin/download-image", {
+      data: dealers,
+      selectedStatus: status,
+    });
   } catch (err) {
-    console.log("error in geting dealer list", err.response);
+    console.log("error in getting dealer list", err);
+  }
+};
+
+export const sendForPrint = async (req, res) => {
+  try {
+    const { dealer_id } = req.body;
+    console.log("deler id in send print", dealer_id);
+    await Dealer.update(
+      {
+        imageStatus: "completed",
+      },
+      {
+        where: {
+          id: dealer_id,
+        },
+      },
+    );
+
+    return res.json({
+      success: true,
+    });
+  } catch (err) {
+    console.log(err);
+
+    return res.json({
+      success: false,
+      message: "Error updating status",
+    });
   }
 };
 
@@ -2390,6 +2443,8 @@ export const getDealerFinalImage = async (req, res) => {
       success: true,
 
       data: {
+        dealer_id: dealer.id,
+
         dealer_name: dealer.shop_name,
 
         dealer_code: dealer.dealer_code,
@@ -2404,5 +2459,129 @@ export const getDealerFinalImage = async (req, res) => {
       success: false,
       message: "Error in fetching dealer image",
     });
+  }
+};
+
+export const downloadDealerImageExcel = async (req, res) => {
+  try {
+    const status = req.query.status || "approved";
+
+    const dealers = await Dealer.findAll({
+      where: {
+        isImageUploaded: "yes",
+        imageStatus: status,
+      },
+
+      raw: true,
+    });
+
+    // =========================
+    // EXCEL
+    // =========================
+
+    const workbook = new ExcelJS.Workbook();
+
+    const worksheet = workbook.addWorksheet("Dealers");
+
+    // =========================
+    // COLUMNS
+    // =========================
+
+    worksheet.columns = [
+      {
+        header: "Dealer Code",
+        key: "dealer_code",
+        width: 20,
+      },
+
+      {
+        header: "Dealer Name",
+        key: "dealer_person",
+        width: 25,
+      },
+
+      {
+        header: "Shop Name",
+        key: "shop_name",
+        width: 30,
+      },
+
+      {
+        header: "State",
+        key: "state",
+        width: 20,
+      },
+
+      {
+        header: "District",
+        key: "district",
+        width: 20,
+      },
+
+      {
+        header: "Mobile",
+        key: "dealer_mobile_number",
+        width: 20,
+      },
+
+      {
+        header: "Status",
+        key: "imageStatus",
+        width: 20,
+      },
+
+      // {
+      //   header: "Image URL",
+      //   key: "image_url",
+      //   width: 60,
+      // },
+    ];
+
+    // =========================
+    // ROWS
+    // =========================
+
+    dealers.forEach((dealer) => {
+      worksheet.addRow({
+        dealer_code: dealer.dealer_code,
+
+        dealer_person: dealer.dealer_person,
+
+        shop_name: dealer.shop_name,
+
+        state: dealer.state,
+
+        district: dealer.district,
+
+        dealer_mobile_number: dealer.dealer_mobile_number,
+
+        imageStatus: dealer.imageStatus,
+
+        // image_url:
+        //   `${process.env.FILE_BASE_URL}${dealer.finalImage || ""}`,
+      });
+    });
+
+    // =========================
+    // RESPONSE
+    // =========================
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${status}-dealers.xlsx`,
+    );
+
+    await workbook.xlsx.write(res);
+
+    res.end();
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).send("Error downloading excel");
   }
 };

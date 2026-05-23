@@ -479,7 +479,7 @@ export const uploadDealerImages = async (req, res) => {
       // =========================
 
       const admins = await AdminModel.findAll({
-        where:{role:"ADMIN"},
+        where: { role: "ADMIN" },
         attributes: ["email"],
       });
 
@@ -520,6 +520,8 @@ export const uploadDealerImages = async (req, res) => {
             language,
 
             totalImages,
+             adminPanelUrl:
+    process.env.ADMIN_PANEL_URL,
           },
         });
       }

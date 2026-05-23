@@ -32,6 +32,7 @@
             <th>Shop Name</th>
            
             <th>Pic Uploaded</th>
+            <th>Status</th>
             <th>Action</th>
             <th>Image</th>
           </tr>
@@ -59,7 +60,7 @@
         <span style="color:#c62828;font-weight:600;">No</span>
       {{/if}}
     </td>
-
+  <td>{{this.imageStatus}}</td>
     <td>
       <a href="dealerdetail/{{this.id}}" class="view-link">View</a>
       <a href="/admin/editdealer/{{this.id}}" class="view-link">

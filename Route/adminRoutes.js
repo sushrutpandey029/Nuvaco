@@ -30,6 +30,8 @@ import {
   rejectDealerImages,
   renderDownloadDealerImage,
   getDealerFinalImage,
+  sendForPrint,
+  downloadDealerImageExcel,
 } from "../Controller/AdminController/Admin.js";
 import dealerUpload from "../middlewares/dealerUpload.js";
 import { upload } from "../middlewares/shopimageupload.js";
@@ -105,5 +107,15 @@ adminrouter.post("/reject-dealer-images", rejectDealerImages);
 adminrouter.get("/download-image", renderDownloadDealerImage);
 
 adminrouter.post("/get-dealer-final-image", getDealerFinalImage);
+
+adminrouter.post(
+  "/send-for-print",
+  sendForPrint,
+);
+
+adminrouter.get(
+  "/download-image-excel",
+  downloadDealerImageExcel,
+);
 
 export default adminrouter;
