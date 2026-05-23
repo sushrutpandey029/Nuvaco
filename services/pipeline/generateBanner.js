@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-
 import { removeBackgroundOpenAI } from "../openai/removeBg.service.js";
 // import { transliterateTagline } from "../openai/transliterate.service.js";
 //  import { replaceTemplateText } from "../image/replaceTemplateText.service.js";
@@ -28,8 +27,6 @@ import { LANGUAGE_TEMPLATES } from "../image/template.config.js";
 //   bullet3: "लीकेज प्रूफ",
 // };
 
-
-
 // DEBUG OUTPUT DIR — remove after testing
 const DEBUG_DIR = "public/debug";
 
@@ -42,12 +39,11 @@ export const generateBanner = async ({
   console.log("Language:", language);
   console.log("Original file:", originalName);
 
-  const TEMPLATE_PATH =
-  LANGUAGE_TEMPLATES[language?.toUpperCase()];
+  const TEMPLATE_PATH = LANGUAGE_TEMPLATES[language?.toUpperCase()];
 
-if (!TEMPLATE_PATH) {
-  throw new Error(`Invalid language: ${language}`);
-}
+  if (!TEMPLATE_PATH) {
+    throw new Error(`Invalid language: ${language}`);
+  }
 
   // Validate template
   if (!fs.existsSync(TEMPLATE_PATH)) {
@@ -95,22 +91,20 @@ if (!TEMPLATE_PATH) {
     // AI never touches this step — face is pixel-locked by Sharp.
     // ─────────────────────────────
 
-    console.log(
-      "STEP 2: Compositing person + products onto language template",
-    );
+    console.log("STEP 2: Compositing person + products onto language template");
 
     let finalBannerBuffer;
 
     try {
-     finalBannerBuffer = await replacePersonInBanner({
-  templatePath: TEMPLATE_PATH,
-  personBuffer: removedBgBuffer,
-});
+      finalBannerBuffer = await replacePersonInBanner({
+        templatePath: TEMPLATE_PATH,
+        personBuffer: removedBgBuffer,
+      });
     } catch (compositeError) {
       throw new Error(`Banner compositing failed: ${compositeError.message}`);
     }
     finalBannerBuffer = await enhanceBanner(finalBannerBuffer);
-   
+
     // DEBUG — save final composite
     const debugFinalPath = path.join(DEBUG_DIR, "step4_final_banner.jpg");
     fs.writeFileSync(debugFinalPath, finalBannerBuffer);

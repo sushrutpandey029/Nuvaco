@@ -186,42 +186,35 @@
     <div id="finalAlert"></div>
 
     <!-- Section label -->
-    <span class="section-label">Select Your Best Photo</span>
-    <p class="select-hint mb-3">Tap a photo to select it, then hit Submit</p>
-
+    <span class="section-label">Preview Photos</span>
+<p class="select-hint mb-3">
+  Please preview your generated photos and continue to the next page.
+</p>
     <!-- Image Grid -->
-    <div class="row g-3 mb-2">
-      {{#each images}}
-      <div class="col-6 col-md-3">
-        <label class="final-pic-item d-block">
-          <input
-            type="radio"
-            name="dealerPic"
-            id="pic{{@index}}"
-            value="{{this.id}}"
-            class="final-pic-radio"
-          />
-          <div class="final-pic-card">
-            <img src="{{this.image}}" alt="Photo {{inc @index}}" />
-            <span class="pic-num-badge">Photo {{inc @index}}</span>
-            <span class="final-pic-check">✓</span>
-          </div>
-        </label>
-      </div>
-      {{/each}}
+ <div class="row g-3 mb-2">
+  {{#each images}}
+  <div class="col-6 col-md-3">
+    <div class="final-pic-card">
+      <img src="{{this.image}}" alt="Photo {{inc @index}}" />
+      <span class="pic-num-badge">Photo {{inc @index}}</span>
     </div>
+  </div>
+  {{/each}}
+</div>
 
     <hr class="upload-divider">
 
     <!-- Action Buttons -->
-    <div class="d-flex gap-3">
-      <a href="/upload-pic" class="final-btn-reupload">&#8592; Re-upload</a>
-      <a href="#" id="submitBtn"
-        class="final-btn-submit"
-        style="opacity:0.45; pointer-events:none;">
-        Submit &#10003;
-      </a>
-    </div>
+  <div class="d-flex gap-3">
+  <a href="/upload-pic" class="final-btn-reupload">
+    &#8592; Back
+  </a>
+
+  <a href="/thankyou" class="final-btn-submit"
+     style="opacity:1; pointer-events:auto;">
+    Next &#8594;
+  </a>
+</div>
 
   </div>
   </div>
@@ -229,7 +222,7 @@
 
 {{> dealerfooter}}
 
-<script>
+{{!-- <script>
   function showAlert(type, message) {
     const el = document.getElementById("finalAlert");
     const map = {
@@ -293,4 +286,4 @@
       this.style.pointerEvents = "auto";
     }
   });
-</script>
+</script> --}}

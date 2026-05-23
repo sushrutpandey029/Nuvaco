@@ -1,6 +1,7 @@
 import AdminModel from "../../Model/adminModel.js";
 import { sendMail } from "../../utils/mailer.js";
 
+
 import Dealer from "../../Model/dealerModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import SalesSpoc from "../../Model/salesSpocModel.js";
@@ -2220,6 +2221,66 @@ const sendApprovalSms = async (mobile_number, shop_name) => {
   }
 };
 
+// export const submitFinalSelectedImage = async (req, res) => {
+//   try {
+//     const { dealer_id, selected_image } = req.body;
+
+//     if (!selected_image) {
+//       req.flash("error", "Please select image");
+//       return res.redirect(`dealer-image/${dealer_id}`);
+//     }
+
+    
+//     const existing = await DealerFinalImage.findOne({
+//       where: { dealer_id },
+//     });
+
+//     if (existing) {
+//       await existing.update({ image_id: selected_image });
+//     } else {
+//       await DealerFinalImage.create({
+//         dealer_id,
+//         image_id: selected_image,
+//       });
+//     }
+
+  
+//     await Dealer.update(
+//       { imageStatus: "approved" },
+//       { where: { id: dealer_id } }
+//     );
+
+   
+//     const dealer = await Dealer.findOne({
+//       where: { id: dealer_id },
+//       attributes: ["dealer_mobile_number", "shop_name"],
+//       raw: true,
+//     });
+
+//     if (dealer && dealer.dealer_mobile_number) {
+//       const smsSent = await sendApprovalSms(
+//         dealer.dealer_mobile_number,
+//         dealer.shop_name || "your shop"
+//       );
+
+//       if (!smsSent) {
+//         console.log("⚠️ SMS failed but image approved successfully");
+//       }
+//     } else {
+//       console.log("⚠️ Dealer mobile number not found, SMS skipped");
+//     }
+
+//     req.flash("success", "Final image selected successfully");
+//     return res.redirect(`dealer-image/${dealer_id}`);
+
+//   } catch (err) {
+//     console.log("submitFinalSelectedImage Error =>", err);
+//     req.flash("error", "Error while selecting image");
+//     return res.redirect(`dealer-image/${dealer_id}`);
+//   }
+// };
+
+
 export const submitFinalSelectedImage = async (req, res) => {
   try {
     const { dealer_id, selected_image } = req.body;
@@ -2229,21 +2290,14 @@ export const submitFinalSelectedImage = async (req, res) => {
       return res.redirect(`dealer-image/${dealer_id}`);
     }
 
-    
-    const existing = await DealerFinalImage.findOne({
-      where: { dealer_id },
-    });
+    const existing = await DealerFinalImage.findOne({ where: { dealer_id } });
 
     if (existing) {
       await existing.update({ image_id: selected_image });
     } else {
-      await DealerFinalImage.create({
-        dealer_id,
-        image_id: selected_image,
-      });
+      await DealerFinalImage.create({ dealer_id, image_id: selected_image });
     }
 
-  
     await Dealer.update(
       { imageStatus: "approved" },
       { where: { id: dealer_id } }
@@ -2252,21 +2306,33 @@ export const submitFinalSelectedImage = async (req, res) => {
    
     const dealer = await Dealer.findOne({
       where: { id: dealer_id },
-      attributes: ["dealer_mobile_number", "shop_name"],
       raw: true,
     });
 
-    if (dealer && dealer.dealer_mobile_number) {
-      const smsSent = await sendApprovalSms(
-        dealer.dealer_mobile_number,
-        dealer.shop_name || "your shop"
-      );
+    
+    if (dealer?.dealer_mobile_number) {
+      const smsSent = await sendApprovalSms(dealer.dealer_mobile_number);
+      if (!smsSent) console.log("⚠️ Approval SMS failed");
+    }
 
-      if (!smsSent) {
-        console.log("⚠️ SMS failed but image approved successfully");
-      }
-    } else {
-      console.log("⚠️ Dealer mobile number not found, SMS skipped");
+  
+    if (dealer) {
+      await sendMail({
+        to: "sushrutpandey1@gmail.com",
+        subject: "✅ Dealer Image Approved",
+        template: "dealerImageApproved",
+        context: {
+          dealerId: dealer.id,
+          dealerCode: dealer.dealer_code,
+          shopName: dealer.shop_name,
+          dealerPerson: dealer.dealer_person,
+          mobile: dealer.dealer_mobile_number,
+          state: dealer.state,
+          district: dealer.district,
+          selectedImageId: selected_image,
+        },
+      });
+      console.log("Approval email sent");
     }
 
     req.flash("success", "Final image selected successfully");
@@ -2278,7 +2344,6 @@ export const submitFinalSelectedImage = async (req, res) => {
     return res.redirect(`dealer-image/${dealer_id}`);
   }
 };
-
 
 
 // export const submitFinalSelectedImage = async (req, res) => {
@@ -2359,6 +2424,8 @@ const sendRejectionSms = async (mobile_number) => {
   }
 };
 
+
+
 export const rejectDealerImages = async (req, res) => {
   const { dealer_id } = req.body;
   try {
@@ -2406,6 +2473,58 @@ export const rejectDealerImages = async (req, res) => {
     return res.redirect(`dealer-image/${dealer_id}`);
   }
 };
+
+// export const rejectDealerImages = async (req, res) => {
+//   const { dealer_id } = req.body;
+//   try {
+//     if (!dealer_id) {
+//       req.flash("error", "Dealer ID required");
+//       return res.redirect("back");
+//     }
+
+//     const dealer = await Dealer.findOne({ where: { id: dealer_id } });
+
+//     if (!dealer) {
+//       req.flash("error", "Dealer not found");
+//       return res.redirect("back");
+//     }
+
+//     dealer.imageStatus = "rejected";
+//     await dealer.save();
+
+//     await DealerFinalImage.destroy({ where: { dealer_id } });
+
+//     if (dealer.dealer_mobile_number) {
+//       const smsSent = await sendRejectionSms(dealer.dealer_mobile_number);
+//       if (!smsSent) console.log("⚠️ Rejection SMS failed");
+//     }
+
+
+//     await sendMail({
+//       to: "sushrutpandey1@gmail.com",
+//       subject: "Dealer Image Rejected",
+//       template: "dealerImageRejected",
+//       context: {
+//         dealerId: dealer.id,
+//         dealerCode: dealer.dealer_code,
+//         shopName: dealer.shop_name,
+//         dealerPerson: dealer.dealer_person,
+//         mobile: dealer.dealer_mobile_number,
+//         state: dealer.state,
+//         district: dealer.district,
+//       },
+//     });
+//     console.log("Rejection email sent");
+
+//     req.flash("success", "Dealer images rejected successfully");
+//     return res.redirect(`dealer-image/${dealer_id}`);
+
+//   } catch (err) {
+//     console.log("Reject Dealer Images Error =>", err.response?.data || err.message);
+//     req.flash("error", "Error while rejecting dealer images");
+//     return res.redirect(`dealer-image/${dealer_id}`);
+//   }
+// };
 
 
 // export const rejectDealerImages = async (req, res) => {

@@ -23,6 +23,7 @@ export const getPersonalizedVideo = async (dealer) => {
     const cached = await CachedVideo.findOne({
         where: { dealer_id: dealerId, status: "ready" },
     });
+    console.log("cached in vido piplein",cached)
 
     if (cached) {
         const absPath = path.join(ROOT, "public", cached.video_path);
@@ -34,7 +35,7 @@ export const getPersonalizedVideo = async (dealer) => {
     }
 
     let messageConfig = await MessageModel.findOne({ where: { state } });
-
+console.log("message config",messageConfig)
     if (!messageConfig) {
         console.warn(`No config for state: ${state}, trying default...`);
         messageConfig = await MessageModel.findOne({ where: { state: "default" } });
