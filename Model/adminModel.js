@@ -11,7 +11,7 @@ const AdminModel = sequelize.define(
       ),
       allowNull: false,
       defaultValue: "ADMIN",
-    },
+    }, 
     fullname: {
       type: DataTypes.STRING,
       allowNull: false,
