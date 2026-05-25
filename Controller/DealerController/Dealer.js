@@ -71,7 +71,9 @@ export const videoStatus = async (req, res) => {
 
 export const sendSmsOtp = async (dealer_mobile_number, otp) => {
   try {
-    const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
+    // const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
+
+    const message = `Hi, Thank you for joining the Mera Bharosa Campaign! Your OTP for registration is ${otp}. This OTP is valid for 10 minutes.`;
 
     const params = {
       APIKey: process.env.SMS_API_KEY,
