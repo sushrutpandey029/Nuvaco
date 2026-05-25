@@ -469,6 +469,8 @@ export const uploadDealerImages = async (req, res) => {
             language,
 
             totalImages,
+             adminPanelUrl:
+    process.env.ADMIN_PANEL_URL,
           },
         });
       }

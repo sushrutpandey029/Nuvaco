@@ -24,66 +24,135 @@
     <div class="dealer-detail-card">
 
       <h2 class="detail-title">
-        Download Dealer Image
+        Download Dealer Images
       </h2>
 
-      <!-- Dropdown -->
-      <div style="margin-top:30px;">
+      <div
+  style="
+    display:flex;
+    gap:12px;
+    margin-bottom:20px;
+    align-items:center;
+  "
+>
 
-        <label
-          style="
-            font-weight:600;
-            margin-bottom:10px;
-            display:block;
-          "
+  <select
+    id="statusFilter"
+    style="
+      padding:10px;
+      border-radius:8px;
+    "
+  >
+
+    <option
+      value="approved"
+      {{#if (eq selectedStatus "approved")}}
+        selected
+      {{/if}}
+    >
+      Approved
+    </option>
+
+    <option
+      value="completed"
+      {{#if (eq selectedStatus "completed")}}
+        selected
+      {{/if}}
+    >
+      Completed
+    </option>
+
+  </select>
+
+  <a
+    href="/admin/download-image-excel?status={{selectedStatus}}"
+    class="add-btn"
+  >
+    Download Excel
+  </a>
+
+</div>
+
+      <!-- TABLE -->
+      <div
+        class="table-scroll-wrap"
+        style="margin-top:30px;"
+      >
+
+        <table
+          id="dataTable"
+          class="dealer-table"
         >
-          Select Dealer
-        </label>
 
-        <input
-          type="text"
-          id="dealerSearch"
-          placeholder="Search dealer..."
-          style="
-            width:100%;
-            padding:12px;
-            border-radius:10px;
-            border:1px solid #ccc;
-            margin-bottom:10px;
-          "
-        />
+          <thead>
 
-        <select
-          id="dealerSelect"
-          style="
-            width:100%;
-            padding:12px;
-            border-radius:10px;
-            border:1px solid #ccc;
-          "
-        >
+            <tr>
 
-          <option value="">
-            Select Dealer
-          </option>
+              <th>S.No</th>
 
-          {{#each data}}
+              <th>Dealer Code</th>
 
-            <option
-              value="{{this.dealer_code}}"
-            >
-              {{this.dealer_person}}
-              -
-              {{this.dealer_code}}
-            </option>
+              <th>Dealer Name</th>
 
-          {{/each}}
+              <th>Shop Name</th>
 
-        </select>
+              <th>State</th>
+
+              <th>Action</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {{#each data}}
+
+              <tr>
+
+                <td>
+                  {{inc @index}}
+                </td>
+
+                <td>
+                  {{this.dealer_code}}
+                </td>
+
+                <td>
+                  {{this.dealer_person}}
+                </td>
+
+                <td>
+                  {{this.shop_name}}
+                </td>
+
+                <td>
+                  {{this.state}}
+                </td>
+
+                <td>
+
+                  <a
+                    class="view-link download-image-btn"
+                    data-dealer-code="{{this.dealer_code}}"
+                  >
+                    View Image
+                  </a>
+
+                </td>
+
+              </tr>
+
+            {{/each}}
+
+          </tbody>
+
+        </table>
 
       </div>
 
-      <!-- Image Preview -->
+      <!-- IMAGE PREVIEW -->
+
       <div
         id="imageContainer"
         style="
@@ -109,21 +178,24 @@
 
         <div style="margin-top:20px;">
 
-          <a
-            id="downloadBtn"
-            href=""
-            download
-            style="
-              background:#2e7d32;
-              color:#fff;
-              text-decoration:none;
-              padding:12px 24px;
-              border-radius:10px;
-              font-weight:600;
-            "
-          >
-            Download Image
-          </a>
+        {{#if (eq selectedStatus "approved")}}
+
+<button
+  id="sendPrintBtn"
+  style="
+    background:#2e7d32;
+    color:#fff;
+    border:none;
+    padding:12px 24px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+  "
+>
+  Send For Print
+</button>
+
+{{/if}}
 
         </div>
 
@@ -137,122 +209,205 @@
 
 <script>
 
+  let selectedDealerId = null;
+
   // =========================
-  // SEARCH FILTER
+  // VIEW IMAGE
   // =========================
 
-  const dealerSearch =
-    document.getElementById(
-      "dealerSearch",
-    );
+  document.addEventListener(
+    "click",
+    async function (e) {
 
-  const dealerSelect =
-    document.getElementById(
-      "dealerSelect",
-    );
+      // =========================
+      // VIEW IMAGE
+      // =========================
 
-  dealerSearch.addEventListener(
-    "keyup",
-    function () {
-
-      const filter =
-        this.value.toLowerCase();
-
-      const options =
-        dealerSelect.options;
-
-      for (
-        let i = 0;
-        i < options.length;
-        i++
+      if (
+        e.target.classList.contains(
+          "download-image-btn",
+        )
       ) {
 
-        const txt =
-          options[i].text.toLowerCase();
+        const dealer_code =
+          e.target.dataset.dealerCode;
 
-        options[i].style.display =
-          txt.includes(filter)
-            ? ""
-            : "none";
-      }
-    },
-  );
+        try {
 
-  // =========================
-  // GET IMAGE
-  // =========================
+          const response =
+            await fetch(
+              "/admin/get-dealer-final-image",
+              {
+                method: "POST",
 
-  dealerSelect.addEventListener(
-    "change",
-    async function () {
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
 
-      const dealer_code =
-        this.value;
-
-      if (!dealer_code) return;
-
-      try {
-
-        const response =
-          await fetch(
-            "/admin/get-dealer-final-image",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
+                body: JSON.stringify({
+                  dealer_code,
+                }),
               },
+            );
 
-              body: JSON.stringify({
-                dealer_code,
-              }),
-            },
+          const result =
+            await response.json();
+
+          if (!result.success) {
+
+            alert(result.message);
+
+            return;
+          }
+
+          // =========================
+          // STORE DEALER ID
+          // =========================
+
+          selectedDealerId =
+            result.data.dealer_id;
+
+          // =========================
+          // SHOW IMAGE
+          // =========================
+
+          document.getElementById(
+            "imageContainer",
+          ).style.display = "block";
+
+          document.getElementById(
+            "dealerName",
+          ).innerText =
+            result.data.dealer_name;
+
+          document.getElementById(
+            "dealerImage",
+          ).src =
+            result.data.image;
+
+          // scroll down
+
+          document
+            .getElementById(
+              "imageContainer",
+            )
+            .scrollIntoView({
+              behavior: "smooth",
+            });
+
+        } catch (err) {
+
+          console.log(err);
+
+          alert(
+            "Error in fetching image",
           );
 
-        const result =
-          await response.json();
+        }
 
-        if (!result.success) {
+      }
 
-          alert(result.message);
+      // =========================
+      // SEND FOR PRINT
+      // =========================
+
+      if (
+        e.target.id ===
+        "sendPrintBtn"
+      ) {
+
+        const dealerId =
+          selectedDealerId;
+
+        if (!dealerId) {
+
+          alert(
+            "Dealer ID not found"
+          );
 
           return;
         }
 
-        // =========================
-        // SHOW IMAGE
-        // =========================
+        if (
+          !confirm(
+            "Send this image for print?"
+          )
+        ) {
+          return;
+        }
 
-        document.getElementById(
-          "imageContainer",
-        ).style.display = "block";
+        try {
 
-        document.getElementById(
-          "dealerName",
-        ).innerText =
-          result.data.dealer_name;
+          const response =
+            await fetch(
+              "/admin/send-for-print",
+              {
+                method: "POST",
 
-        document.getElementById(
-          "dealerImage",
-        ).src =
-          result.data.image;
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
 
-        document.getElementById(
-          "downloadBtn",
-        ).href =
-          result.data.image;
+                body: JSON.stringify({
+                  dealer_id: dealerId,
+                }),
+              },
+            );
 
-      } catch (err) {
+          const result =
+            await response.json();
 
-        console.log(err);
+          if (result.success) {
 
-        alert(
-          "Error in fetching image",
-        );
+            alert(
+              "Status updated to completed"
+            );
+
+            window.location.reload();
+
+          } else {
+
+            alert(result.message);
+
+          }
+
+        } catch (err) {
+
+          console.log(err);
+
+          alert(
+            "Error updating status"
+          );
+
+        }
+
       }
+
     },
   );
+
+  // =========================
+  // STATUS FILTER
+  // =========================
+
+  document
+    .getElementById(
+      "statusFilter",
+    )
+    .addEventListener(
+      "change",
+      function () {
+
+        const status =
+          this.value;
+
+        window.location.href =
+          `/admin/download-image?status=${status}`;
+
+      },
+    );
 
 </script>
 
