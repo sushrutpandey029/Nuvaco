@@ -40,11 +40,11 @@ import { isAdminLoggedIn } from "../middlewares/auth/isAdminLoggedIn.js";
 
 const adminrouter = express.Router();
 
-// adminrouter.use(isAdminLoggedIn);
-
 adminrouter.post("/adminsigup", AdminRegister);
 adminrouter.get("/login", adminloginview);
 adminrouter.post("/adminsignin", adminlogin);
+
+adminrouter.use(isAdminLoggedIn);
 adminrouter.get("/dashboard", adminDashboard);
 
 adminrouter.get("/adminprofile", adminProfile);
@@ -108,14 +108,8 @@ adminrouter.get("/download-image", renderDownloadDealerImage);
 
 adminrouter.post("/get-dealer-final-image", getDealerFinalImage);
 
-adminrouter.post(
-  "/send-for-print",
-  sendForPrint,
-);
+adminrouter.post("/send-for-print", sendForPrint);
 
-adminrouter.get(
-  "/download-image-excel",
-  downloadDealerImageExcel,
-);
+adminrouter.get("/download-image-excel", downloadDealerImageExcel);
 
 export default adminrouter;

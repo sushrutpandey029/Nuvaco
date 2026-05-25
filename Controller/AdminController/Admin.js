@@ -1,5 +1,5 @@
 import AdminModel from "../../Model/adminModel.js";
-import { sendMail } from "../../utils/mailer.js";
+import { sendMail } from "../../utils/mailer/index.js";
 
 import Dealer from "../../Model/dealerModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
@@ -16,6 +16,7 @@ import fs from "fs";
 import DealerImage from "../../Model/dealer/DealerImage.js";
 import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 import ExcelJS from "exceljs";
+import { sendApprovedImageSms } from "../../utils/sms/sendApprovedImageSms.js";
 
 // export const AdminRegister = async (req, res) => {
 //   try {
@@ -201,6 +202,7 @@ export const AdminRegister = async (req, res) => {
 };
 
 export const adminloginview = async (req, res) => {
+  console.log("req session in logvin view", req.session);
   const loggedInAdmin = req.session.admin;
 
   if (loggedInAdmin) {
@@ -2341,6 +2343,62 @@ export const submitFinalSelectedImage = async (req, res) => {
       },
     );
 
+    // =========================
+    // FIND DEALER
+    // =========================
+
+    const dealer = await Dealer.findOne({
+      where: { id: dealer_id },
+    });
+    console.log("deale rlist", dealer);
+
+    //send sms to daler
+    const resp = await sendApprovedImageSms(dealer.dealer_mobile_number);
+    console.log("resp of send approved sms", resp);
+
+    // =========================
+    // GET STORM USERS
+    // =========================
+
+    const stormUsers = await AdminModel.findAll({
+      where: {
+        role: "STORM",
+      },
+
+      attributes: ["email"],
+    });
+    console.log("storm users", stormUsers);
+
+    const stormEmails = stormUsers.map((user) => user.email);
+
+    // =========================
+    // SEND MAIL TO STORM
+    // =========================
+
+    if (stormEmails.length > 0) {
+      await sendMail({
+        to: stormEmails.join(","),
+
+        subject: "Dealer Image Approved – Nuvoco",
+
+        template: "storm/dealerApproved",
+
+        context: {
+          dealerCode: dealer.dealer_code,
+
+          dealerName: dealer.dealer_person,
+
+          shopName: dealer.shop_name,
+
+          state: dealer.state,
+
+          district: dealer.district,
+
+          adminPanelUrl: process.env.ADMIN_PANEL_URL,
+        },
+      });
+    }
+
     req.flash("success", "Final image selected successfully");
 
     return res.redirect(`dealer-image/${dealer_id}`);
@@ -2441,19 +2499,6 @@ export const rejectDealerImages = async (req, res) => {
   }
 };
 
-// export const renderDownloadDealerImage = async (req, res) => {
-//   try {
-//     const dealers = await Dealer.findAll({
-//       where: { isImageUploaded: "yes", imageStatus: "approved" },
-//       raw: true,
-//     });
-//     console.log("dealer list", dealers.slice(0, 5));
-//     res.render("admin/download-image", { data: dealers });
-//   } catch (err) {
-//     console.log("error in geting dealer list", err.response);
-//   }
-// };
-
 export const renderDownloadDealerImage = async (req, res) => {
   try {
     const status = req.query.status || "approved";
@@ -2466,7 +2511,7 @@ export const renderDownloadDealerImage = async (req, res) => {
 
       raw: true,
     });
-    console.log("dealer in render down inage", dealers);
+
     res.render("admin/download-image", {
       data: dealers,
       selectedStatus: status,
@@ -2572,9 +2617,137 @@ export const getDealerFinalImage = async (req, res) => {
   }
 };
 
+// export const downloadDealerImageExcel = async (req, res) => {
+//   try {
+//     const status = req.query.status || "approved";
+
+//     const dealers = await Dealer.findAll({
+//       where: {
+//         isImageUploaded: "yes",
+//         imageStatus: status,
+//       },
+
+//       raw: true,
+//     });
+//     console.log("dealers in downloa dexel", JSON.stringify(dealers, null, 2));
+
+//     // =========================
+//     // EXCEL
+//     // =========================
+
+//     const workbook = new ExcelJS.Workbook();
+
+//     const worksheet = workbook.addWorksheet("Dealers");
+
+//     // =========================
+//     // COLUMNS
+//     // =========================
+
+//     worksheet.columns = [
+//       {
+//         header: "Dealer Code",
+//         key: "dealer_code",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Dealer Name",
+//         key: "dealer_person",
+//         width: 25,
+//       },
+
+//       {
+//         header: "Shop Name",
+//         key: "shop_name",
+//         width: 30,
+//       },
+
+//       {
+//         header: "State",
+//         key: "state",
+//         width: 20,
+//       },
+
+//       {
+//         header: "District",
+//         key: "district",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Mobile",
+//         key: "dealer_mobile_number",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Status",
+//         key: "imageStatus",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Image URL",
+//         key: "image_url",
+//         width: 60,
+//       },
+//     ];
+
+//     // =========================
+//     // ROWS
+//     // =========================
+
+//     dealers.forEach((dealer) => {
+//       worksheet.addRow({
+//         dealer_code: dealer.dealer_code,
+
+//         dealer_person: dealer.dealer_person,
+
+//         shop_name: dealer.shop_name,
+
+//         state: dealer.state,
+
+//         district: dealer.district,
+
+//         dealer_mobile_number: dealer.dealer_mobile_number,
+
+//         imageStatus: dealer.imageStatus,
+
+//         image_url: `${process.env.FILE_BASE_URL}${dealer.finalImage || ""}`,
+//       });
+//     });
+
+//     // =========================
+//     // RESPONSE
+//     // =========================
+
+//     res.setHeader(
+//       "Content-Type",
+//       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+//     );
+
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=${status}-dealers.xlsx`,
+//     );
+
+//     await workbook.xlsx.write(res);
+
+//     res.end();
+//   } catch (err) {
+//     console.log(err);
+
+//     res.status(500).send("Error downloading excel");
+//   }
+// };
+
 export const downloadDealerImageExcel = async (req, res) => {
   try {
     const status = req.query.status || "approved";
+
+    // =========================
+    // GET DEALERS
+    // =========================
 
     const dealers = await Dealer.findAll({
       where: {
@@ -2640,19 +2813,41 @@ export const downloadDealerImageExcel = async (req, res) => {
         width: 20,
       },
 
-      // {
-      //   header: "Image URL",
-      //   key: "image_url",
-      //   width: 60,
-      // },
+      {
+        header: "Image URL",
+        key: "image_url",
+        width: 70,
+      },
     ];
 
     // =========================
     // ROWS
     // =========================
 
-    dealers.forEach((dealer) => {
-      worksheet.addRow({
+    for (const dealer of dealers) {
+      // final selected image
+      const finalImage = await DealerFinalImage.findOne({
+        where: {
+          dealer_id: dealer.id,
+        },
+
+        include: [
+          {
+            model: DealerImage,
+            attributes: ["image"],
+          },
+        ],
+      });
+
+      let imageUrl = "";
+
+      if (finalImage?.DealerImage?.image) {
+        imageUrl = `${process.env.FILE_BASE_URL}${finalImage.DealerImage.image}`;
+      }
+
+      // add row
+
+      const row = worksheet.addRow({
         dealer_code: dealer.dealer_code,
 
         dealer_person: dealer.dealer_person,
@@ -2667,10 +2862,27 @@ export const downloadDealerImageExcel = async (req, res) => {
 
         imageStatus: dealer.imageStatus,
 
-        // image_url:
-        //   `${process.env.FILE_BASE_URL}${dealer.finalImage || ""}`,
+        image_url: imageUrl,
       });
-    });
+
+      // =========================
+      // MAKE URL CLICKABLE
+      // =========================
+
+      const cell = row.getCell(8);
+
+      cell.value = {
+        text: "View Image",
+        hyperlink: imageUrl,
+      };
+
+      cell.font = {
+        color: {
+          argb: "0000FF",
+        },
+        underline: true,
+      };
+    }
 
     // =========================
     // RESPONSE

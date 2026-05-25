@@ -76,6 +76,7 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.dealer = req.session.dealer || null;
+  res.locals.admin = req.session.admin || null;
   next();
 });
 

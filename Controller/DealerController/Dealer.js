@@ -71,7 +71,9 @@ export const videoStatus = async (req, res) => {
 
 export const sendSmsOtp = async (dealer_mobile_number, otp) => {
   try {
-    const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
+    console.log("in send sms otp", dealer_mobile_number, otp);
+    // const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
+    const message = `Hi, Thank you for joining the Mera Bharosa Campaign! Your OTP for registration is ${otp}. This OTP is valid for 10 minutes. Please do not share it with anyone. STRMCM`;
 
     const params = {
       APIKey: process.env.SMS_API_KEY,
@@ -87,6 +89,7 @@ export const sendSmsOtp = async (dealer_mobile_number, otp) => {
     };
 
     const response = await axios.get(process.env.SMS_BASE_URL, { params });
+    console.log("resp of sns otp", response.data);
     return response.data ? true : false;
   } catch (error) {
     console.log("SMS Error:", error.message);
@@ -102,7 +105,7 @@ export const sendOTP = async (req, res) => {
     if (!dealer_mobile_number) {
       return res.json({ success: false, message: "Contact required" }); // ✅ JSON, not redirect
     }
-
+    console.log("deae mob no", dealer_mobile_number);
     const dealer = await Dealer.findOne({ where: { dealer_mobile_number } });
 
     if (!dealer) {
@@ -110,13 +113,13 @@ export const sendOTP = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await DealerOTP.destroy({ where: { dealer_mobile_number } });
     await DealerOTP.create({ dealer_mobile_number, otp, expiresAt });
-
+    console.log("before sndnsmsotp");
     const smsSent = await sendSmsOtp(dealer_mobile_number, otp);
-
+    console.log("after send sms");
     if (!smsSent) {
       return res.json({ success: false, message: "Failed to send OTP" }); // ✅ JSON, not redirect
     }
@@ -207,7 +210,7 @@ export const resendOTP = async (req, res) => {
     console.log("NEW OTP:", otp);
 
     // ✅ Expiry time
-    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // ✅ Delete old OTP
     await DealerOTP.destroy({
