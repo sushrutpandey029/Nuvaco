@@ -1,0 +1,106 @@
+{{> header admin=admin }}
+{{> sidebar }}
+<main class="purple-main" style="align-items:flex-start; padding-top:32px;">
+  <div class="pbubble pb1"></div>
+  <div class="pbubble pb2"></div>
+  <div class="pbubble pb3"></div>
+  <div style="position:relative;z-index:2;width:100%;">
+    <!-- Top Header -->
+    <div class="page-topbar">
+
+      <div>
+
+
+        <div style="display:flex; gap:12px;">
+          <a href="/admin/dealerregister" class="add-btn">
+            Add Dealer <i class="bi bi-plus-lg ms-2"></i>
+          </a>
+          <a href="/admin/download-dealer-excel" class="download-btn">
+            Download Excel <i class="bi bi-download ms-2"></i>
+          </a>
+        </div>
+
+      </div>
+      <div class="table-scroll-wrap">
+        <table id="dataTable" class="dealer-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>State</th>
+              <th>Dealer Name</th>
+              <th>Shop Name</th>
+
+              <th>Pic Uploaded</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Image</th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+            {{#each dealers}}
+            <tr>
+              <td>{{inc @index}}</td>
+              <!-- ✅ state instead of region -->
+              <td>{{this.state}}</td>
+
+
+
+              <td>{{this.dealer_person}}</td>
+              <td>{{this.shop_name}}</td>
+
+
+              <td>
+                <!-- ✅ correct field -->
+                {{#if (eq this.isImageUploaded "yes")}}
+                <span style="color:#2e7d32;font-weight:600;">Yes</span>
+                {{else}}
+                <span style="color:#c62828;font-weight:600;">No</span>
+                {{/if}}
+              </td>
+              <td>{{this.imageStatus}}</td>
+              <td class="d-flex align-items-center gap-2">
+
+                <!-- View -->
+                <a href="dealerdetail/{{this.id}}"
+                  class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                  style="width:32px; height:32px;">
+                  <i class="bi bi-eye text-primary"></i>
+                </a>
+
+                <!-- Edit -->
+                <a href="/admin/editdealer/{{this.id}}"
+                  class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                  style="width:32px; height:32px;">
+                  <i class="bi bi-pen text-success"></i>
+                </a>
+
+                <!-- Delete -->
+                <a href="/admin/delete-dealer/{{this.id}}"
+                  onclick="return confirm('Are you sure you want to delete this dealer?')"
+                  class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                  style="width:32px; height:32px;">
+                  <i class="bi bi-trash text-danger"></i>
+                </a>
+
+              </td>
+              <td>
+                {{#if (eq this.isImageUploaded "yes")}}
+                <a href="dealer-image/{{this.id}}" class="view-link">
+                  View
+                </a>
+                {{else}}
+                -
+                {{/if}}
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+
+
+        </table>
+      </div>
+    </div>
+</main>
+{{> footer }}

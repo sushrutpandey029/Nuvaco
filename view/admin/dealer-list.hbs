@@ -22,6 +22,28 @@
       </div>
 
     </div>
+
+    {{!-- //filiter  --}}
+
+<div style="margin-bottom:16px; display:flex; gap:12px; align-items:center;">
+  
+  <label style="font-weight:600;">
+    Pic Uploaded:
+  </label>
+
+ <select
+  id="picUploadedFilter"
+  class="form-select"
+  style="width:180px;"
+>
+  <option value="">All</option>
+  <option value="Yes">Yes</option>
+  <option value="No">No</option>
+</select>
+
+</div>
+
+
     <div class="table-scroll-wrap">
       <table id="dataTable" class="dealer-table">
         <thead>

@@ -3,22 +3,34 @@ import Dealer from "../../Model/dealerModel.js";
 import DealerOTP from "../../Model/dealer/dealerOtp.js";
 import MessageModel from "../../Model/dealer/MessageModel.js";
 import DealerImage from "../../Model/dealer/DealerImage.js";
+
 import fs from "fs";
+
 import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 // import { processImagesPipeline } from "../../services/image/pipeline.service.js";
 import RegionVideo from "../../Model/regionVideoModel.js";
+
 import { formatImageArray } from "../../utils/formatImagePath.js";
+
 import SalesSpoc from "../../Model/salesSpocModel.js";
+
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
-import path from "path";
+
+import path from "path"
+
 import { generateBanner } from "../../services/pipeline/generateBannerold.js";
+
 import {
   getPersonalizedVideo,
   getVideoStatus,
 } from "../../services/video/videoPipeline.js";
+
 import { processDealerBannerPipeline } from "../../services/pipeline/processDealerBannerPipeline.service.js";
+
 import { sendMail } from "../../utils/mailer/index.js";
+
 import AdminModel from "../../Model/adminModel.js";
+import { sendApprovedImageSms } from "../../utils/sms/sendApprovedImageSms.js";
 
 export const renderLogin = async (req, res) => {
   const dealer = req.session.dealer;
@@ -30,6 +42,7 @@ export const renderLogin = async (req, res) => {
     success: req.flash("success")[0] || null,
   });
 };
+
 export const renderHome = async (req, res) => {
   const dealer = req.session.dealer;
 
@@ -67,13 +80,11 @@ export const videoStatus = async (req, res) => {
   return res.json(status);
 };
 
-// ✅ Send OTP
-
 export const sendSmsOtp = async (dealer_mobile_number, otp) => {
   try {
+    console.log("in send sms otp", dealer_mobile_number, otp);
     // const message = `Welcome to Nuvoco Super Women Sangini! Your OTP is ${otp}. STRMCM`;
-
-    const message = `Hi, Thank you for joining the Mera Bharosa Campaign! Your OTP for registration is ${otp}. This OTP is valid for 10 minutes.`;
+    const message = `Hi, Thank you for joining the Mera Bharosa Campaign! Your OTP for registration is ${otp}. This OTP is valid for 10 minutes. Please do not share it with anyone. STRMCM`;
 
     const params = {
       APIKey: process.env.SMS_API_KEY,
@@ -89,6 +100,7 @@ export const sendSmsOtp = async (dealer_mobile_number, otp) => {
     };
 
     const response = await axios.get(process.env.SMS_BASE_URL, { params });
+    console.log("resp of sns otp", response.data);
     return response.data ? true : false;
   } catch (error) {
     console.log("SMS Error:", error.message);
@@ -104,7 +116,7 @@ export const sendOTP = async (req, res) => {
     if (!dealer_mobile_number) {
       return res.json({ success: false, message: "Contact required" }); // ✅ JSON, not redirect
     }
-
+    console.log("deae mob no", dealer_mobile_number);
     const dealer = await Dealer.findOne({ where: { dealer_mobile_number } });
 
     if (!dealer) {
@@ -112,13 +124,13 @@ export const sendOTP = async (req, res) => {
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await DealerOTP.destroy({ where: { dealer_mobile_number } });
     await DealerOTP.create({ dealer_mobile_number, otp, expiresAt });
-
+    console.log("before sndnsmsotp");
     const smsSent = await sendSmsOtp(dealer_mobile_number, otp);
-
+    console.log("after send sms");
     if (!smsSent) {
       return res.json({ success: false, message: "Failed to send OTP" }); // ✅ JSON, not redirect
     }
@@ -129,6 +141,7 @@ export const sendOTP = async (req, res) => {
     return res.json({ success: false, message: "Something went wrong" }); // ✅ JSON, not redirect
   }
 };
+
 export const verifyOTP = async (req, res) => {
   try {
     const { dealer_mobile_number, otp } = req.body;
@@ -209,7 +222,7 @@ export const resendOTP = async (req, res) => {
     console.log("NEW OTP:", otp);
 
     // ✅ Expiry time
-    const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     // ✅ Delete old OTP
     await DealerOTP.destroy({
@@ -337,7 +350,6 @@ export const renderThankyouPage = async (req, res) => {
   return res.render("dealer/thankyou");
 };
 
-
 export const uploadDealerImages = async (req, res) => {
   try {
     const { dealer_id, language } = req.body;
@@ -425,6 +437,11 @@ export const uploadDealerImages = async (req, res) => {
     // =========================
 
     try {
+
+        //send sms to daler
+    const resp = await sendApprovedImageSms(dealer.dealer_mobile_number);
+    console.log("resp of send approved sms", resp);
+
       // =========================
       // GET ALL ADMINS
       // =========================
@@ -471,8 +488,8 @@ export const uploadDealerImages = async (req, res) => {
             language,
 
             totalImages,
-             adminPanelUrl:
-    process.env.ADMIN_PANEL_URL,
+            adminPanelUrl:
+              process.env.ADMIN_PANEL_URL,
           },
         });
       }
@@ -545,65 +562,6 @@ export const getDealerProfile = async (req, res) => {
   }
 };
 
-// export const getDealerProfile = async (req, res) => {
 
-//   try {
 
-//     const dealerId = Number(req.params.id);
 
-//     if (!dealerId) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Dealer ID is required",
-//       });
-//     }
-
-//     const dealer = await Dealer.findOne({
-
-//       where: {
-//         id: dealerId,
-//       },
-
-//       include: [
-
-//         {
-//           model: SalesSpoc,
-//           as: "SalesSpocs",
-//         },
-
-//         {
-//           model: TradeMarketingSpoc,
-//           as: "TradeMarketingSpocs",
-//         },
-//       ],
-//     });
-
-//     if (!dealer) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Dealer not found",
-//       });
-//     }
-
-//     return res.status(200).json({
-
-//       success: true,
-
-//       data: dealer,
-//     });
-
-//   } catch (error) {
-
-//     console.log(
-//       "Get Dealer Profile Error:",
-//       error
-//     );
-
-//     return res.status(500).json({
-
-//       success: false,
-
-//       message: error.message,
-//     });
-//   }
-// };

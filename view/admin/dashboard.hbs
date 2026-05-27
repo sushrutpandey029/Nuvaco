@@ -5,29 +5,16 @@
 
 <!-- MAIN CONTENT -->
 <main class="main-content flex-grow-1 p-4">
-
+<div class="mb-2 mt-4">
+    <h5>
+        Total Summary
+    </h5>
+</div>
 
     <!-- Summary Cards -->
     <div class="row g-4 mb-4">
 
-        <!-- TOTAL DEALERS -->
-        {{!-- <div class="col-sm-6 col-xl-3">
-            <div class="stat-card">
-                <div class="stat-icon bg-primary-soft">
-                    <i class="bi bi-people-fill text-primary"></i>
-                </div>
-
-                <div>
-                    <div class="stat-value">
-                        {{totalDealers}}
-                    </div>
-
-                    <div class="stat-label">
-                        Total Dealers
-                    </div>
-                </div>
-            </div>
-        </div> --}}
+      
 
         <!-- ONBOARDED -->
         <div class="col-sm-6 col-xl-3">
@@ -120,6 +107,84 @@
 
     </div>
 
+     {{#if selectedState}}
+
+<div class="mb-2 mt-4">
+    <h5>
+        {{capitalize selectedState}} Summary
+    </h5>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <!-- STATE ONBOARDED -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+
+            <div class="stat-icon bg-success-soft">
+                <i class="bi bi-check-circle-fill text-success"></i>
+            </div>
+
+            <div>
+                <div class="stat-value">
+                    {{stateOnboarded}}
+                </div>
+
+                <div class="stat-label">
+                    State Onboarded
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- STATE UPLOADED -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+
+            <div class="stat-icon bg-info-soft">
+                <i class="bi bi-image-fill text-info"></i>
+            </div>
+
+            <div>
+                <div class="stat-value">
+                    {{stateUploaded}}
+                </div>
+
+                <div class="stat-label">
+                    State Uploaded
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- STATE CUTOUTS -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+
+            <div class="stat-icon bg-warning-soft">
+                <i class="bi bi-clock-fill text-warning"></i>
+            </div>
+
+            <div>
+                <div class="stat-value">
+                    {{stateCutouts}}
+                </div>
+
+                <div class="stat-label">
+                    State Cutouts
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{{/if}}
+
+
 
     <!-- Bar Chart Card -->
     <div class="chart-card">
@@ -127,18 +192,7 @@
             style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
             <h5 class="chart-title">Dealers by State</h5>
             <div style="display:flex; gap:16px; flex-wrap:wrap;">
-                <div
-                    style="display:flex; align-items:center; gap:7px; font-size:0.78rem; font-weight:600; color:#6b7280;">
-                    <div style="width:28px; height:10px; border-radius:3px; background:#7c6fe0;"></div> Onboarded
-                </div>
-                <div
-                    style="display:flex; align-items:center; gap:7px; font-size:0.78rem; font-weight:600; color:#6b7280;">
-                    <div style="width:28px; height:10px; border-radius:3px; background:#34d399;"></div> Uploaded
-                </div>
-                <div
-                    style="display:flex; align-items:center; gap:7px; font-size:0.78rem; font-weight:600; color:#6b7280;">
-                    <div style="width:28px; height:10px; border-radius:3px; background:#fbbf24;"></div> Cutouts
-                </div>
+             
             </div>
         </div>
         <canvas id="dealersChart" height="100"></canvas>

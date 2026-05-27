@@ -32,19 +32,21 @@ import {
   getDealerFinalImage,
   sendForPrint,
   downloadDealerImageExcel,
+  downloadBannerPdf
 } from "../Controller/AdminController/Admin.js";
 import dealerUpload from "../middlewares/dealerUpload.js";
 import { upload } from "../middlewares/shopimageupload.js";
 import Videoupload from "../middlewares/videoUpload.js";
 import { isAdminLoggedIn } from "../middlewares/auth/isAdminLoggedIn.js";
 
-const adminrouter = express.Router();
 
-// adminrouter.use(isAdminLoggedIn);
+const adminrouter = express.Router();
 
 adminrouter.post("/adminsigup", AdminRegister);
 adminrouter.get("/login", adminloginview);
 adminrouter.post("/adminsignin", adminlogin);
+
+adminrouter.use(isAdminLoggedIn);
 adminrouter.get("/dashboard", adminDashboard);
 
 adminrouter.get("/adminprofile", adminProfile);
@@ -108,14 +110,12 @@ adminrouter.get("/download-image", renderDownloadDealerImage);
 
 adminrouter.post("/get-dealer-final-image", getDealerFinalImage);
 
-adminrouter.post(
-  "/send-for-print",
-  sendForPrint,
-);
+adminrouter.post("/send-for-print", sendForPrint);
 
+adminrouter.get("/download-image-excel", downloadDealerImageExcel);
 adminrouter.get(
-  "/download-image-excel",
-  downloadDealerImageExcel,
+  "/download-pdf/:id",
+  downloadBannerPdf
 );
 
 export default adminrouter;

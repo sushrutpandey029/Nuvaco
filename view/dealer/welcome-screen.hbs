@@ -1,7 +1,11 @@
 {{> dealerheader dealer=dealer}}
 
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
   body {
     min-height: 100vh;
@@ -23,16 +27,40 @@
   }
 
   /* Bubbles */
-  .pbubble { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.15); pointer-events: none; }
-  .pb1 { width: 200px; height: 200px; top: -50px; right: 80px; }
-  .pb2 { width: 120px; height: 120px; bottom: 80px; right: 200px; }
-  .pb3 { width: 60px;  height: 60px;  top: 160px; right: 30px; background: rgba(124,111,224,0.3); }
+  .pbubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+  }
+
+  .pb1 {
+    width: 200px;
+    height: 200px;
+    top: -50px;
+    right: 80px;
+  }
+
+  .pb2 {
+    width: 120px;
+    height: 120px;
+    bottom: 80px;
+    right: 200px;
+  }
+
+  .pb3 {
+    width: 60px;
+    height: 60px;
+    top: 160px;
+    right: 30px;
+    background: rgba(124, 111, 224, 0.3);
+  }
 
   /* Video card */
   .video-card {
     background: #fff;
     border-radius: 20px;
-    box-shadow: 0 8px 40px rgba(100,90,200,0.18);
+    box-shadow: 0 8px 40px rgba(100, 90, 200, 0.18);
     padding: 28px 28px 24px;
     width: 100%;
     max-width: 680px;
@@ -76,18 +104,24 @@
   .spinner {
     width: 44px;
     height: 44px;
-    border: 3px solid rgba(124,111,224,0.15);
+    border: 3px solid rgba(124, 111, 224, 0.15);
     border-top-color: #7c6fe0;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
   .processing-text {
     font-size: 0.95rem;
     font-weight: 600;
     color: #6b7280;
   }
+
   .processing-sub {
     font-size: 0.82rem;
     color: #9ca3af;
@@ -114,21 +148,33 @@
     transition: opacity 0.18s, transform 0.12s;
     letter-spacing: 0.02em;
   }
-  .btn-action:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-action:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
 
   .btn-outline {
     background: transparent;
     border: 2px solid #7c6fe0;
     color: #7c6fe0;
   }
+
   .btn-solid {
     background: linear-gradient(90deg, #a89eea, #7c6fe0);
     color: #fff;
   }
 
   @media (max-width: 600px) {
-    .video-card { padding: 20px 16px 18px; border-radius: 16px; }
-    .btn-action { font-size: 0.88rem; padding: 11px 0; }
+    .video-card {
+      padding: 20px 16px 18px;
+      border-radius: 16px;
+    }
+
+    .btn-action {
+      font-size: 0.88rem;
+      padding: 11px 0;
+    }
   }
 </style>
 
@@ -142,26 +188,24 @@
     <span class="video-card-title">Your Personalised Video</span>
 
     <!-- Video -->
-    <video id="dealerVideo" controls autoplay playsinline {{#unless videoPath}}style="display:none"{{/unless}}>
+    <video id="dealerVideo" controls autoplay playsinline {{#unless videoPath}}style="display:none" {{/unless}}>
       {{#if videoPath}}
-        <source src="{{videoPath}}" type="video/mp4">
+      <source src="{{videoPath}}" type="video/mp4">
       {{else}}
-        <source src="/uploads/videos/default.mp4" type="video/mp4">
+      <source src="/uploads/videos/default.mp4" type="video/mp4">
       {{/if}}
     </video>
 
     <!-- Processing state -->
-    <div id="processingMsg" {{#if videoPath}}style="display:none"{{/if}}>
+    <div id="processingMsg" {{#if videoPath}}style="display:none" {{/if}}>
       <div class="spinner"></div>
-      <p class="processing-text">Aapka personalized video ban raha hai...</p>
-      <p class="processing-sub">Thoda wait karein, yeh 1–2 minute le sakta hai.</p>
+      <p class="processing-text">Your personalized video is being created...</p>
+      <p class="processing-sub">Please wait a moment, this may take 1–2 minutes.</p>
     </div>
 
     <!-- Buttons -->
     <div class="btn-row" id="btnRow" style="display:{{#if videoPath}}flex{{else}}none{{/if}};">
-      <a href="javascript:void(0)" onclick="replayVideo()" class="btn-action btn-outline">
-        &#9654; Re-Listen
-      </a>
+
       <a href="/upload-pic" class="btn-action btn-solid">
         Next &#8594;
       </a>
@@ -177,10 +221,10 @@
     video.play();
   }
 
-  {{#unless videoPath}}
+  { { #unless videoPath } }
   var poll = setInterval(async function () {
     try {
-      var res  = await fetch('/video-status');
+      var res = await fetch('/video-status');
       var data = await res.json();
       if (data.status === 'ready' && data.videoPath) {
         clearInterval(poll);
@@ -198,7 +242,7 @@
       console.error('Poll error:', e);
     }
   }, 3000);
-  {{/unless}}
+  { {/unless } }
 </script>
 
 {{> dealerfooter}}

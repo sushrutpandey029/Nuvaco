@@ -22,13 +22,14 @@ import {
 import { isDealerLoggedIn } from "../middlewares/auth/isDealerLoggedIn.js";
 const dealerrouter = express.Router();
 
-// dealerrouter.use(isDealerLoggedIn);
-
 dealerrouter.get("/", renderHome);
 dealerrouter.get("/login", renderLogin);
 dealerrouter.post("/send-otp", sendOTP);
 dealerrouter.post("/verify-otp", verifyOTP);
 dealerrouter.post("/resend-otp", resendOTP);
+
+//protected routes
+dealerrouter.use(isDealerLoggedIn);
 dealerrouter.get("/logout", logout);
 
 dealerrouter.get("/upload-pic", renderUploadPic);

@@ -30,6 +30,7 @@ const DealerImage = sequelize.define(
       allowNull: false,
     },
   },
+
   {
     tableName: "dealer_images",
     timestamps: true,

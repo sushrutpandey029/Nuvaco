@@ -40,6 +40,10 @@ hbs.registerHelper("gt", (a, b) => a > b);
 hbs.registerHelper("inc", function (value) {
   return value + 1;
 });
+hbs.registerHelper("capitalize", function (text) {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -76,6 +80,7 @@ app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.dealer = req.session.dealer || null;
+  res.locals.admin = req.session.admin || null;
   next();
 });
 

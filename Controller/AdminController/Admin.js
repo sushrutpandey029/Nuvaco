@@ -1,10 +1,14 @@
 import AdminModel from "../../Model/adminModel.js";
-import { sendMail } from "../../utils/mailer.js";
+import { sendMail } from "../../utils/mailer/index.js";
 
-
+import path from "path";
+import PDFDocument from "pdfkit";
+import sharp from "sharp";
 import Dealer from "../../Model/dealerModel.js";
 import TradeMarketingSpoc from "../../Model/tradeMarketingSpocModel.js";
 import SalesSpoc from "../../Model/salesSpocModel.js";
+
+import MessageModel from "../../Model/dealer/MessageModel.js";
 
 import { Op } from "sequelize";
 import XLSX from "xlsx";
@@ -17,85 +21,194 @@ import fs from "fs";
 import DealerImage from "../../Model/dealer/DealerImage.js";
 import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 import ExcelJS from "exceljs";
+import { sendApprovedImageSms } from "../../utils/sms/sendApprovedImageSms.js";
+
+
+// export const AdminRegister = async (req, res) => {
+//   try {
+//     const { fullname, email, password, phonenumber } = req.body;
+
+//     if (!fullname || !email || !password || !phonenumber) {
+//       return res.status(400).json({ message: "All fields are required" });
+//     }
+
+//     const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
+//     if (isDuplicateEmail) {
+//       return res.status(400).json({ message: "Email already exists" });
+//     }
+
+//     const hashpassword = await bcrypt.hash(password, 10);
+
+//     const newAdmin = await AdminModel.create({
+//       fullname,
+//       email,
+//       password: hashpassword,
+//       phonenumber,
+//     });
+
+//     await sendMail({
+//       to: newAdmin.email,
+//       subject: "Welcome to Nuvaco",
+//       html: `
+//   <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:20px;">
+//     <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:30px;">
+
+//       <h2 style="color:#333; text-align:center;">Welcome to Nuvaco</h2>
+
+//       <p style="font-size:16px; color:#555;">
+//         Hi <strong>${newAdmin.fullname}</strong>,
+//       </p>
+
+//       <p style="font-size:15px; color:#555;">
+//         Your admin account has been successfully created. You can now access the platform using your credentials below:
+//       </p>
+
+//       <div style="background:#f1f1f1; padding:15px; border-radius:6px; margin:20px 0;">
+//         <p style="margin:5px 0;"><strong>Email:</strong> ${newAdmin.email}</p>
+//         <p style="margin:5px 0;"><strong>Password:</strong> ${password}</p>
+//       </div>
+
+//       <p style="font-size:14px; color:#777;">
+//         For security reasons, we recommend changing your password after your first login.
+//       </p>
+
+//       <div style="text-align:center; margin:30px 0;">
+//         <a href="http://localhost:3000/"
+//            style="background:#007bff; color:#fff; padding:12px 20px; text-decoration:none; border-radius:5px;">
+//           Login to Dashboard
+//         </a>
+//       </div>
+
+//       <p style="font-size:12px; color:#aaa; text-align:center;">
+//         © ${new Date().getFullYear()} Nuvaco. All rights reserved.
+//       </p>
+
+//     </div>
+//   </div>
+//   `,
+//     });
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Admin registered successfully",
+//       data: newAdmin,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// };
 
 export const AdminRegister = async (req, res) => {
   try {
-    const { fullname, email, password, phonenumber } = req.body;
+    const { fullname, email, password, phonenumber, role } = req.body;
 
-    if (!fullname || !email || !password || !phonenumber) {
-      return res.status(400).json({ message: "All fields are required" });
+    // =========================
+    // VALIDATION
+    // =========================
+
+    if (!fullname || !email || !password || !phonenumber || !role) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
-    const isDuplicateEmail = await AdminModel.findOne({ where: { email } });
+    // =========================
+    // VALID ROLE
+    // =========================
+
+    const allowedRoles = ["ADMIN", "STORM"];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
+
+    // =========================
+    // DUPLICATE EMAIL
+    // =========================
+
+    const isDuplicateEmail = await AdminModel.findOne({
+      where: { email },
+    });
+
     if (isDuplicateEmail) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({
+        message: "Email already exists",
+      });
     }
+
+    // =========================
+    // HASH PASSWORD
+    // =========================
 
     const hashpassword = await bcrypt.hash(password, 10);
 
+    // =========================
+    // CREATE ADMIN
+    // =========================
+
     const newAdmin = await AdminModel.create({
+      role,
+
       fullname,
+
       email,
+
       password: hashpassword,
+
       phonenumber,
     });
 
+    // =========================
+    // SEND MAIL
+    // =========================
+
     await sendMail({
       to: newAdmin.email,
-      subject: "Welcome to Nuvaco",
-      html: `
-  <div style="font-family: Arial, sans-serif; background-color:#f4f6f8; padding:20px;">
-    <div style="max-width:600px; margin:auto; background:#ffffff; border-radius:8px; padding:30px;">
-      
-      <h2 style="color:#333; text-align:center;">Welcome to Nuvaco</h2>
-      
-      <p style="font-size:16px; color:#555;">
-        Hi <strong>${newAdmin.fullname}</strong>,
-      </p>
 
-      <p style="font-size:15px; color:#555;">
-        Your admin account has been successfully created. You can now access the platform using your credentials below:
-      </p>
+      subject: "Welcome to Nuvoco",
 
-      <div style="background:#f1f1f1; padding:15px; border-radius:6px; margin:20px 0;">
-        <p style="margin:5px 0;"><strong>Email:</strong> ${newAdmin.email}</p>
-        <p style="margin:5px 0;"><strong>Password:</strong> ${password}</p>
-      </div>
+      template: "admin/welcomeAdmin",
 
-      <p style="font-size:14px; color:#777;">
-        For security reasons, we recommend changing your password after your first login.
-      </p>
+      context: {
+        fullname: newAdmin.fullname,
 
-      <div style="text-align:center; margin:30px 0;">
-        <a href="http://localhost:3000/" 
-           style="background:#007bff; color:#fff; padding:12px 20px; text-decoration:none; border-radius:5px;">
-          Login to Dashboard
-        </a>
-      </div>
+        email: newAdmin.email,
 
-      <p style="font-size:12px; color:#aaa; text-align:center;">
-        © ${new Date().getFullYear()} Nuvaco. All rights reserved.
-      </p>
+        password,
 
-    </div>
-  </div>
-  `,
+        role: newAdmin.role,
+
+        loginUrl: process.env.ADMIN_PANEL_URL,
+      },
     });
+
+    // =========================
+    // RESPONSE
+    // =========================
 
     return res.status(201).json({
       success: true,
+
       message: "Admin registered successfully",
+
       data: newAdmin,
     });
   } catch (error) {
     return res.status(500).json({
       message: "Internal server error",
+
       error: error.message,
     });
   }
 };
 
 export const adminloginview = async (req, res) => {
+  console.log("req session in logvin view", req.session);
   const loggedInAdmin = req.session.admin;
 
   if (loggedInAdmin) {
@@ -153,7 +266,11 @@ export const adminlogin = async (req, res) => {
     // ✅ 6. Store session (simple login)
     req.session.admin = {
       id: admin.id,
+
+      role: admin.role,
+
       email: admin.email,
+
       fullname: admin.fullname,
     };
 
@@ -165,6 +282,110 @@ export const adminlogin = async (req, res) => {
     return res.redirect("login");
   }
 };
+
+// export const adminDashboard = async (req, res) => {
+//   try {
+//     const admin = req.session.admin;
+
+//     if (!admin) {
+//       return res.redirect("login");
+//     }
+
+//     const { state } = req.query;
+
+//     const dealers = await Dealer.findAll();
+
+//     // summary cards
+//     const totalDealers = dealers.length;
+
+//     const uploadedPics = dealers.filter(
+//       (dealer) => dealer.isImageUploaded === "yes",
+//     ).length;
+
+//     const cutouts = dealers.filter(
+//       (dealer) => dealer.imageStatus === "approved",
+//     ).length;
+
+//     const onboarded = totalDealers;
+
+//     // statewise object
+//     const stateData = {};
+
+//     dealers.forEach((dealer) => {
+//       // STATE FILTER
+//       if (state && dealer.state !== state) {
+//         return;
+//       }
+
+//       const dealerState = dealer.state || "Unknown";
+
+//       // initialize
+//       if (!stateData[dealerState]) {
+//         stateData[dealerState] = {
+//           onboarded: 0,
+
+//           uploaded: 0,
+
+//           cutouts: 0,
+//         };
+//       }
+
+//       // onboarded
+//       stateData[dealerState].onboarded++;
+
+//       // uploaded
+//       if (dealer.isImageUploaded === "yes") {
+//         stateData[dealerState].uploaded++;
+//       }
+
+//       if (dealer.imageStatus === "approved") {
+//         stateData[dealerState].cutouts++;
+//       }
+//     });
+
+//     // chart arrays
+//     const chartLabels = Object.keys(stateData);
+
+//     const onboardedData = chartLabels.map(
+//       (state) => stateData[state].onboarded,
+//     );
+
+//     const uploadedData = chartLabels.map((state) => stateData[state].uploaded);
+
+//     const cutoutData = chartLabels.map((state) => stateData[state].cutouts);
+
+//     // unique states
+//     const states = [...new Set(dealers.map((dealer) => dealer.state))];
+
+//     return res.render("admin/dashboard", {
+//       admin,
+
+//       totalDealers,
+
+//       onboarded,
+
+//       uploadedPics,
+
+//       cutouts,
+
+//       states,
+
+//       selectedState: state || "",
+
+//       chartLabels: JSON.stringify(chartLabels),
+
+//       onboardedData: JSON.stringify(onboardedData),
+
+//       uploadedData: JSON.stringify(uploadedData),
+
+//       cutoutData: JSON.stringify(cutoutData),
+//     });
+//   } catch (error) {
+//     console.log(error);
+
+//     return res.redirect("/admin/login");
+//   }
+// };
 
 export const adminDashboard = async (req, res) => {
   try {
@@ -240,6 +461,28 @@ export const adminDashboard = async (req, res) => {
     // unique states
     const states = [...new Set(dealers.map((dealer) => dealer.state))];
 
+    //statewise data
+
+    let stateOnboarded = 0;
+    let stateUploaded = 0;
+    let stateCutouts = 0;
+
+    if (state) {
+      const filteredDealers = dealers.filter(
+        (dealer) => dealer.state === state,
+      );
+
+      stateOnboarded = filteredDealers.length;
+
+      stateUploaded = filteredDealers.filter(
+        (dealer) => dealer.isImageUploaded === "yes",
+      ).length;
+
+      stateCutouts = filteredDealers.filter(
+        (dealer) => dealer.imageStatus === "approved",
+      ).length;
+    }
+
     return res.render("admin/dashboard", {
       admin,
 
@@ -250,6 +493,10 @@ export const adminDashboard = async (req, res) => {
       uploadedPics,
 
       cutouts,
+
+      stateOnboarded,
+      stateUploaded,
+      stateCutouts,
 
       states,
 
@@ -505,11 +752,43 @@ export const videoMessage = async (req, res) => {
   res.render("admin/video-message", { admin, states });
 };
 
+// export const uploadRegionVideo = async (req, res) => {
+//   try {
+//     const { state } = req.body;
+
+//     // ❌ Validation
+//     if (!state) {
+//       req.flash("error", "Region required");
+//       return res.redirect("add-state-message");
+//     }
+
+//     if (!req.file) {
+//       req.flash("error", "Video file required");
+//       return res.redirect("add-state-message");
+//     }
+
+//     // ✅ Save data
+//     const saveData = await RegionVideo.create({
+//       state,
+//       video: req.file.path,
+//     });
+
+//     // ✅ Success message
+//     req.flash("success", "Video uploaded successfully");
+//     return res.redirect("state-message-list"); // or specific page
+//   } catch (error) {
+//     console.log("ERROR =>", error);
+
+//     req.flash("error", "Something went wrong");
+//     return res.redirect("add-state-message");
+//   }
+// };
+
+
 export const uploadRegionVideo = async (req, res) => {
   try {
     const { state } = req.body;
 
-    // ❌ Validation
     if (!state) {
       req.flash("error", "Region required");
       return res.redirect("add-state-message");
@@ -520,18 +799,40 @@ export const uploadRegionVideo = async (req, res) => {
       return res.redirect("add-state-message");
     }
 
-    // ✅ Save data
+    // ✅ Save in region_videos
     const saveData = await RegionVideo.create({
       state,
       video: req.file.path,
     });
 
-    // ✅ Success message
+    // ✅ Auto create/update message config  <-- YEH NAYI LINES
+    await MessageModel.findOrCreate({
+      where: { state },
+      defaults: {
+        state,
+        video_path: null,
+        name_timestamp: 4,
+        name_prefix: "Shri ",
+        name_suffix: " ji",
+      },
+    });
+
+    // default entry bhi ensure karo
+    await MessageModel.findOrCreate({
+      where: { state: "default" },
+      defaults: {
+        state: "default",
+        video_path: null,
+        name_timestamp: 4,
+        name_prefix: "Shri ",
+        name_suffix: " ji",
+      },
+    });
+
     req.flash("success", "Video uploaded successfully");
-    return res.redirect("state-message-list"); // or specific page
+    return res.redirect("state-message-list");
   } catch (error) {
     console.log("ERROR =>", error);
-
     req.flash("error", "Something went wrong");
     return res.redirect("add-state-message");
   }
@@ -1654,10 +1955,10 @@ export const getDealers = async (req, res) => {
 
     const whereCondition = search
       ? {
-          dealer_name: {
-            [Op.like]: `%${search}%`,
-          },
-        }
+        dealer_name: {
+          [Op.like]: `%${search}%`,
+        },
+      }
       : {};
 
     const { count, rows } = await Dealer.findAndCountAll({
@@ -2229,7 +2530,7 @@ const sendApprovalSms = async (mobile_number, shop_name) => {
 //       return res.redirect(`dealer-image/${dealer_id}`);
 //     }
 
-    
+
 //     const existing = await DealerFinalImage.findOne({
 //       where: { dealer_id },
 //     });
@@ -2243,13 +2544,13 @@ const sendApprovalSms = async (mobile_number, shop_name) => {
 //       });
 //     }
 
-  
+
 //     await Dealer.update(
 //       { imageStatus: "approved" },
 //       { where: { id: dealer_id } }
 //     );
 
-   
+
 //     const dealer = await Dealer.findOne({
 //       where: { id: dealer_id },
 //       attributes: ["dealer_mobile_number", "shop_name"],
@@ -2279,7 +2580,6 @@ const sendApprovalSms = async (mobile_number, shop_name) => {
 //   }
 // };
 
-
 export const submitFinalSelectedImage = async (req, res) => {
   try {
     const { dealer_id, selected_image } = req.body;
@@ -2298,56 +2598,68 @@ export const submitFinalSelectedImage = async (req, res) => {
     }
 
     await Dealer.update(
-      { imageStatus: "approved" },
-      { where: { id: dealer_id } }
+      {
+        imageStatus: "approved",
+      },
+      {
+        where: { id: dealer_id },
+      },
     );
 
+    // =========================
+    // FIND DEALER
+    // =========================
 
     const dealer = await Dealer.findOne({
       where: { id: dealer_id },
-      raw: true,
     });
+    console.log("deale rlist", dealer);
 
-    if (dealer?.dealer_mobile_number) {
-      const smsSent = await sendApprovalSms(dealer.dealer_mobile_number);
-      if (!smsSent) console.log("⚠️ Approval SMS failed");
-    }
+    // //send sms to daler
+    // const resp = await sendApprovedImageSms(dealer.dealer_mobile_number);
+    // console.log("resp of send approved sms", resp);
 
-    if (dealer) {
-      try {
-      
-        const admins = await AdminModel.findAll({
-          where: {
-            role: ["STORM"],
-          },
-          attributes: ["email"],
-        });
+    // =========================
+    // GET STORM USERS
+    // =========================
 
-        const adminEmails = admins.map((a) => a.email).filter(Boolean);
+    const stormUsers = await AdminModel.findAll({
+      where: {
+        role: "STORM",
+      },
 
-        console.log("Admin emails to notify:", adminEmails);
+      attributes: ["email"],
+    });
+    console.log("storm users", stormUsers);
 
-        if (adminEmails.length > 0) {
-          await sendMail({
-            to: adminEmails.join(","),
-            subject: "Dealer Image Approved – Nuvoco",
-            template: "admin/dealerImageApproved",
-            context: {
-              dealerId: dealer.id,
-              dealerCode: dealer.dealer_code,
-              shopName: dealer.shop_name,
-              dealerPerson: dealer.dealer_person,
-              mobile: dealer.dealer_mobile_number,
-              state: dealer.state,
-              district: dealer.district,
-              selectedImageId: selected_image,
-            },
-          });
-          console.log("Approval email sent to:", adminEmails.join(", "));
-        }
-      } catch (mailError) {
-        console.log("Mail error:", mailError.message);
-      }
+    const stormEmails = stormUsers.map((user) => user.email);
+
+    // =========================
+    // SEND MAIL TO STORM
+    // =========================
+
+    if (stormEmails.length > 0) {
+      await sendMail({
+        to: stormEmails.join(","),
+
+        subject: "Dealer Image Approved – Nuvoco",
+
+        template: "storm/dealerApproved",
+
+        context: {
+          dealerCode: dealer.dealer_code,
+
+          dealerName: dealer.dealer_person,
+
+          shopName: dealer.shop_name,
+
+          state: dealer.state,
+
+          district: dealer.district,
+
+          adminPanelUrl: process.env.ADMIN_PANEL_URL,
+        },
+      });
     }
 
     req.flash("success", "Final image selected successfully");
@@ -2382,19 +2694,19 @@ export const submitFinalSelectedImageold = async (req, res) => {
       { where: { id: dealer_id } }
     );
 
-   
+
     const dealer = await Dealer.findOne({
       where: { id: dealer_id },
       raw: true,
     });
 
-    
+
     if (dealer?.dealer_mobile_number) {
       const smsSent = await sendApprovalSms(dealer.dealer_mobile_number);
       if (!smsSent) console.log("Approval SMS failed");
     }
 
-  
+
     if (dealer) {
       await sendMail({
         to: "sushrutpandey1@gmail.com",
@@ -2517,16 +2829,16 @@ export const rejectDealerImages = async (req, res) => {
       return res.redirect("back");
     }
 
-   
+
     dealer.imageStatus = "rejected";
     await dealer.save();
 
-   
+
     await DealerFinalImage.destroy({
       where: { dealer_id },
     });
 
-  
+
     const mobile = dealer.dealer_mobile_number;
 
     if (mobile) {
@@ -2623,19 +2935,6 @@ export const rejectDealerImages = async (req, res) => {
 
 //     req.flash("success", "Dealer images rejected successfully");
 
-//     return res.redirect(`dealer-image/${dealer_id}`);
-//   } catch (err) {
-//     console.log(
-//       "Reject Dealer Images Error =>",
-//       err.response?.data || err.message,
-//     );
-
-//     req.flash("error", "Error while rejecting dealer images");
-
-//     return res.redirect(`dealer-image/${dealer_id}`);
-//   }
-// };
-
 export const renderDownloadDealerImage = async (req, res) => {
   try {
     const status = req.query.status || "approved";
@@ -2648,7 +2947,7 @@ export const renderDownloadDealerImage = async (req, res) => {
 
       raw: true,
     });
-    console.log("dealer in render down inage", dealers);
+
     res.render("admin/download-image", {
       data: dealers,
       selectedStatus: status,
@@ -2754,9 +3053,137 @@ export const getDealerFinalImage = async (req, res) => {
   }
 };
 
+// export const downloadDealerImageExcel = async (req, res) => {
+//   try {
+//     const status = req.query.status || "approved";
+
+//     const dealers = await Dealer.findAll({
+//       where: {
+//         isImageUploaded: "yes",
+//         imageStatus: status,
+//       },
+
+//       raw: true,
+//     });
+//     console.log("dealers in downloa dexel", JSON.stringify(dealers, null, 2));
+
+//     // =========================
+//     // EXCEL
+//     // =========================
+
+//     const workbook = new ExcelJS.Workbook();
+
+//     const worksheet = workbook.addWorksheet("Dealers");
+
+//     // =========================
+//     // COLUMNS
+//     // =========================
+
+//     worksheet.columns = [
+//       {
+//         header: "Dealer Code",
+//         key: "dealer_code",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Dealer Name",
+//         key: "dealer_person",
+//         width: 25,
+//       },
+
+//       {
+//         header: "Shop Name",
+//         key: "shop_name",
+//         width: 30,
+//       },
+
+//       {
+//         header: "State",
+//         key: "state",
+//         width: 20,
+//       },
+
+//       {
+//         header: "District",
+//         key: "district",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Mobile",
+//         key: "dealer_mobile_number",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Status",
+//         key: "imageStatus",
+//         width: 20,
+//       },
+
+//       {
+//         header: "Image URL",
+//         key: "image_url",
+//         width: 60,
+//       },
+//     ];
+
+//     // =========================
+//     // ROWS
+//     // =========================
+
+//     dealers.forEach((dealer) => {
+//       worksheet.addRow({
+//         dealer_code: dealer.dealer_code,
+
+//         dealer_person: dealer.dealer_person,
+
+//         shop_name: dealer.shop_name,
+
+//         state: dealer.state,
+
+//         district: dealer.district,
+
+//         dealer_mobile_number: dealer.dealer_mobile_number,
+
+//         imageStatus: dealer.imageStatus,
+
+//         image_url: `${process.env.FILE_BASE_URL}${dealer.finalImage || ""}`,
+//       });
+//     });
+
+//     // =========================
+//     // RESPONSE
+//     // =========================
+
+//     res.setHeader(
+//       "Content-Type",
+//       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+//     );
+
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename=${status}-dealers.xlsx`,
+//     );
+
+//     await workbook.xlsx.write(res);
+
+//     res.end();
+//   } catch (err) {
+//     console.log(err);
+
+//     res.status(500).send("Error downloading excel");
+//   }
+// };
+
 export const downloadDealerImageExcel = async (req, res) => {
   try {
     const status = req.query.status || "approved";
+
+    // =========================
+    // GET DEALERS
+    // =========================
 
     const dealers = await Dealer.findAll({
       where: {
@@ -2822,19 +3249,41 @@ export const downloadDealerImageExcel = async (req, res) => {
         width: 20,
       },
 
-      // {
-      //   header: "Image URL",
-      //   key: "image_url",
-      //   width: 60,
-      // },
+      {
+        header: "Image URL",
+        key: "image_url",
+        width: 70,
+      },
     ];
 
     // =========================
     // ROWS
     // =========================
 
-    dealers.forEach((dealer) => {
-      worksheet.addRow({
+    for (const dealer of dealers) {
+      // final selected image
+      const finalImage = await DealerFinalImage.findOne({
+        where: {
+          dealer_id: dealer.id,
+        },
+
+        include: [
+          {
+            model: DealerImage,
+            attributes: ["image"],
+          },
+        ],
+      });
+
+      let imageUrl = "";
+
+      if (finalImage?.DealerImage?.image) {
+        imageUrl = `${process.env.FILE_BASE_URL}${finalImage.DealerImage.image}`;
+      }
+
+      // add row
+
+      const row = worksheet.addRow({
         dealer_code: dealer.dealer_code,
 
         dealer_person: dealer.dealer_person,
@@ -2849,10 +3298,27 @@ export const downloadDealerImageExcel = async (req, res) => {
 
         imageStatus: dealer.imageStatus,
 
-        // image_url:
-        //   `${process.env.FILE_BASE_URL}${dealer.finalImage || ""}`,
+        image_url: imageUrl,
       });
-    });
+
+      // =========================
+      // MAKE URL CLICKABLE
+      // =========================
+
+      const cell = row.getCell(8);
+
+      cell.value = {
+        text: "View Image",
+        hyperlink: imageUrl,
+      };
+
+      cell.font = {
+        color: {
+          argb: "0000FF",
+        },
+        underline: true,
+      };
+    }
 
     // =========================
     // RESPONSE
@@ -2877,3 +3343,486 @@ export const downloadDealerImageExcel = async (req, res) => {
     res.status(500).send("Error downloading excel");
   }
 };
+
+export const downloadBannerPdf = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const finalImage = await DealerFinalImage.findOne({
+      where: { dealer_id: id },
+      include: [
+        {
+          model: DealerImage,
+          include: [{ model: Dealer }],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!finalImage || !finalImage.DealerImage) {
+      return res.status(404).send("Final image not found");
+    }
+
+    const dealerImage = finalImage.DealerImage;
+    const dealer = dealerImage.Dealer;
+
+    if (!dealer) {
+      return res.status(404).send("Dealer info not found");
+    }
+
+    const relativeImagePath = dealerImage.image;
+    const imagePath = path.join(process.cwd(), relativeImagePath);
+
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).send("Image file missing");
+    }
+
+    // ================================
+    // 4ft x 6ft @ 300 DPI
+    // ================================
+
+    const DPI          = 300;
+    const widthInches  = 48;     // 4ft
+    const heightInches = 72;     // 6ft
+    const widthPx      = widthInches  * DPI;   // 14400px
+    const heightPx     = heightInches * DPI;   // 21600px
+
+    // ================================
+    // Resize image
+    // ================================
+
+    const resizedImageBuffer = await sharp(imagePath)
+      .resize(widthPx, heightPx, {
+        fit: "fill",
+        withoutEnlargement: false,
+      })
+      .withMetadata({ density: DPI })
+      .toBuffer();
+
+    // ================================
+    // PDF size in points (1 inch = 72 pts)
+    // ================================
+
+    const widthPts  = widthInches  * 72;   // 3456 pts
+    const heightPts = heightInches * 72;   // 5184 pts
+
+    // ================================
+    // Build PDF
+    // ================================
+
+    const doc = new PDFDocument({
+      size: [widthPts, heightPts],
+      margin: 0,
+    });
+
+    const safeName   = dealer.shop_name.replace(/[^a-zA-Z0-9_\- ]/g, "").trim();
+    const safeCode   = dealer.dealer_code.replace(/[^a-zA-Z0-9_\-]/g, "").trim();
+    const safePerson = dealer.dealer_person.replace(/[^a-zA-Z0-9_\- ]/g, "").trim();
+
+    const filename = `${safeName}-${safePerson}-${safeCode}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    doc.pipe(res);
+
+    doc.image(resizedImageBuffer, 0, 0, {
+      width:  widthPts,
+      height: heightPts,
+    });
+
+    doc.end();
+
+  } catch (error) {
+    console.error("PDF Error:", error);
+    return res.status(500).send("PDF generation failed");
+  }
+};
+
+
+// export const downloadBannerPdf = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // ================================
+//     // Fetch FinalImage + DealerImage + Dealer
+//     // ================================
+//     const finalImage = await DealerFinalImage.findOne({
+//       where: { dealer_id: id },
+//       include: [
+//         {
+//           model: DealerImage,
+//           include: [{ model: Dealer }],   // Dealer info for name, code, region
+//         },
+//       ],
+//       order: [["createdAt", "DESC"]],
+//     });
+
+//     if (!finalImage || !finalImage.DealerImage) {
+//       return res.status(404).send("Final image not found");
+//     }
+
+//     const dealerImage = finalImage.DealerImage;
+//     const dealer = dealerImage.Dealer;
+
+//     if (!dealer) {
+//       return res.status(404).send("Dealer info not found");
+//     }
+
+//     const relativeImagePath = dealerImage.image;
+//     const imagePath = path.join(process.cwd(), relativeImagePath);
+
+//     if (!fs.existsSync(imagePath)) {
+//       return res.status(404).send("Image file missing");
+//     }
+
+//     // ================================
+//     // 4ft x 6ft @ 150 DPI
+//     // ================================
+
+//     // const DPI = 150;
+//     // const widthInches = 48;    // 4ft
+//     // const heightInches = 72;   // 6ft
+
+//     // const widthPx = widthInches * DPI;   // 7200px
+//     // const heightPx = heightInches * DPI;   // 10800px
+
+//     const DPI = 300;
+// const widthInches = 48;    // 4ft
+// const heightInches = 72;   // 6ft
+
+// const widthPx  = widthInches  * DPI;   // 14400px
+// const heightPx = heightInches * DPI;   // 21600px
+
+//     // ================================
+//     // Resize image to 150 DPI canvas
+//     // ================================
+
+//     const resizedImageBuffer = await sharp(imagePath)
+//       .resize(widthPx, heightPx, {
+//         fit: "fill",
+//         withoutEnlargement: false,
+//       })
+//       .withMetadata({ density: DPI })
+//       .toBuffer();
+
+//     // ================================
+//     // PDF size in points (1 inch = 72 pts)
+//     // ================================
+
+//     const widthPts = widthInches * 72;   // 3456 pts
+//     const heightPts = heightInches * 72;   // 5184 pts
+
+//     // ================================
+//     // Build PDF
+//     // ================================
+
+//     const doc = new PDFDocument({
+//       size: [widthPts, heightPts],
+//       margin: 0,
+//     });
+
+//     // Filename uses dealer code + name (sanitized for filesystem safety)
+//     const safeName = dealer.shop_name.replace(/[^a-zA-Z0-9_\- ]/g, "").trim();
+//     const safeCode = dealer.dealer_code.replace(/[^a-zA-Z0-9_\-]/g, "").trim();
+//     const safePerson = dealer.dealer_person.replace(/[^a-zA-Z0-9_\- ]/g, "").trim();
+
+//     const filename = `${safeName}-${safePerson}-${safeCode}.pdf`;
+
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader(
+//       "Content-Disposition",
+//       `attachment; filename="${filename}"`
+//     );
+
+//     doc.pipe(res);
+
+//     // Full-bleed background image
+//     doc.image(resizedImageBuffer, 0, 0, {
+//       width: widthPts,
+//       height: heightPts,
+//     });
+
+//     // ================================
+//     // Dealer info overlay (bottom strip)
+//     // ================================
+
+//     const stripHeight = 220;
+//     const stripY = heightPts - stripHeight;
+
+//     // Semi-transparent dark strip so text is readable over any image
+//     doc
+//       .save()
+//       .rect(0, stripY, widthPts, stripHeight)
+//       .fillOpacity(0.55)
+//       .fill("#000000")
+//       .restore();
+
+//     // Reset opacity for text
+//     doc.fillOpacity(1);
+
+//     const paddingX = 60;
+//     const lineGap = 52;
+//     let currentY = stripY + 30;
+
+//     // Shop name  — largest
+//     doc
+//       .font("Helvetica-Bold")
+//       .fontSize(52)
+//       .fillColor("#FFFFFF")
+//       .text(dealer.shop_name, paddingX, currentY, { lineBreak: false });
+
+//     currentY += lineGap;
+
+//     // Dealer code + person name
+//     doc
+//       .font("Helvetica")
+//       .fontSize(38)
+//       .fillColor("#DDDDDD")
+//       .text(
+//         `Code: ${dealer.dealer_code}   |   ${dealer.dealer_person}`,
+//         paddingX,
+//         currentY,
+//         { lineBreak: false }
+//       );
+
+//     currentY += lineGap;
+
+//     // District (region) + State
+//     doc
+//       .font("Helvetica")
+//       .fontSize(36)
+//       .fillColor("#BBBBBB")
+//       .text(
+//         `${dealer.district}, ${dealer.state}`,
+//         paddingX,
+//         currentY,
+//         { lineBreak: false }
+//       );
+
+//     doc.end();
+//   } catch (error) {
+//     console.error("PDF Error:", error);
+//     return res.status(500).send("PDF generation failed");
+//   }
+// };
+
+
+// export const downloadBannerPdf = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     // fetch latest final image
+//     const finalImage = await DealerFinalImage.findOne({
+//       where: {
+//         dealer_id: id,
+//       },
+
+//       include: [
+//         {
+//           model: DealerImage,
+//         },
+//       ],
+
+//       order: [["createdAt", "DESC"]],
+//     });
+
+//     if (!finalImage || !finalImage.DealerImage) {
+//       return res.status(404).send("Final image not found");
+//     }
+
+//     // ACTUAL IMAGE PATH
+//     const relativeImagePath = finalImage.DealerImage.image;
+
+//     const imagePath = path.join(process.cwd(), relativeImagePath);
+
+//     console.log("PDF IMAGE PATH:", imagePath);
+
+//     if (!fs.existsSync(imagePath)) {
+//       return res.status(404).send("Image file missing");
+//     }
+
+//     // PDF
+//     const doc = new PDFDocument({
+//       size: "A4",
+//       margin: 20,
+//     });
+
+//     const filename = `dealer-banner-${id}.pdf`;
+
+//     res.setHeader("Content-Type", "application/pdf");
+
+//     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+//     doc.pipe(res);
+
+//     // add image
+//     doc.image(imagePath, {
+//       fit: [550, 750],
+//       align: "center",
+//       valign: "center",
+//     });
+
+//     doc.end();
+//   } catch (error) {
+//     console.log(error);
+
+//     return res.status(500).send("PDF generation failed");
+//   }
+// };
+
+
+// export const downloadBannerPdf = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const finalImage = await DealerFinalImage.findOne({
+//       where: { dealer_id: id },
+//       include: [{ model: DealerImage }],
+//       order: [["createdAt", "DESC"]],
+//     });
+
+//     if (!finalImage || !finalImage.DealerImage) {
+//       return res.status(404).send("Final image not found");
+//     }
+
+//     const relativeImagePath = finalImage.DealerImage.image;
+//     const imagePath = path.join(process.cwd(), relativeImagePath);
+
+//     if (!fs.existsSync(imagePath)) {
+//       return res.status(404).send("Image file missing");
+//     }
+
+//     // =========================
+//     // IMAGE SIZE NIKALO
+//     // =========================
+
+//     const imageMetadata = await sharp(imagePath).metadata();
+
+//     const imageWidthPx  = imageMetadata.width;
+//     const imageHeightPx = imageMetadata.height;
+
+//     // =========================
+//     // 100 DPI PE SIZE CALCULATE KARO
+//     // =========================
+
+//     const DPI = 100;
+
+//     // pixels / DPI = inches
+//     const widthInInches  = imageWidthPx  / DPI;
+//     const heightInInches = imageHeightPx / DPI;
+
+//     // PDFKit points use karta hai (1 inch = 72 points)
+//     const widthInPoints  = widthInInches  * 72;
+//     const heightInPoints = heightInInches * 72;
+
+//     // =========================
+//     // PDF BANAO EXACT SIZE PE
+//     // =========================
+
+//     const doc = new PDFDocument({
+//       size: [widthInPoints, heightInPoints], // exact image size
+//       margin: 0,
+//     });
+
+//     const filename = `dealer-banner-${id}.pdf`;
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+//     doc.pipe(res);
+
+//     // Image full page pe fit karo
+//     doc.image(imagePath, 0, 0, {
+//       width:  widthInPoints,
+//       height: heightInPoints,
+//     });
+
+//     doc.end();
+
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).send("PDF generation failed");
+//   }
+// };
+
+
+
+// export const downloadBannerPdf = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const finalImage = await DealerFinalImage.findOne({
+//       where: { dealer_id: id },
+//       include: [{ model: DealerImage }],
+//       order: [["createdAt", "DESC"]],
+//     });
+
+//     if (!finalImage || !finalImage.DealerImage) {
+//       return res.status(404).send("Final image not found");
+//     }
+
+//     const relativeImagePath = finalImage.DealerImage.image;
+//     const imagePath = path.join(process.cwd(), relativeImagePath);
+
+//     if (!fs.existsSync(imagePath)) {
+//       return res.status(404).send("Image file missing");
+//     }
+
+//     // =========================
+//     // 4ft x 6ft @ 100 DPI
+//     // =========================
+
+//     const DPI = 100;
+//     const widthInches = 48;   // 4ft
+//     const heightInches = 72;   // 6ft
+
+//     const widthPx = widthInches * DPI;  // 4800
+//     const heightPx = heightInches * DPI;  // 7200
+
+//     // =========================
+//     // IMAGE RESIZE KARO
+//     // =========================
+
+//     const resizedImageBuffer = await sharp(imagePath)
+//       .resize(widthPx, heightPx, {
+//         fit: "fill",        // exact 4800x7200 karo
+//         withoutEnlargement: false,
+//       })
+//       .withMetadata({ density: DPI })  // DPI set karo
+//       .toBuffer();
+
+//     // =========================
+//     // PDF SIZE (points mein)
+//     // =========================
+
+//     const widthPts = widthInches * 72;  // 3456 pts
+//     const heightPts = heightInches * 72;  // 5184 pts
+
+//     // =========================
+//     // PDF BANAO
+//     // =========================
+
+//     const doc = new PDFDocument({
+//       size: [widthPts, heightPts],
+//       margin: 0,
+//     });
+
+//     const filename = `dealer-banner-${id}.pdf`;
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+//     doc.pipe(res);
+
+//     // Buffer se image add karo
+//     doc.image(resizedImageBuffer, 0, 0, {
+//       width: widthPts,
+//       height: heightPts,
+//     });
+
+//     doc.end();
+
+//   } catch (error) {
+//     console.log("PDF Error:", error);
+//     return res.status(500).send("PDF generation failed");
+//   }
+// };

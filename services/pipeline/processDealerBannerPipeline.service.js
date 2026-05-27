@@ -50,6 +50,12 @@ export const processDealerBannerPipeline = async ({
     // existing image id from frontend
     const existingImageId = image_ids[i];
 
+    // Add delay between each image (except first)
+  if (i > 0) {
+    console.log(`Waiting before image ${i + 1}...`);
+    await new Promise(resolve => setTimeout(resolve, 5000)); // 2 second gap
+  }
+
     // generate new banner
     const finalImagePath = await generateBanner({
       personBuffer: file.buffer,

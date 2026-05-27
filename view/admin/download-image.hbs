@@ -1,25 +1,20 @@
 {{> header admin=admin }}
 {{> sidebar }}
 
-<main
-  class="purple-main"
-  style="
+<main class="purple-main" style="
     align-items:flex-start;
     padding-top:32px;
-  "
->
+  ">
 
   <div class="pbubble pb1"></div>
   <div class="pbubble pb2"></div>
   <div class="pbubble pb3"></div>
 
-  <div
-    style="
+  <div style="
       position:relative;
       z-index:2;
       width:100%;
-    "
-  >
+    ">
 
     <div class="dealer-detail-card">
 
@@ -27,62 +22,38 @@
         Download Dealer Images
       </h2>
 
-      <div
-  style="
+      <div style="
     display:flex;
     gap:12px;
     margin-bottom:20px;
     align-items:center;
-  "
->
+  ">
 
-  <select
-    id="statusFilter"
-    style="
+        <select id="statusFilter" style="
       padding:10px;
       border-radius:8px;
-    "
-  >
+    ">
 
-    <option
-      value="approved"
-      {{#if (eq selectedStatus "approved")}}
-        selected
-      {{/if}}
-    >
-      Approved
-    </option>
+          <option value="approved" {{#if (eq selectedStatus "approved" )}} selected {{/if}}>
+            Approved
+          </option>
 
-    <option
-      value="completed"
-      {{#if (eq selectedStatus "completed")}}
-        selected
-      {{/if}}
-    >
-      Completed
-    </option>
+          <option value="completed" {{#if (eq selectedStatus "completed" )}} selected {{/if}}>
+            Completed
+          </option>
 
-  </select>
+        </select>
 
-  <a
-    href="/admin/download-image-excel?status={{selectedStatus}}"
-    class="add-btn"
-  >
-    Download Excel
-  </a>
+        <a href="/admin/download-image-excel?status={{selectedStatus}}" class="add-btn">
+          Download Excel
+        </a>
 
-</div>
+      </div>
 
       <!-- TABLE -->
-      <div
-        class="table-scroll-wrap"
-        style="margin-top:30px;"
-      >
+      <div class="table-scroll-wrap" style="margin-top:30px;">
 
-        <table
-          id="dataTable"
-          class="dealer-table"
-        >
+        <table id="dataTable" class="dealer-table">
 
           <thead>
 
@@ -108,40 +79,37 @@
 
             {{#each data}}
 
-              <tr>
+            <tr>
 
-                <td>
-                  {{inc @index}}
-                </td>
+              <td>
+                {{inc @index}}
+              </td>
 
-                <td>
-                  {{this.dealer_code}}
-                </td>
+              <td>
+                {{this.dealer_code}}
+              </td>
 
-                <td>
-                  {{this.dealer_person}}
-                </td>
+              <td>
+                {{this.dealer_person}}
+              </td>
 
-                <td>
-                  {{this.shop_name}}
-                </td>
+              <td>
+                {{this.shop_name}}
+              </td>
 
-                <td>
-                  {{this.state}}
-                </td>
+              <td>
+                {{this.state}}
+              </td>
 
-                <td>
+              <td>
 
-                  <a
-                    class="view-link download-image-btn"
-                    data-dealer-code="{{this.dealer_code}}"
-                  >
-                    View Image
-                  </a>
+                <a class="view-link download-image-btn" data-dealer-code="{{this.dealer_code}}">
+                  View Image
+                </a>
 
-                </td>
+              </td>
 
-              </tr>
+            </tr>
 
             {{/each}}
 
@@ -153,49 +121,43 @@
 
       <!-- IMAGE PREVIEW -->
 
-      <div
-        id="imageContainer"
-        style="
+      <div id="imageContainer" style="
           margin-top:40px;
           display:none;
           text-align:center;
-        "
-      >
+        ">
 
         <h3 id="dealerName"></h3>
 
-        <img
-          id="dealerImage"
-          src=""
-          alt="Dealer Image"
-          style="
+        <img id="dealerImage" src="" alt="Dealer Image" style="
             width:350px;
             border-radius:16px;
             border:3px solid #ddd;
             margin-top:20px;
-          "
-        />
+          " />
 
         <div style="margin-top:20px;">
 
-        {{#if (eq selectedStatus "approved")}}
+          {{#if (eq selectedStatus "approved")}}
 
-<button
-  id="sendPrintBtn"
-  style="
-    background:#2e7d32;
-    color:#fff;
-    border:none;
-    padding:12px 24px;
-    border-radius:10px;
-    font-weight:600;
-    cursor:pointer;
-  "
->
-  Send For Print
-</button>
+          <button id="sendPrintBtn" style="
+  background:#2e7d32;
+  color:#fff;
+  border:none;
+  padding:12px 24px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+">
+            Send For Print
+          </button>
 
-{{/if}}
+          {{!-- ID dynamically JS se set hogi --}}
+          <a id="downloadPdfBtn" href="#" class="btn btn-danger">
+            Download PDF
+          </a>
+
+          {{/if}}
 
         </div>
 
@@ -211,203 +173,155 @@
 
   let selectedDealerId = null;
 
-  // =========================
-  // VIEW IMAGE
-  // =========================
+  document.addEventListener("click", async function (e) {
 
-  document.addEventListener(
-    "click",
-    async function (e) {
+    // =========================
+    // VIEW IMAGE
+    // =========================
 
-      // =========================
-      // VIEW IMAGE
-      // =========================
+    if (e.target.classList.contains("download-image-btn")) {
 
-      if (
-        e.target.classList.contains(
-          "download-image-btn",
-        )
-      ) {
+      const dealer_code = e.target.dataset.dealerCode;
 
-        const dealer_code =
-          e.target.dataset.dealerCode;
+      try {
 
-        try {
+        const response = await fetch("/admin/get-dealer-final-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ dealer_code }),
+        });
 
-          const response =
-            await fetch(
-              "/admin/get-dealer-final-image",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-
-                body: JSON.stringify({
-                  dealer_code,
-                }),
-              },
-            );
-
-          const result =
-            await response.json();
-
-          if (!result.success) {
-
-            alert(result.message);
-
-            return;
-          }
-
-          // =========================
-          // STORE DEALER ID
-          // =========================
-
-          selectedDealerId =
-            result.data.dealer_id;
-
-          // =========================
-          // SHOW IMAGE
-          // =========================
-
-          document.getElementById(
-            "imageContainer",
-          ).style.display = "block";
-
-          document.getElementById(
-            "dealerName",
-          ).innerText =
-            result.data.dealer_name;
-
-          document.getElementById(
-            "dealerImage",
-          ).src =
-            result.data.image;
-
-          // scroll down
-
-          document
-            .getElementById(
-              "imageContainer",
-            )
-            .scrollIntoView({
-              behavior: "smooth",
-            });
-
-        } catch (err) {
-
-          console.log(err);
-
-          alert(
-            "Error in fetching image",
-          );
-
-        }
-
-      }
-
-      // =========================
-      // SEND FOR PRINT
-      // =========================
-
-      if (
-        e.target.id ===
-        "sendPrintBtn"
-      ) {
-
-        const dealerId =
-          selectedDealerId;
-
-        if (!dealerId) {
-
-          alert(
-            "Dealer ID not found"
-          );
-
+        // ✅ SESSION EXPIRE CHECK
+        if (response.status === 401) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/admin/login";
           return;
         }
 
-        if (
-          !confirm(
-            "Send this image for print?"
-          )
-        ) {
+        // ✅ REDIRECT CHECK (middleware ne HTML bheja)
+        if (!response.headers.get("content-type")?.includes("application/json")) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/admin/login";
           return;
         }
 
-        try {
+        const result = await response.json();
 
-          const response =
-            await fetch(
-              "/admin/send-for-print",
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-
-                body: JSON.stringify({
-                  dealer_id: dealerId,
-                }),
-              },
-            );
-
-          const result =
-            await response.json();
-
-          if (result.success) {
-
-            alert(
-              "Status updated to completed"
-            );
-
-            window.location.reload();
-
-          } else {
-
-            alert(result.message);
-
-          }
-
-        } catch (err) {
-
-          console.log(err);
-
-          alert(
-            "Error updating status"
-          );
-
+        if (!result.success) {
+          alert(result.message);
+          return;
         }
 
+        // STORE DEALER ID
+        selectedDealerId = result.data.dealer_id;
+
+        // UPDATE PDF LINK
+        const pdfLink = document.getElementById("downloadPdfBtn");
+        if (pdfLink) {
+          pdfLink.href = `/admin/download-pdf/${result.data.dealer_id}`;
+        }
+
+        // SHOW IMAGE
+        document.getElementById("imageContainer").style.display = "block";
+        document.getElementById("dealerName").innerText = result.data.dealer_name;
+        document.getElementById("dealerImage").src = result.data.image;
+
+        // SCROLL
+        document.getElementById("imageContainer").scrollIntoView({ behavior: "smooth" });
+
+      } catch (err) {
+        console.log(err);
+        alert("Error in fetching image");
       }
 
-    },
-  );
+    }
+
+    // =========================
+    // SEND FOR PRINT
+    // =========================
+
+    if (e.target.id === "sendPrintBtn") {
+
+      const dealerId = selectedDealerId;
+
+      if (!dealerId) {
+        alert("Please view an image first");
+        return;
+      }
+
+      if (!confirm("Send this image for print?")) return;
+
+      try {
+
+        const response = await fetch("/admin/send-for-print", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ dealer_id: dealerId }),
+        });
+
+        // ✅ SESSION CHECK
+        if (response.status === 401) {
+          alert("Session expired. Please login again.");
+          window.location.href = "/admin/login";
+          return;
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert("Status updated to completed");
+          window.location.reload();
+        } else {
+          alert(result.message);
+        }
+
+      } catch (err) {
+        console.log(err);
+        alert("Error updating status");
+      }
+
+    }
+
+  });
 
   // =========================
   // STATUS FILTER
   // =========================
 
-  document
-    .getElementById(
-      "statusFilter",
-    )
-    .addEventListener(
-      "change",
-      function () {
+  document.getElementById("statusFilter").addEventListener("change", function () {
+    window.location.href = `/admin/download-image?status=${this.value}`;
+  });
 
-        const status =
-          this.value;
+   //download button
 
-        window.location.href =
-          `/admin/download-image?status=${status}`;
+   document.addEventListener("click", function (e) {
 
-      },
-    );
+  // DOWNLOAD PDF
+  if (e.target.id === "downloadPdfBtn") {
+
+    const btn = e.target;
+
+    // Disable multiple clicks
+    btn.style.pointerEvents = "none";
+    btn.style.opacity = "0.7";
+
+    // Change text
+    btn.innerText = "Downloading...";
+
+    // Re-enable after download starts
+    setTimeout(() => {
+      btn.style.pointerEvents = "auto";
+      btn.style.opacity = "1";
+      btn.innerText = "Download PDF";
+    }, 5000);
+
+  }
+
+});
 
 </script>
 
