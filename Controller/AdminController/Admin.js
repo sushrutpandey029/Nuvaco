@@ -18,6 +18,9 @@ import DealerFinalImage from "../../Model/dealer/DealerFinalImage.js";
 import ExcelJS from "exceljs";
 import { sendApprovedImageSms } from "../../utils/sms/sendApprovedImageSms.js";
 
+import path from "path";
+import PDFDocument from "pdfkit";
+
 // export const AdminRegister = async (req, res) => {
 //   try {
 //     const { fullname, email, password, phonenumber } = req.body;
@@ -351,6 +354,28 @@ export const adminDashboard = async (req, res) => {
     // unique states
     const states = [...new Set(dealers.map((dealer) => dealer.state))];
 
+    //statewise data
+
+    let stateOnboarded = 0;
+    let stateUploaded = 0;
+    let stateCutouts = 0;
+
+    if (state) {
+      const filteredDealers = dealers.filter(
+        (dealer) => dealer.state === state,
+      );
+
+      stateOnboarded = filteredDealers.length;
+
+      stateUploaded = filteredDealers.filter(
+        (dealer) => dealer.isImageUploaded === "yes",
+      ).length;
+
+      stateCutouts = filteredDealers.filter(
+        (dealer) => dealer.imageStatus === "approved",
+      ).length;
+    }
+
     return res.render("admin/dashboard", {
       admin,
 
@@ -361,6 +386,10 @@ export const adminDashboard = async (req, res) => {
       uploadedPics,
 
       cutouts,
+
+      stateOnboarded,
+      stateUploaded,
+      stateCutouts,
 
       states,
 
@@ -2905,5 +2934,68 @@ export const downloadDealerImageExcel = async (req, res) => {
     console.log(err);
 
     res.status(500).send("Error downloading excel");
+  }
+};
+
+export const downloadBannerPdf = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // fetch latest final image
+    const finalImage = await DealerFinalImage.findOne({
+      where: {
+        dealer_id: id,
+      },
+
+      include: [
+        {
+          model: DealerImage,
+        },
+      ],
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!finalImage || !finalImage.DealerImage) {
+      return res.status(404).send("Final image not found");
+    }
+
+    // ACTUAL IMAGE PATH
+    const relativeImagePath = finalImage.DealerImage.image;
+
+    const imagePath = path.join(process.cwd(), relativeImagePath);
+
+    console.log("PDF IMAGE PATH:", imagePath);
+
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).send("Image file missing");
+    }
+
+    // PDF
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: 20,
+    });
+
+    const filename = `dealer-banner-${id}.pdf`;
+
+    res.setHeader("Content-Type", "application/pdf");
+
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    doc.pipe(res);
+
+    // add image
+    doc.image(imagePath, {
+      fit: [550, 750],
+      align: "center",
+      valign: "center",
+    });
+
+    doc.end();
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).send("PDF generation failed");
   }
 };

@@ -11,7 +11,6 @@ export const processDealerBannerPipeline = async ({
   language,
   image_ids = [],
 }) => {
-
   // ─────────────────────────────
   // DEALER VALIDATION
   // ─────────────────────────────
@@ -44,11 +43,17 @@ export const processDealerBannerPipeline = async ({
   const results = [];
 
   for (let i = 0; i < files.length; i++) {
-
     const file = files[i];
 
     // existing image id from frontend
     const existingImageId = image_ids[i];
+
+    // Add delay between each image (except first)
+  // if (i > 0) {
+  //   console.log(`Waiting before image ${i + 1}...`);
+  //   await new Promise(resolve => setTimeout(resolve, 5000)); // 2 second gap
+  // }
+
 
     // generate new banner
     const finalImagePath = await generateBanner({
@@ -62,7 +67,6 @@ export const processDealerBannerPipeline = async ({
     // ==================================================
 
     if (existingImageId) {
-
       const existingImage = await DealerImage.findOne({
         where: {
           id: existingImageId,
@@ -76,17 +80,13 @@ export const processDealerBannerPipeline = async ({
 
       // delete old image file
       try {
-
         const oldFilePath = `.${existingImage.image}`;
 
         if (fs.existsSync(oldFilePath)) {
           fs.unlinkSync(oldFilePath);
         }
-
       } catch (e) {
-
         console.log("Delete old image error:", e.message);
-
       }
 
       // update existing row
@@ -96,15 +96,12 @@ export const processDealerBannerPipeline = async ({
       await existingImage.save();
 
       results.push(existingImage);
-
     }
 
     // ==================================================
     // CREATE NEW IMAGE
     // ==================================================
-
     else {
-
       // check max limit
       const totalImages = await DealerImage.count({
         where: { dealer_id },
@@ -121,14 +118,11 @@ export const processDealerBannerPipeline = async ({
       });
 
       results.push(created);
-
     }
-
   }
 
   return results;
 };
-
 
 // import fs from "fs";
 
@@ -225,6 +219,6 @@ export const processDealerBannerPipeline = async ({
 
 //     results.push(created);
 //   }
-  
+
 //   return results;
 // };

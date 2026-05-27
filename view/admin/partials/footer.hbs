@@ -26,6 +26,7 @@
       </div>
 
       <form
+      id="uploadExcelForm"
         action="/admin/upload-dealers"
         method="POST"
         enctype="multipart/form-data"
@@ -46,6 +47,7 @@
         <div class="modal-footer">
 
           <button
+          id="uploadExcelBtn"
             type="submit"
             class="btn btn-login"
           >
@@ -126,7 +128,7 @@
 
 {{!-- for table paginatipon --}}
 
-<script>
+{{!-- <script>
   $(document).ready(function () {
     $('#dataTable').DataTable({
       paging: true,
@@ -134,9 +136,64 @@
       ordering: true,
       pageLength: 10
     });
+
+      // Pic Uploaded filter
+    $('#picUploadedFilter').on(
+      'change',
+      function () {
+
+        const value = $(this).val();
+
+        // column index of Pic Uploaded
+        table.column(4).search(value).draw();
+      }
+    );
+
+  });
+</script> --}}
+
+<script>
+  $(document).ready(function () {
+
+    const table = $('#dataTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      pageLength: 10
+    });
+
+    // custom filter
+    $.fn.dataTable.ext.search.push(
+      function (settings, data, dataIndex) {
+
+        const filterValue =
+          $('#picUploadedFilter').val();
+
+        // Pic Uploaded column index = 4
+        const picUploaded =
+          data[4].trim();
+
+        if (
+          filterValue === "" ||
+          picUploaded === filterValue
+        ) {
+          return true;
+        }
+
+        return false;
+      }
+    );
+
+    // dropdown change
+    $('#picUploadedFilter').on(
+      'change',
+      function () {
+        table.draw();
+      }
+    );
+
   });
 </script>
-
 {{!-- for admin dashboard graph --}}
 
   
@@ -226,6 +283,80 @@ document
     window.location.href =
       `/admin/dashboard?${params.toString()}`;
   });
+
+</script>
+
+
+{{!-- uplaod button in exel upload --}}
+<script>
+  document
+    .getElementById("uploadExcelForm")
+    .addEventListener("submit", function () {
+
+      const btn =
+        document.getElementById(
+          "uploadExcelBtn"
+        );
+
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          role="status"
+        ></span>
+        Processing...
+      `;
+    });
+</script>
+
+{{!-- image approve and reject button processing --}}
+<script>
+
+  // Submit Selected Image
+  document
+    .getElementById("submitImageForm")
+    .addEventListener(
+      "submit",
+      function () {
+
+        const btn =
+          document.getElementById(
+            "submitImageBtn"
+          );
+
+        btn.disabled = true;
+
+        btn.innerHTML = `
+          <span
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
+          Processing...
+        `;
+      }
+    );
+
+  // Reject All Images
+  document
+    .getElementById("rejectForm")
+    .addEventListener(
+      "submit",
+      function () {
+
+        const btn =
+          document.getElementById(
+            "rejectBtn"
+          );
+
+        btn.disabled = true;
+
+        btn.innerHTML = `
+          <span
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
+          Processing...
+        `;
+      }
+    );
 
 </script>
 

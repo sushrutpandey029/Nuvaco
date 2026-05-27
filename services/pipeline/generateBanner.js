@@ -2,12 +2,12 @@ import fs from "fs";
 import path from "path";
 
 import { removeBackgroundOpenAI } from "../openai/removeBg.service.js";
-// import { transliterateTagline } from "../openai/transliterate.service.js";
-//  import { replaceTemplateText } from "../image/replaceTemplateText.service.js";
+
 import { replacePersonInBanner } from "../image/replacePerson.service.js";
 import { saveImage } from "../image/saveImage.service.js";
 import { createTempFile } from "../../utils/createTempFile.js";
 import { enhanceBanner } from "../image/enhanceBanner.service.js";
+import { enhancePersonImage } from "../image/enhancePerson.service.js";
 
 import { LANGUAGE_TEMPLATES } from "../image/template.config.js";
 
@@ -72,9 +72,15 @@ export const generateBanner = async ({
     console.log("STEP 1: Removing background...");
 
     let removedBgBuffer;
+    let enhancedPersonBuffer;
 
     try {
       removedBgBuffer = await removeBackgroundOpenAI(tempPath);
+
+       enhancedPersonBuffer =
+  await enhancePersonImage(
+    removedBgBuffer
+  );
     } catch (bgError) {
       throw new Error(`Background removal failed: ${bgError.message}`);
     }
@@ -98,7 +104,8 @@ export const generateBanner = async ({
     try {
       finalBannerBuffer = await replacePersonInBanner({
         templatePath: TEMPLATE_PATH,
-        personBuffer: removedBgBuffer,
+        personBuffer: enhancedPersonBuffer,
+        // personBuffer: removedBgBuffer,
       });
     } catch (compositeError) {
       throw new Error(`Banner compositing failed: ${compositeError.message}`);

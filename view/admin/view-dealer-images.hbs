@@ -16,14 +16,14 @@
       </h2>
 
       <!-- Language -->
-      <div style="margin-bottom:25px;">
+      {{!-- <div style="margin-bottom:25px;">
         <h3>
           Language : {{data.[0].language}}
         </h3>
-      </div>
+      </div> --}}
 
       <!-- FORM -->
-      <form action="/admin/submit-final-image" method="POST">
+      <form id="submitImageForm" action="/admin/submit-final-image" method="POST">
 
         <input
           type="hidden"
@@ -76,6 +76,18 @@
               "
             />
 
+            <!-- Language -->
+<div
+  style="
+    margin-top:10px;
+    font-weight:600;
+    color:#555;
+    font-size:14px;
+  "
+>
+  {{this.language}}
+</div>
+
           </div>
 
           {{/each}}
@@ -95,6 +107,7 @@
 
           <!-- Submit Final -->
           <button
+           id="submitImageBtn"
             type="submit"
             style="
               background:#2e7d32;
@@ -108,11 +121,13 @@
           >
             Submit Selected Image
           </button>
+{{!-- </div> --}}
 
       </form>
 
           <!-- Reject All -->
           <form
+          id="rejectForm"
             action="/admin/reject-dealer-images"
             method="POST"
           >
@@ -124,6 +139,7 @@
             />
 
             <button
+            id="rejectBtn"
               type="submit"
               onclick="return confirm('Are you sure you want to reject all images?')"
               style="
@@ -166,6 +182,17 @@
                 box-shadow:0 4px 12px rgba(0,0,0,0.15);
               "
             />
+            <!-- Language -->
+<div
+  style="
+    margin-top:10px;
+    font-weight:600;
+    color:#555;
+    font-size:14px;
+  "
+>
+  {{this.language}}
+</div>
 
           {{/if}}
 

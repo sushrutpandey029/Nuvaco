@@ -47,6 +47,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static("uploads"));
 
+// in app.js / server.js
+app.use((req, res, next) => {
+  res.setHeader("ngrok-skip-browser-warning", "true");
+  next();
+});
+
 // Session Store
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,

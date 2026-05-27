@@ -7,7 +7,7 @@ export const LANGUAGE_TEMPLATES = {
 
   PUNJABI: "public/templates/punjabi/templatebg.jpg",
 
-  ENGLISH: "public/templates/english/templatebg.jpg",
+  ENGLISH: "public/templates/english/templatebg.jpeg",
 
   ODIA: "public/templates/odia/templatebg.jpg",
 

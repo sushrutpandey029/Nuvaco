@@ -1,6 +1,3 @@
-
-
-
 // replacePerson.service.js  (FIXED — auto-crops black padding from product asset)
 
 import fs from "fs";
@@ -53,14 +50,12 @@ export const replacePersonInBanner = async ({ templatePath, personBuffer }) => {
       },
     ])
     .jpeg({ quality: 95 })
+
     .toBuffer();
 
   console.log("Composite complete");
   return finalBannerBuffer;
 };
-
-
-
 
 const removeBlackBgAndTrim = async (imagePath, targetHeight) => {
   if (!fs.existsSync(imagePath)) {
